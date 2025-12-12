@@ -1,0 +1,173 @@
+// Copyright (c) 2025 kk
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+package repositories
+
+import (
+	"context"
+	"errors"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/video-manager/backend/internal/models"
+	"github.com/video-manager/backend/pkg/database"
+)
+
+var (
+	ErrStreamPathNotFound = errors.New("stream path not found")
+)
+
+type StreamPathRepository struct{}
+
+func NewStreamPathRepository() *StreamPathRepository {
+	return &StreamPathRepository{}
+}
+
+// GetAll retrieves all stream paths, optionally filtered by stream_id
+func (r *StreamPathRepository) GetAll(ctx context.Context, streamID *int64) ([]models.StreamPath, error) {
+	var query string
+	var rows pgx.Rows
+	var err error
+
+	if streamID != nil {
+		query = `
+			SELECT sp.id, sp.stream_id, sp.table_id, sp.full_path, sp.created_at, sp.updated_at,
+			       s.id, s.name, s.code, s.created_at, s.updated_at
+			FROM stream_paths sp
+			JOIN streams s ON sp.stream_id = s.id
+			WHERE sp.stream_id = $1
+			ORDER BY sp.created_at DESC
+		`
+		rows, err = database.DB.Query(ctx, query, *streamID)
+	} else {
+		query = `
+			SELECT sp.id, sp.stream_id, sp.table_id, sp.full_path, sp.created_at, sp.updated_at,
+			       s.id, s.name, s.code, s.created_at, s.updated_at
+			FROM stream_paths sp
+			JOIN streams s ON sp.stream_id = s.id
+			ORDER BY sp.created_at DESC
+		`
+		rows, err = database.DB.Query(ctx, query)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var paths []models.StreamPath
+	for rows.Next() {
+		var sp models.StreamPath
+		var s models.Stream
+		err := rows.Scan(
+			&sp.ID, &sp.StreamID, &sp.TableID, &sp.FullPath, &sp.CreatedAt, &sp.UpdatedAt,
+			&s.ID, &s.Name, &s.Code, &s.CreatedAt, &s.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		sp.Stream = &s
+		paths = append(paths, sp)
+	}
+
+	return paths, rows.Err()
+}
+
+// GetByID retrieves a stream path by ID
+func (r *StreamPathRepository) GetByID(ctx context.Context, id int64) (*models.StreamPath, error) {
+	query := `
+		SELECT sp.id, sp.stream_id, sp.table_id, sp.full_path, sp.created_at, sp.updated_at,
+		       s.id, s.name, s.code, s.created_at, s.updated_at
+		FROM stream_paths sp
+		JOIN streams s ON sp.stream_id = s.id
+		WHERE sp.id = $1
+	`
+	var sp models.StreamPath
+	var s models.Stream
+	err := database.DB.QueryRow(ctx, query, id).Scan(
+		&sp.ID, &sp.StreamID, &sp.TableID, &sp.FullPath, &sp.CreatedAt, &sp.UpdatedAt,
+		&s.ID, &s.Name, &s.Code, &s.CreatedAt, &s.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, ErrStreamPathNotFound
+		}
+		return nil, err
+	}
+	sp.Stream = &s
+	return &sp, nil
+}
+
+// Create creates a new stream path
+func (r *StreamPathRepository) Create(ctx context.Context, streamID int64, tableID, fullPath string) (*models.StreamPath, error) {
+	// Verify stream exists
+	streamRepo := NewStreamRepository()
+	_, err := streamRepo.GetByID(ctx, streamID)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `INSERT INTO stream_paths (stream_id, table_id, full_path) VALUES ($1, $2, $3) RETURNING id, stream_id, table_id, full_path, created_at, updated_at`
+	var sp models.StreamPath
+	err = database.DB.QueryRow(ctx, query, streamID, tableID, fullPath).Scan(
+		&sp.ID, &sp.StreamID, &sp.TableID, &sp.FullPath, &sp.CreatedAt, &sp.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Load stream information
+	sp.Stream, _ = streamRepo.GetByID(ctx, streamID)
+	return &sp, nil
+}
+
+// Update updates an existing stream path
+func (r *StreamPathRepository) Update(ctx context.Context, id int64, streamID int64, tableID, fullPath string) (*models.StreamPath, error) {
+	// Check if path exists
+	_, err := r.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify stream exists
+	streamRepo := NewStreamRepository()
+	_, err = streamRepo.GetByID(ctx, streamID)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `UPDATE stream_paths SET stream_id = $1, table_id = $2, full_path = $3, updated_at = NOW() WHERE id = $4 RETURNING id, stream_id, table_id, full_path, created_at, updated_at`
+	var sp models.StreamPath
+	err = database.DB.QueryRow(ctx, query, streamID, tableID, fullPath, id).Scan(
+		&sp.ID, &sp.StreamID, &sp.TableID, &sp.FullPath, &sp.CreatedAt, &sp.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Load stream information
+	sp.Stream, _ = streamRepo.GetByID(ctx, streamID)
+	return &sp, nil
+}
+
+// Delete deletes a stream path
+func (r *StreamPathRepository) Delete(ctx context.Context, id int64) error {
+	// Check if path exists
+	_, err := r.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+
+	// Delete associated video stream endpoints first (they are auto-generated)
+	_, err = database.DB.Exec(ctx, `DELETE FROM video_stream_endpoints WHERE stream_path_id = $1`, id)
+	if err != nil {
+		return err
+	}
+
+	query := `DELETE FROM stream_paths WHERE id = $1`
+	_, err = database.DB.Exec(ctx, query, id)
+	return err
+}
+
