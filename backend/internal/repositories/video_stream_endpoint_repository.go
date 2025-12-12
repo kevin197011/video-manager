@@ -395,6 +395,12 @@ func (r *VideoStreamEndpointRepository) GenerateAll(ctx context.Context) (int, e
 				continue
 			}
 
+			// Check provider match: if stream.provider_id is NULL, match all providers
+			// if stream.provider_id is set, only match lines from that provider
+			if stream.ProviderID != nil && line.ProviderID != *stream.ProviderID {
+				continue
+			}
+
 			for _, domain := range domains {
 				// Generate full URL
 				fullURL := url_generator.GenerateEndpointURL(line.DisplayName, domain.Name, streamPath.FullPath)

@@ -96,9 +96,11 @@ func (h *StreamHandler) Create(c *gin.Context) {
 	stream, err := h.service.Create(c.Request.Context(), req)
 	if err != nil {
 		if err == repositories.ErrStreamCodeExists {
-			response.BadRequest(c, "Stream code already exists")
+			response.BadRequest(c, "视频流区域代码已存在")
+		} else if err == repositories.ErrStreamNameExists {
+			response.BadRequest(c, "视频流区域名称已存在")
 		} else {
-			response.InternalServerError(c, "Failed to create stream")
+			response.InternalServerError(c, "创建视频流区域失败")
 		}
 		return
 	}
@@ -135,11 +137,13 @@ func (h *StreamHandler) Update(c *gin.Context) {
 	stream, err := h.service.Update(c.Request.Context(), id, req)
 	if err != nil {
 		if err == repositories.ErrStreamNotFound {
-			response.NotFound(c, "Stream not found")
+			response.NotFound(c, "视频流区域不存在")
 		} else if err == repositories.ErrStreamCodeExists {
-			response.BadRequest(c, "Stream code already exists")
+			response.BadRequest(c, "视频流区域代码已存在")
+		} else if err == repositories.ErrStreamNameExists {
+			response.BadRequest(c, "视频流区域名称已存在")
 		} else {
-			response.InternalServerError(c, "Failed to update stream")
+			response.InternalServerError(c, "更新视频流区域失败")
 		}
 		return
 	}

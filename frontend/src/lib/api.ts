@@ -154,6 +154,8 @@ export type Stream = {
   id: number;
   name: string;
   code: string;
+  provider_id?: number | null;
+  provider?: CDNProvider;
   created_at: string;
   updated_at: string;
 };
@@ -167,11 +169,11 @@ export const streamAPI = {
     const response = await api.get<APIResponse<Stream>>(`/stream-regions/${id}`);
     return response.data.data;
   },
-  create: async (data: { name: string; code: string }): Promise<Stream> => {
+  create: async (data: { name: string; code: string; provider_id?: number | null }): Promise<Stream> => {
     const response = await api.post<APIResponse<Stream>>('/stream-regions', data);
     return response.data.data;
   },
-  update: async (id: number, data: { name: string; code: string }): Promise<Stream> => {
+  update: async (id: number, data: { name: string; code: string; provider_id?: number | null }): Promise<Stream> => {
     const response = await api.put<APIResponse<Stream>>(`/stream-regions/${id}`, data);
     return response.data.data;
   },

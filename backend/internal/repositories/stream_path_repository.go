@@ -8,6 +8,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/video-manager/backend/internal/models"
@@ -15,7 +16,8 @@ import (
 )
 
 var (
-	ErrStreamPathNotFound = errors.New("stream path not found")
+	ErrStreamPathNotFound      = errors.New("stream path not found")
+	ErrStreamPathTableIDExists = errors.New("stream path table_id already exists")
 )
 
 type StreamPathRepository struct{}
@@ -108,12 +110,26 @@ func (r *StreamPathRepository) Create(ctx context.Context, streamID int64, table
 		return nil, err
 	}
 
+	// Check if table_id already exists
+	var tableIDExists bool
+	err = database.DB.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM stream_paths WHERE table_id = $1)`, tableID).Scan(&tableIDExists)
+	if err != nil {
+		return nil, err
+	}
+	if tableIDExists {
+		return nil, ErrStreamPathTableIDExists
+	}
+
 	query := `INSERT INTO stream_paths (stream_id, table_id, full_path) VALUES ($1, $2, $3) RETURNING id, stream_id, table_id, full_path, created_at, updated_at`
 	var sp models.StreamPath
 	err = database.DB.QueryRow(ctx, query, streamID, tableID, fullPath).Scan(
 		&sp.ID, &sp.StreamID, &sp.TableID, &sp.FullPath, &sp.CreatedAt, &sp.UpdatedAt,
 	)
 	if err != nil {
+		// Check for unique constraint violation
+		if strings.Contains(err.Error(), "stream_paths_table_id_unique") || strings.Contains(err.Error(), "idx_stream_paths_table_id_unique") {
+			return nil, ErrStreamPathTableIDExists
+		}
 		return nil, err
 	}
 
@@ -137,12 +153,26 @@ func (r *StreamPathRepository) Update(ctx context.Context, id int64, streamID in
 		return nil, err
 	}
 
+	// Check if table_id already exists for another path
+	var existingTableID int64
+	err = database.DB.QueryRow(ctx, `SELECT id FROM stream_paths WHERE table_id = $1`, tableID).Scan(&existingTableID)
+	if err == nil && existingTableID != id {
+		return nil, ErrStreamPathTableIDExists
+	}
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, err
+	}
+
 	query := `UPDATE stream_paths SET stream_id = $1, table_id = $2, full_path = $3, updated_at = NOW() WHERE id = $4 RETURNING id, stream_id, table_id, full_path, created_at, updated_at`
 	var sp models.StreamPath
 	err = database.DB.QueryRow(ctx, query, streamID, tableID, fullPath, id).Scan(
 		&sp.ID, &sp.StreamID, &sp.TableID, &sp.FullPath, &sp.CreatedAt, &sp.UpdatedAt,
 	)
 	if err != nil {
+		// Check for unique constraint violation
+		if strings.Contains(err.Error(), "stream_paths_table_id_unique") || strings.Contains(err.Error(), "idx_stream_paths_table_id_unique") {
+			return nil, ErrStreamPathTableIDExists
+		}
 		return nil, err
 	}
 

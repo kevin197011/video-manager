@@ -375,6 +375,7 @@ export default function LinesPage() {
         <LineForm
           line={editingLine}
           providers={providers}
+          lines={lines}
           open={showForm}
           onClose={() => {
             setShowForm(false);

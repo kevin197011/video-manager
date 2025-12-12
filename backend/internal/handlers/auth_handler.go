@@ -212,7 +212,11 @@ func (h *AuthHandler) CreateToken(c *gin.Context) {
 		req,
 	)
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, err.Error())
+		if err == repositories.ErrTokenNameExists {
+			response.BadRequest(c, "Token 名称已存在")
+		} else {
+			response.Error(c, http.StatusBadRequest, err.Error())
+		}
 		return
 	}
 

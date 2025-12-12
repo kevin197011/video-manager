@@ -104,9 +104,11 @@ func (h *StreamPathHandler) Create(c *gin.Context) {
 	path, err := h.service.Create(c.Request.Context(), req)
 	if err != nil {
 		if err == repositories.ErrStreamNotFound {
-			response.BadRequest(c, "Stream not found")
+			response.BadRequest(c, "视频流区域不存在")
+		} else if err == repositories.ErrStreamPathTableIDExists {
+			response.BadRequest(c, "桌台号已存在")
 		} else {
-			response.InternalServerError(c, "Failed to create stream path")
+			response.InternalServerError(c, "创建流路径失败")
 		}
 		return
 	}
@@ -143,11 +145,13 @@ func (h *StreamPathHandler) Update(c *gin.Context) {
 	path, err := h.service.Update(c.Request.Context(), id, req)
 	if err != nil {
 		if err == repositories.ErrStreamPathNotFound {
-			response.NotFound(c, "Stream path not found")
+			response.NotFound(c, "流路径不存在")
 		} else if err == repositories.ErrStreamNotFound {
-			response.BadRequest(c, "Stream not found")
+			response.BadRequest(c, "视频流区域不存在")
+		} else if err == repositories.ErrStreamPathTableIDExists {
+			response.BadRequest(c, "桌台号已存在")
 		} else {
-			response.InternalServerError(c, "Failed to update stream path")
+			response.InternalServerError(c, "更新流路径失败")
 		}
 		return
 	}

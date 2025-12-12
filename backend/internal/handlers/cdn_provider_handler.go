@@ -96,11 +96,13 @@ func (h *CDNProviderHandler) Create(c *gin.Context) {
 	provider, err := h.service.Create(c.Request.Context(), req)
 	if err != nil {
 		if err == repositories.ErrProviderCodeExists {
-			response.BadRequest(c, "Provider code already exists")
+			response.BadRequest(c, "厂商代码已存在")
+		} else if err == repositories.ErrProviderNameExists {
+			response.BadRequest(c, "厂商名称已存在")
 		} else if err == repositories.ErrInvalidCodeFormat {
-			response.BadRequest(c, "Code can only contain letters, numbers, underscores and hyphens")
+			response.BadRequest(c, "代码只能包含字母、数字、下划线和连字符")
 		} else {
-			response.InternalServerError(c, "Failed to create provider")
+			response.InternalServerError(c, "创建厂商失败")
 		}
 		return
 	}
@@ -137,13 +139,15 @@ func (h *CDNProviderHandler) Update(c *gin.Context) {
 	provider, err := h.service.Update(c.Request.Context(), id, req)
 	if err != nil {
 		if err == repositories.ErrProviderNotFound {
-			response.NotFound(c, "Provider not found")
+			response.NotFound(c, "厂商不存在")
 		} else if err == repositories.ErrProviderCodeExists {
-			response.BadRequest(c, "Provider code already exists")
+			response.BadRequest(c, "厂商代码已存在")
+		} else if err == repositories.ErrProviderNameExists {
+			response.BadRequest(c, "厂商名称已存在")
 		} else if err == repositories.ErrInvalidCodeFormat {
-			response.BadRequest(c, "Code can only contain letters, numbers, underscores and hyphens")
+			response.BadRequest(c, "代码只能包含字母、数字、下划线和连字符")
 		} else {
-			response.InternalServerError(c, "Failed to update provider")
+			response.InternalServerError(c, "更新厂商失败")
 		}
 		return
 	}

@@ -96,9 +96,9 @@ func (h *DomainHandler) Create(c *gin.Context) {
 	domain, err := h.service.Create(c.Request.Context(), req)
 	if err != nil {
 		if err == repositories.ErrDomainNameExists {
-			response.BadRequest(c, "Domain name already exists")
+			response.BadRequest(c, "域名名称已存在")
 		} else {
-			response.InternalServerError(c, "Failed to create domain")
+			response.InternalServerError(c, "创建域名失败")
 		}
 		return
 	}
@@ -135,11 +135,11 @@ func (h *DomainHandler) Update(c *gin.Context) {
 	domain, err := h.service.Update(c.Request.Context(), id, req)
 	if err != nil {
 		if err == repositories.ErrDomainNotFound {
-			response.NotFound(c, "Domain not found")
+			response.NotFound(c, "域名不存在")
 		} else if err == repositories.ErrDomainNameExists {
-			response.BadRequest(c, "Domain name already exists")
+			response.BadRequest(c, "域名名称已存在")
 		} else {
-			response.InternalServerError(c, "Failed to update domain")
+			response.InternalServerError(c, "更新域名失败")
 		}
 		return
 	}

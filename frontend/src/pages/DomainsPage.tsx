@@ -316,6 +316,7 @@ export default function DomainsPage() {
       {showForm && (
         <DomainForm
           domain={editingDomain}
+          domains={domains}
           open={showForm}
           onClose={() => {
             setShowForm(false);

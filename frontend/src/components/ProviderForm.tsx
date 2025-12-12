@@ -13,9 +13,10 @@ interface ProviderFormProps {
   open: boolean;
   onClose: () => void;
   onSubmit: () => void;
+  providers?: CDNProvider[]; // 用于前端唯一性验证
 }
 
-export default function ProviderForm({ provider, open, onClose, onSubmit }: ProviderFormProps) {
+export default function ProviderForm({ provider, open, onClose, onSubmit, providers = [] }: ProviderFormProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -81,6 +82,19 @@ export default function ProviderForm({ provider, open, onClose, onSubmit }: Prov
             { min: 1, message: '名称不能为空' },
             { max: 255, message: '名称不能超过255个字符' },
             { whitespace: true, message: '名称不能仅为空白字符' },
+            {
+              validator: async (_, value) => {
+                if (!value) return Promise.resolve();
+                // 检查名称是否已存在（排除当前编辑的 provider）
+                const existing = providers.find(
+                  (p) => p.name.toLowerCase() === value.toLowerCase().trim() && p.id !== provider?.id
+                );
+                if (existing) {
+                  return Promise.reject(new Error('厂商名称已存在'));
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <Input placeholder="输入 provider name" showCount maxLength={255} />

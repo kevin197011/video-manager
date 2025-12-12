@@ -303,7 +303,57 @@ func runMigrations() error {
 		}
 	}
 
-	// Read migration files (both .up.sql and .sql files)
+	// Create migrations table if not exists
+	_, err := database.DB.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS schema_migrations (
+			version INTEGER PRIMARY KEY,
+			applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		)
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to create migrations table: %w", err)
+	}
+
+	// Check if init_schema.sql exists and database is empty (new deployment)
+	initSchemaFile := filepath.Join(migrationsDir, "init_schema.sql")
+	if _, err := os.Stat(initSchemaFile); err == nil {
+		// Check if database is empty (no migrations applied)
+		var count int
+		err := database.DB.QueryRow(ctx, "SELECT COUNT(*) FROM schema_migrations").Scan(&count)
+		if err == nil && count == 0 {
+			// Database is empty, use init_schema.sql for initialization
+			logger.Info("Database is empty, using init_schema.sql for initialization")
+			sql, err := os.ReadFile(initSchemaFile)
+			if err != nil {
+				return fmt.Errorf("failed to read init_schema.sql: %w", err)
+			}
+
+			tx, err := database.DB.Begin(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to begin transaction: %w", err)
+			}
+
+			if _, err := tx.Exec(ctx, string(sql)); err != nil {
+				tx.Rollback(ctx)
+				return fmt.Errorf("failed to execute init_schema.sql: %w", err)
+			}
+
+			// Mark all migrations as applied (version 0 means initialized with init_schema.sql)
+			if _, err := tx.Exec(ctx, "INSERT INTO schema_migrations (version) VALUES (0) ON CONFLICT DO NOTHING"); err != nil {
+				tx.Rollback(ctx)
+				return fmt.Errorf("failed to record initialization: %w", err)
+			}
+
+			if err := tx.Commit(ctx); err != nil {
+				return fmt.Errorf("failed to commit initialization: %w", err)
+			}
+
+			logger.Info("Database initialized successfully using init_schema.sql")
+			return nil
+		}
+	}
+
+	// Read migration files (both .up.sql and .sql files) for incremental migrations
 	upFiles, err := filepath.Glob(filepath.Join(migrationsDir, "*.up.sql"))
 	if err != nil {
 		return fmt.Errorf("failed to read migration files: %w", err)
@@ -323,10 +373,11 @@ func runMigrations() error {
 		files = append(files, file)
 	}
 	for _, file := range sqlFiles {
-		// Skip .down.sql files and files already in upFiles
+		// Skip .down.sql files, init_schema.sql, and files already in upFiles
 		base := filepath.Base(file)
 		isDownFile := strings.HasSuffix(base, ".down.sql")
-		if !isDownFile && !filesMap[file] {
+		isInitSchema := base == "init_schema.sql"
+		if !isDownFile && !isInitSchema && !filesMap[file] {
 			// Check if it's a numbered migration file (e.g., 000007_insert_test_data.sql)
 			if len(base) >= 6 && base[0] >= '0' && base[0] <= '9' {
 				files = append(files, file)
@@ -337,17 +388,6 @@ func runMigrations() error {
 	if len(files) == 0 {
 		logger.Info("No migration files found")
 		return nil
-	}
-
-	// Create migrations table if not exists
-	_, err = database.DB.Exec(ctx, `
-		CREATE TABLE IF NOT EXISTS schema_migrations (
-			version INTEGER PRIMARY KEY,
-			applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		)
-	`)
-	if err != nil {
-		return fmt.Errorf("failed to create migrations table: %w", err)
 	}
 
 	// Get applied migrations

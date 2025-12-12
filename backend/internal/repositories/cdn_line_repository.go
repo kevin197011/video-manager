@@ -8,6 +8,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/video-manager/backend/internal/models"
@@ -15,7 +16,8 @@ import (
 )
 
 var (
-	ErrLineNotFound = errors.New("cdn line not found")
+	ErrLineNotFound          = errors.New("cdn line not found")
+	ErrLineDisplayNameExists = errors.New("cdn line display_name already exists")
 )
 
 type CDNLineRepository struct{}
@@ -101,6 +103,16 @@ func (r *CDNLineRepository) Create(ctx context.Context, providerID int64, name, 
 		return nil, err
 	}
 
+	// Check if display_name already exists
+	var displayNameExists bool
+	err = database.DB.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cdn_lines WHERE display_name = $1)`, displayName).Scan(&displayNameExists)
+	if err != nil {
+		return nil, err
+	}
+	if displayNameExists {
+		return nil, ErrLineDisplayNameExists
+	}
+
 	query := `INSERT INTO cdn_lines (provider_id, name, display_name, created_at, updated_at)
 	          VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, provider_id, name, display_name, created_at, updated_at`
 	var l models.CDNLine
@@ -108,6 +120,10 @@ func (r *CDNLineRepository) Create(ctx context.Context, providerID int64, name, 
 		&l.ID, &l.ProviderID, &l.Name, &l.DisplayName, &l.CreatedAt, &l.UpdatedAt,
 	)
 	if err != nil {
+		// Check for unique constraint violation
+		if strings.Contains(err.Error(), "cdn_lines_display_name_unique") || strings.Contains(err.Error(), "idx_cdn_lines_display_name_unique") {
+			return nil, ErrLineDisplayNameExists
+		}
 		return nil, err
 	}
 	return &l, nil
@@ -128,6 +144,16 @@ func (r *CDNLineRepository) Update(ctx context.Context, id int64, providerID int
 		return nil, err
 	}
 
+	// Check if display_name already exists for another line
+	var existingDisplayNameID int64
+	err = database.DB.QueryRow(ctx, `SELECT id FROM cdn_lines WHERE display_name = $1`, displayName).Scan(&existingDisplayNameID)
+	if err == nil && existingDisplayNameID != id {
+		return nil, ErrLineDisplayNameExists
+	}
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, err
+	}
+
 	query := `UPDATE cdn_lines SET provider_id = $1, name = $2, display_name = $3, updated_at = NOW()
 	          WHERE id = $4 RETURNING id, provider_id, name, display_name, created_at, updated_at`
 	var l models.CDNLine
@@ -135,6 +161,10 @@ func (r *CDNLineRepository) Update(ctx context.Context, id int64, providerID int
 		&l.ID, &l.ProviderID, &l.Name, &l.DisplayName, &l.CreatedAt, &l.UpdatedAt,
 	)
 	if err != nil {
+		// Check for unique constraint violation
+		if strings.Contains(err.Error(), "cdn_lines_display_name_unique") || strings.Contains(err.Error(), "idx_cdn_lines_display_name_unique") {
+			return nil, ErrLineDisplayNameExists
+		}
 		return nil, err
 	}
 	return &l, nil

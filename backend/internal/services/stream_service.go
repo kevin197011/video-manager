@@ -38,7 +38,7 @@ func (s *StreamService) Create(ctx context.Context, req models.CreateStreamReque
 	// Normalize input
 	name := strings.TrimSpace(req.Name)
 	code := strings.TrimSpace(req.Code)
-	stream, err := s.repo.Create(ctx, name, code)
+	stream, err := s.repo.Create(ctx, name, code, req.ProviderID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (s *StreamService) Update(ctx context.Context, id int64, req models.UpdateS
 	// Normalize input
 	name := strings.TrimSpace(req.Name)
 	code := strings.TrimSpace(req.Code)
-	stream, err := s.repo.Update(ctx, id, name, code)
+	stream, err := s.repo.Update(ctx, id, name, code, req.ProviderID)
 	if err != nil {
 		return nil, err
 	}

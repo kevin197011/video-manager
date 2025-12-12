@@ -137,6 +137,9 @@ func (s *AuthService) CreateToken(ctx context.Context, userID int64, username st
 	// Save token metadata to database
 	_, err = s.tokenRepo.Create(ctx, userID, req.Name, tokenHash, req.NeverExpire, expiresAt)
 	if err != nil {
+		if err == repositories.ErrTokenNameExists {
+			return "", err
+		}
 		logger.ErrorContext(ctx, "Failed to save token metadata", "user_id", userID, "error", err)
 		// Don't fail the request if we can't save metadata, but log it
 	}

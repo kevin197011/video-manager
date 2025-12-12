@@ -11,12 +11,13 @@ import type { CDNLine, CDNProvider } from '../lib/api';
 interface LineFormProps {
   line: CDNLine | null;
   providers: CDNProvider[];
+  lines?: CDNLine[]; // 用于前端唯一性验证
   open: boolean;
   onClose: () => void;
   onSubmit: () => void;
 }
 
-export default function LineForm({ line, providers, open, onClose, onSubmit }: LineFormProps) {
+export default function LineForm({ line, providers, lines = [], open, onClose, onSubmit }: LineFormProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -121,6 +122,19 @@ export default function LineForm({ line, providers, open, onClose, onSubmit }: L
             { min: 1, message: '显示名称不能为空' },
             { max: 255, message: '显示名称不能超过255个字符' },
             { whitespace: true, message: '显示名称不能仅为空白字符' },
+            {
+              validator: async (_, value) => {
+                if (!value) return Promise.resolve();
+                // 检查显示名称是否已存在（排除当前编辑的 line）
+                const existing = lines.find(
+                  (l) => l.display_name.toLowerCase() === value.toLowerCase().trim() && l.id !== line?.id
+                );
+                if (existing) {
+                  return Promise.reject(new Error('线路显示名称已存在'));
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <Input placeholder="输入 display name" showCount maxLength={255} />

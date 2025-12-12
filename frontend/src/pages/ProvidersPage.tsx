@@ -331,6 +331,7 @@ export default function ProvidersPage() {
             setEditingProvider(null);
           }}
           onSubmit={handleFormSubmit}
+          providers={providers}
         />
       )}
 

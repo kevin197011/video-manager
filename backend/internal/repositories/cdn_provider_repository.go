@@ -8,6 +8,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/video-manager/backend/internal/models"
@@ -17,6 +18,7 @@ import (
 var (
 	ErrProviderNotFound   = errors.New("cdn provider not found")
 	ErrProviderCodeExists = errors.New("cdn provider code already exists")
+	ErrProviderNameExists = errors.New("cdn provider name already exists")
 	ErrInvalidCodeFormat  = errors.New("code can only contain letters, numbers, underscores and hyphens")
 )
 
@@ -66,13 +68,23 @@ func (r *CDNProviderRepository) GetByID(ctx context.Context, id int64) (*models.
 // Create creates a new CDN provider
 func (r *CDNProviderRepository) Create(ctx context.Context, name, code string) (*models.CDNProvider, error) {
 	// Check if code already exists
-	var exists bool
-	err := database.DB.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cdn_providers WHERE code = $1)`, code).Scan(&exists)
+	var codeExists bool
+	err := database.DB.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cdn_providers WHERE code = $1)`, code).Scan(&codeExists)
 	if err != nil {
 		return nil, err
 	}
-	if exists {
+	if codeExists {
 		return nil, ErrProviderCodeExists
+	}
+
+	// Check if name already exists
+	var nameExists bool
+	err = database.DB.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cdn_providers WHERE name = $1)`, name).Scan(&nameExists)
+	if err != nil {
+		return nil, err
+	}
+	if nameExists {
+		return nil, ErrProviderNameExists
 	}
 
 	query := `INSERT INTO cdn_providers (name, code, created_at, updated_at)
@@ -82,6 +94,13 @@ func (r *CDNProviderRepository) Create(ctx context.Context, name, code string) (
 		&p.ID, &p.Name, &p.Code, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
+		// Check for unique constraint violation
+		if strings.Contains(err.Error(), "cdn_providers_name_unique") || strings.Contains(err.Error(), "idx_cdn_providers_name_unique") {
+			return nil, ErrProviderNameExists
+		}
+		if strings.Contains(err.Error(), "cdn_providers_code_unique") || strings.Contains(err.Error(), "idx_cdn_providers_code") {
+			return nil, ErrProviderCodeExists
+		}
 		return nil, err
 	}
 	return &p, nil
@@ -96,10 +115,20 @@ func (r *CDNProviderRepository) Update(ctx context.Context, id int64, name, code
 	}
 
 	// Check if code already exists for another provider
-	var existingID int64
-	err = database.DB.QueryRow(ctx, `SELECT id FROM cdn_providers WHERE code = $1`, code).Scan(&existingID)
-	if err == nil && existingID != id {
+	var existingCodeID int64
+	err = database.DB.QueryRow(ctx, `SELECT id FROM cdn_providers WHERE code = $1`, code).Scan(&existingCodeID)
+	if err == nil && existingCodeID != id {
 		return nil, ErrProviderCodeExists
+	}
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, err
+	}
+
+	// Check if name already exists for another provider
+	var existingNameID int64
+	err = database.DB.QueryRow(ctx, `SELECT id FROM cdn_providers WHERE name = $1`, name).Scan(&existingNameID)
+	if err == nil && existingNameID != id {
+		return nil, ErrProviderNameExists
 	}
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
@@ -112,6 +141,13 @@ func (r *CDNProviderRepository) Update(ctx context.Context, id int64, name, code
 		&p.ID, &p.Name, &p.Code, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
+		// Check for unique constraint violation
+		if strings.Contains(err.Error(), "cdn_providers_name_unique") || strings.Contains(err.Error(), "idx_cdn_providers_name_unique") {
+			return nil, ErrProviderNameExists
+		}
+		if strings.Contains(err.Error(), "cdn_providers_code_unique") || strings.Contains(err.Error(), "idx_cdn_providers_code") {
+			return nil, ErrProviderCodeExists
+		}
 		return nil, err
 	}
 	return &p, nil

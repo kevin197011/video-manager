@@ -11,12 +11,13 @@ import type { StreamPath, Stream } from '../lib/api';
 interface StreamPathFormProps {
   path: StreamPath | null;
   streams: Stream[];
+  paths?: StreamPath[]; // 用于前端唯一性验证
   open: boolean;
   onClose: () => void;
   onSubmit: () => void;
 }
 
-export default function StreamPathForm({ path, streams, open, onClose, onSubmit }: StreamPathFormProps) {
+export default function StreamPathForm({ path, streams, paths = [], open, onClose, onSubmit }: StreamPathFormProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -108,6 +109,19 @@ export default function StreamPathForm({ path, streams, open, onClose, onSubmit 
             { min: 1, message: '桌台号不能为空' },
             { max: 255, message: '桌台号不能超过255个字符' },
             { whitespace: true, message: '桌台号不能仅为空白字符' },
+            {
+              validator: async (_, value) => {
+                if (!value) return Promise.resolve();
+                // 检查桌台号是否已存在（排除当前编辑的 path）
+                const existing = paths.find(
+                  (p) => p.table_id.toLowerCase() === value.toLowerCase().trim() && p.id !== path?.id
+                );
+                if (existing) {
+                  return Promise.reject(new Error('桌台号已存在'));
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <Input placeholder="输入桌台号 (e.g., k001)" showCount maxLength={255} />

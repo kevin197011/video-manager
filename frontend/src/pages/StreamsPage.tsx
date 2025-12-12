@@ -54,7 +54,9 @@ export default function StreamsPage() {
     const filtered = (streams || []).filter(
       (stream) =>
         stream.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        stream.code.toLowerCase().includes(searchText.toLowerCase())
+        stream.code.toLowerCase().includes(searchText.toLowerCase()) ||
+        stream.provider?.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        stream.provider?.code.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredStreams(filtered);
   };
@@ -129,12 +131,13 @@ export default function StreamsPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['ID', 'Name', 'Code', 'Created At', '更新时间'].join(','),
+      ['ID', 'Name', 'Code', 'Provider', 'Created At', '更新时间'].join(','),
       ...(filteredStreams || []).map((s) =>
         [
           s.id,
           `"${s.name}"`,
           `"${s.code}"`,
+          `"${s.provider?.name || '所有厂商'}"`,
           new Date(s.created_at).toISOString(),
           new Date(s.updated_at).toISOString(),
         ].join(',')
@@ -179,6 +182,22 @@ export default function StreamsPage() {
       dataIndex: 'code',
       key: 'code',
       sorter: (a, b) => a.code.localeCompare(b.code),
+    },
+    {
+      title: '关联厂商',
+      dataIndex: 'provider',
+      key: 'provider',
+      render: (provider: Stream['provider']) => {
+        if (provider) {
+          return provider.name;
+        }
+        return <span style={{ color: '#999' }}>所有厂商</span>;
+      },
+      sorter: (a, b) => {
+        const aName = a.provider?.name || '';
+        const bName = b.provider?.name || '';
+        return aName.localeCompare(bName);
+      },
     },
     {
       title: '创建时间',
@@ -254,7 +273,7 @@ export default function StreamsPage() {
         <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>视频流区域</h2>
         <Space>
           <Search
-            placeholder="搜索 name or code"
+            placeholder="搜索名称、代码或厂商"
             allowClear
             style={{ width: 250 }}
             prefix={<SearchOutlined />}
@@ -325,6 +344,7 @@ export default function StreamsPage() {
       {showForm && (
         <StreamForm
           stream={editingStream}
+          streams={streams}
           open={showForm}
           onClose={() => {
             setShowForm(false);
@@ -361,6 +381,13 @@ export default function StreamsPage() {
             <Descriptions.Item label="ID">{viewingStream.id}</Descriptions.Item>
             <Descriptions.Item label="名称">{viewingStream.name}</Descriptions.Item>
             <Descriptions.Item label="代码">{viewingStream.code}</Descriptions.Item>
+            <Descriptions.Item label="关联厂商">
+              {viewingStream.provider ? (
+                `${viewingStream.provider.name} (${viewingStream.provider.code})`
+              ) : (
+                <span style={{ color: '#999' }}>所有厂商（匹配所有厂商的相同代码线路）</span>
+              )}
+            </Descriptions.Item>
             <Descriptions.Item label="创建时间">
               {new Date(viewingStream.created_at).toLocaleString()}
             </Descriptions.Item>

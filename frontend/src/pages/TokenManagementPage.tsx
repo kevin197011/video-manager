@@ -299,7 +299,22 @@ export default function TokenManagementPage() {
             <Form.Item
               name="name"
               label="Token 名称"
-              rules={[{ required: true, message: '请输入 Token 名称' }]}
+              rules={[
+                { required: true, message: '请输入 Token 名称' },
+                {
+                  validator: async (_, value) => {
+                    if (!value) return Promise.resolve();
+                    // 检查名称是否已存在（同一用户下）
+                    const existing = tokens.find(
+                      (t) => t.name.toLowerCase() === value.toLowerCase().trim()
+                    );
+                    if (existing) {
+                      return Promise.reject(new Error('Token 名称已存在'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
               tooltip="为 Token 起一个便于识别的名称，如：开发环境、生产环境等"
             >
               <Input placeholder="例如：开发环境 Token" />

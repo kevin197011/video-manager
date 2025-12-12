@@ -10,12 +10,13 @@ import type { Domain } from '../lib/api';
 
 interface DomainFormProps {
   domain: Domain | null;
+  domains?: Domain[]; // 用于前端唯一性验证
   open: boolean;
   onClose: () => void;
   onSubmit: () => void;
 }
 
-export default function DomainForm({ domain, open, onClose, onSubmit }: DomainFormProps) {
+export default function DomainForm({ domain, domains = [], open, onClose, onSubmit }: DomainFormProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -81,6 +82,19 @@ export default function DomainForm({ domain, open, onClose, onSubmit }: DomainFo
             { max: 255, message: '域名不能超过255个字符' },
             { whitespace: true, message: '域名不能仅为空白字符' },
             { pattern: /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}$/, message: '请输入有效的域名' },
+            {
+              validator: async (_, value) => {
+                if (!value) return Promise.resolve();
+                // 检查名称是否已存在（排除当前编辑的 domain）
+                const existing = domains.find(
+                  (d) => d.name.toLowerCase() === value.toLowerCase().trim() && d.id !== domain?.id
+                );
+                if (existing) {
+                  return Promise.reject(new Error('域名名称已存在'));
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <Input placeholder="输入 domain name (e.g., a.com)" showCount maxLength={255} />

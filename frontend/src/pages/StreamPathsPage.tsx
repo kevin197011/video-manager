@@ -400,6 +400,7 @@ export default function StreamPathsPage() {
         <StreamPathForm
           path={editingPath}
           streams={streams}
+          paths={paths}
           open={showForm}
           onClose={() => {
             setShowForm(false);
