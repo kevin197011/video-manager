@@ -69,7 +69,7 @@ export default function LinesPage() {
       filtered = filtered.filter(
         (line) =>
           line.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          line.display_name.toLowerCase().includes(searchText.toLowerCase()) ||
+          line.code.toLowerCase().includes(searchText.toLowerCase()) ||
           line.provider?.name.toLowerCase().includes(searchText.toLowerCase())
       );
     }
@@ -147,12 +147,12 @@ export default function LinesPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['ID', 'Display Name', 'Name', 'Provider', 'Created At', '更新时间'].join(','),
+      ['ID', '名称', '代码', 'Provider', 'Created At', '更新时间'].join(','),
       ...filteredLines.map((l) =>
         [
           l.id,
-          `"${l.display_name}"`,
           `"${l.name}"`,
+          `"${l.code}"`,
           `"${l.provider?.name || 'Unknown'}"`,
           new Date(l.created_at).toISOString(),
           new Date(l.updated_at).toISOString(),
@@ -188,13 +188,13 @@ export default function LinesPage() {
       sorter: (a, b) => a.id - b.id,
     },
     {
-      title: '显示名称',
-      dataIndex: 'display_name',
-      key: 'display_name',
-      sorter: (a, b) => a.display_name.localeCompare(b.display_name),
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
-      title: '名称',
+      title: '代码',
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
@@ -235,7 +235,7 @@ export default function LinesPage() {
           </Button>
           <Popconfirm
             title="删除线路"
-            description={`确定要删除 "${record.display_name}" (${record.name})?`}
+            description={`确定要删除 "${record.name}" (代码: ${record.code})?`}
             onConfirm={() => handleDelete(record.id)}
             okText="确定"
             cancelText="取消"
@@ -290,7 +290,7 @@ export default function LinesPage() {
         <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>CDN 线路</h2>
         <Space>
           <Search
-            placeholder="搜索 name, display name or provider"
+            placeholder="搜索名称、代码或厂商"
             allowClear
             style={{ width: 280 }}
             prefix={<SearchOutlined />}
@@ -411,8 +411,8 @@ export default function LinesPage() {
         {viewingLine && (
           <Descriptions column={1} bordered>
             <Descriptions.Item label="ID">{viewingLine.id}</Descriptions.Item>
-            <Descriptions.Item label="显示名称">{viewingLine.display_name}</Descriptions.Item>
             <Descriptions.Item label="名称">{viewingLine.name}</Descriptions.Item>
+            <Descriptions.Item label="代码">{viewingLine.code}</Descriptions.Item>
             <Descriptions.Item label="厂商">
               {viewingLine.provider?.name || 'Unknown'} ({viewingLine.provider?.code || 'N/A'})
             </Descriptions.Item>

@@ -24,11 +24,13 @@ CREATE TABLE IF NOT EXISTS cdn_providers (
 );
 
 -- Create cdn_lines table
+-- name: 名称 (原 display_name)
+-- code: 代码 (原 name)
 CREATE TABLE IF NOT EXISTS cdn_lines (
     id BIGSERIAL PRIMARY KEY,
     provider_id BIGINT NOT NULL REFERENCES cdn_providers(id) ON DELETE RESTRICT,
     name VARCHAR(255) NOT NULL,
-    display_name VARCHAR(255) NOT NULL,
+    code VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -154,9 +156,9 @@ CREATE INDEX IF NOT EXISTS idx_tokens_expires_at ON tokens(expires_at);
 ALTER TABLE cdn_providers ADD CONSTRAINT cdn_providers_name_unique UNIQUE (name);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_cdn_providers_name_unique ON cdn_providers(name);
 
--- cdn_lines unique constraints (on display_name)
-ALTER TABLE cdn_lines ADD CONSTRAINT cdn_lines_display_name_unique UNIQUE (display_name);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_cdn_lines_display_name_unique ON cdn_lines(display_name);
+-- cdn_lines unique constraints (on name)
+ALTER TABLE cdn_lines ADD CONSTRAINT cdn_lines_name_unique UNIQUE (name);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_cdn_lines_name_unique ON cdn_lines(name);
 
 -- streams unique constraints
 ALTER TABLE streams ADD CONSTRAINT streams_name_unique UNIQUE (name);
@@ -182,41 +184,42 @@ INSERT INTO cdn_providers (name, code) VALUES
 ON CONFLICT (code) DO NOTHING;
 
 -- Insert CDN Lines
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'kkw', 'bt-kkw' FROM cdn_providers WHERE code = 'volcano'
-ON CONFLICT (display_name) DO NOTHING;
+-- name: 名称 (原 display_name), code: 代码 (原 name)
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'bt-kkw', 'kkw' FROM cdn_providers WHERE code = 'volcano'
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'eu2', 'bt-eu2' FROM cdn_providers WHERE code = 'volcano'
-ON CONFLICT (display_name) DO NOTHING;
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'bt-eu2', 'eu2' FROM cdn_providers WHERE code = 'volcano'
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'eu3', 'bt-eu3' FROM cdn_providers WHERE code = 'volcano'
-ON CONFLICT (display_name) DO NOTHING;
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'bt-eu3', 'eu3' FROM cdn_providers WHERE code = 'volcano'
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'kkw', 'tc-kkw' FROM cdn_providers WHERE code = 'tencent'
-ON CONFLICT (display_name) DO NOTHING;
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'tc-kkw', 'kkw' FROM cdn_providers WHERE code = 'tencent'
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'eu2', 'tc-eu2' FROM cdn_providers WHERE code = 'tencent'
-ON CONFLICT (display_name) DO NOTHING;
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'tc-eu2', 'eu2' FROM cdn_providers WHERE code = 'tencent'
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'eu3', 'tc-eu3' FROM cdn_providers WHERE code = 'tencent'
-ON CONFLICT (display_name) DO NOTHING;
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'tc-eu3', 'eu3' FROM cdn_providers WHERE code = 'tencent'
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'kkw', 'cn-kkw' FROM cdn_providers WHERE code = 'wangsu'
-ON CONFLICT (display_name) DO NOTHING;
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'cn-kkw', 'kkw' FROM cdn_providers WHERE code = 'wangsu'
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'eu2', 'cn-eu2' FROM cdn_providers WHERE code = 'wangsu'
-ON CONFLICT (display_name) DO NOTHING;
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'cn-eu2', 'eu2' FROM cdn_providers WHERE code = 'wangsu'
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO cdn_lines (provider_id, name, display_name)
-SELECT id, 'eu3', 'cn-eu3' FROM cdn_providers WHERE code = 'wangsu'
-ON CONFLICT (display_name) DO NOTHING;
+INSERT INTO cdn_lines (provider_id, name, code)
+SELECT id, 'cn-eu3', 'eu3' FROM cdn_providers WHERE code = 'wangsu'
+ON CONFLICT (name) DO NOTHING;
 
 -- Insert Domains
 INSERT INTO domains (name) VALUES
@@ -255,7 +258,7 @@ SELECT DISTINCT
     d.id,
     s.id,
     sp.id,
-    'https://' || l.display_name || '.' || d.name || '/' || sp.full_path || '.flv',
+    'https://' || l.name || '.' || d.name || '/' || sp.full_path || '.flv',
     1
 FROM cdn_lines l
 CROSS JOIN domains d

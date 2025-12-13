@@ -109,6 +109,9 @@ definitions:
         maxLength: 255
         minLength: 1
         type: string
+      provider_id:
+        description: 'Optional: NULL means match all providers'
+        type: integer
     required:
     - code
     - name
@@ -193,6 +196,11 @@ definitions:
         type: integer
       name:
         type: string
+      provider:
+        $ref: '#/definitions/models.CDNProvider'
+      provider_id:
+        description: NULL means match all providers
+        type: integer
       updated_at:
         type: string
     type: object
@@ -297,6 +305,9 @@ definitions:
         maxLength: 255
         minLength: 1
         type: string
+      provider_id:
+        description: 'Optional: NULL means match all providers'
+        type: integer
     required:
     - code
     - name

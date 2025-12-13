@@ -62,8 +62,8 @@ export type CDNLine = {
   id: number;
   provider_id: number;
   provider?: CDNProvider;
-  name: string;
-  display_name: string;
+  name: string;  // 名称 (原 display_name)
+  code: string;  // 代码 (原 name)
   created_at: string;
   updated_at: string;
 };
@@ -106,11 +106,11 @@ export const lineAPI = {
     const response = await api.get<APIResponse<CDNLine>>(`/cdn-lines/${id}`);
     return response.data.data;
   },
-  create: async (data: { provider_id: number; name: string; display_name: string }): Promise<CDNLine> => {
+  create: async (data: { provider_id: number; name: string; code: string }): Promise<CDNLine> => {
     const response = await api.post<APIResponse<CDNLine>>('/cdn-lines', data);
     return response.data.data;
   },
-  update: async (id: number, data: { provider_id: number; name: string; display_name: string }): Promise<CDNLine> => {
+  update: async (id: number, data: { provider_id: number; name: string; code: string }): Promise<CDNLine> => {
     const response = await api.put<APIResponse<CDNLine>>(`/cdn-lines/${id}`, data);
     return response.data.data;
   },

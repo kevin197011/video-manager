@@ -166,7 +166,7 @@ export default function VideoStreamEndpointForm({
           <Select placeholder="Select a CDN line">
             {filteredLines.map((line) => (
               <Select.Option key={line.id} value={line.id}>
-                {line.display_name} ({line.name})
+                {line.name} ({line.code})
               </Select.Option>
             ))}
           </Select>

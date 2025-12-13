@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	ErrLineNotFound          = errors.New("cdn line not found")
-	ErrLineDisplayNameExists = errors.New("cdn line display_name already exists")
+	ErrLineNotFound    = errors.New("cdn line not found")
+	ErrLineNameExists  = errors.New("cdn line name already exists")
 )
 
 type CDNLineRepository struct{}
@@ -32,7 +32,7 @@ func (r *CDNLineRepository) GetAll(ctx context.Context, providerID *int64) ([]mo
 	var args []interface{}
 
 	if providerID != nil {
-		query = `SELECT l.id, l.provider_id, l.name, l.display_name, l.created_at, l.updated_at,
+		query = `SELECT l.id, l.provider_id, l.name, l.code, l.created_at, l.updated_at,
 		         p.id, p.name, p.code, p.created_at, p.updated_at
 		         FROM cdn_lines l
 		         JOIN cdn_providers p ON l.provider_id = p.id
@@ -40,7 +40,7 @@ func (r *CDNLineRepository) GetAll(ctx context.Context, providerID *int64) ([]mo
 		         ORDER BY l.created_at DESC`
 		args = []interface{}{*providerID}
 	} else {
-		query = `SELECT l.id, l.provider_id, l.name, l.display_name, l.created_at, l.updated_at,
+		query = `SELECT l.id, l.provider_id, l.name, l.code, l.created_at, l.updated_at,
 		         p.id, p.name, p.code, p.created_at, p.updated_at
 		         FROM cdn_lines l
 		         JOIN cdn_providers p ON l.provider_id = p.id
@@ -59,7 +59,7 @@ func (r *CDNLineRepository) GetAll(ctx context.Context, providerID *int64) ([]mo
 		var l models.CDNLine
 		var p models.CDNProvider
 		if err := rows.Scan(
-			&l.ID, &l.ProviderID, &l.Name, &l.DisplayName, &l.CreatedAt, &l.UpdatedAt,
+			&l.ID, &l.ProviderID, &l.Name, &l.Code, &l.CreatedAt, &l.UpdatedAt,
 			&p.ID, &p.Name, &p.Code, &p.CreatedAt, &p.UpdatedAt,
 		); err != nil {
 			return nil, err
@@ -73,7 +73,7 @@ func (r *CDNLineRepository) GetAll(ctx context.Context, providerID *int64) ([]mo
 
 // GetByID retrieves a CDN line by ID
 func (r *CDNLineRepository) GetByID(ctx context.Context, id int64) (*models.CDNLine, error) {
-	query := `SELECT l.id, l.provider_id, l.name, l.display_name, l.created_at, l.updated_at,
+	query := `SELECT l.id, l.provider_id, l.name, l.code, l.created_at, l.updated_at,
 	          p.id, p.name, p.code, p.created_at, p.updated_at
 	          FROM cdn_lines l
 	          JOIN cdn_providers p ON l.provider_id = p.id
@@ -81,7 +81,7 @@ func (r *CDNLineRepository) GetByID(ctx context.Context, id int64) (*models.CDNL
 	var l models.CDNLine
 	var p models.CDNProvider
 	err := database.DB.QueryRow(ctx, query, id).Scan(
-		&l.ID, &l.ProviderID, &l.Name, &l.DisplayName, &l.CreatedAt, &l.UpdatedAt,
+		&l.ID, &l.ProviderID, &l.Name, &l.Code, &l.CreatedAt, &l.UpdatedAt,
 		&p.ID, &p.Name, &p.Code, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
@@ -95,7 +95,7 @@ func (r *CDNLineRepository) GetByID(ctx context.Context, id int64) (*models.CDNL
 }
 
 // Create creates a new CDN line
-func (r *CDNLineRepository) Create(ctx context.Context, providerID int64, name, displayName string) (*models.CDNLine, error) {
+func (r *CDNLineRepository) Create(ctx context.Context, providerID int64, name, code string) (*models.CDNLine, error) {
 	// Verify provider exists
 	providerRepo := NewCDNProviderRepository()
 	_, err := providerRepo.GetByID(ctx, providerID)
@@ -103,26 +103,26 @@ func (r *CDNLineRepository) Create(ctx context.Context, providerID int64, name, 
 		return nil, err
 	}
 
-	// Check if display_name already exists
-	var displayNameExists bool
-	err = database.DB.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cdn_lines WHERE display_name = $1)`, displayName).Scan(&displayNameExists)
+	// Check if name already exists
+	var nameExists bool
+	err = database.DB.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cdn_lines WHERE name = $1)`, name).Scan(&nameExists)
 	if err != nil {
 		return nil, err
 	}
-	if displayNameExists {
-		return nil, ErrLineDisplayNameExists
+	if nameExists {
+		return nil, ErrLineNameExists
 	}
 
-	query := `INSERT INTO cdn_lines (provider_id, name, display_name, created_at, updated_at)
-	          VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, provider_id, name, display_name, created_at, updated_at`
+	query := `INSERT INTO cdn_lines (provider_id, name, code, created_at, updated_at)
+	          VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, provider_id, name, code, created_at, updated_at`
 	var l models.CDNLine
-	err = database.DB.QueryRow(ctx, query, providerID, name, displayName).Scan(
-		&l.ID, &l.ProviderID, &l.Name, &l.DisplayName, &l.CreatedAt, &l.UpdatedAt,
+	err = database.DB.QueryRow(ctx, query, providerID, name, code).Scan(
+		&l.ID, &l.ProviderID, &l.Name, &l.Code, &l.CreatedAt, &l.UpdatedAt,
 	)
 	if err != nil {
 		// Check for unique constraint violation
-		if strings.Contains(err.Error(), "cdn_lines_display_name_unique") || strings.Contains(err.Error(), "idx_cdn_lines_display_name_unique") {
-			return nil, ErrLineDisplayNameExists
+		if strings.Contains(err.Error(), "cdn_lines_name_unique") || strings.Contains(err.Error(), "idx_cdn_lines_name_unique") {
+			return nil, ErrLineNameExists
 		}
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func (r *CDNLineRepository) Create(ctx context.Context, providerID int64, name, 
 }
 
 // Update updates an existing CDN line
-func (r *CDNLineRepository) Update(ctx context.Context, id int64, providerID int64, name, displayName string) (*models.CDNLine, error) {
+func (r *CDNLineRepository) Update(ctx context.Context, id int64, providerID int64, name, code string) (*models.CDNLine, error) {
 	// Check if line exists
 	_, err := r.GetByID(ctx, id)
 	if err != nil {
@@ -144,26 +144,26 @@ func (r *CDNLineRepository) Update(ctx context.Context, id int64, providerID int
 		return nil, err
 	}
 
-	// Check if display_name already exists for another line
-	var existingDisplayNameID int64
-	err = database.DB.QueryRow(ctx, `SELECT id FROM cdn_lines WHERE display_name = $1`, displayName).Scan(&existingDisplayNameID)
-	if err == nil && existingDisplayNameID != id {
-		return nil, ErrLineDisplayNameExists
+	// Check if name already exists for another line
+	var existingNameID int64
+	err = database.DB.QueryRow(ctx, `SELECT id FROM cdn_lines WHERE name = $1`, name).Scan(&existingNameID)
+	if err == nil && existingNameID != id {
+		return nil, ErrLineNameExists
 	}
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
 
-	query := `UPDATE cdn_lines SET provider_id = $1, name = $2, display_name = $3, updated_at = NOW()
-	          WHERE id = $4 RETURNING id, provider_id, name, display_name, created_at, updated_at`
+	query := `UPDATE cdn_lines SET provider_id = $1, name = $2, code = $3, updated_at = NOW()
+	          WHERE id = $4 RETURNING id, provider_id, name, code, created_at, updated_at`
 	var l models.CDNLine
-	err = database.DB.QueryRow(ctx, query, providerID, name, displayName, id).Scan(
-		&l.ID, &l.ProviderID, &l.Name, &l.DisplayName, &l.CreatedAt, &l.UpdatedAt,
+	err = database.DB.QueryRow(ctx, query, providerID, name, code, id).Scan(
+		&l.ID, &l.ProviderID, &l.Name, &l.Code, &l.CreatedAt, &l.UpdatedAt,
 	)
 	if err != nil {
 		// Check for unique constraint violation
-		if strings.Contains(err.Error(), "cdn_lines_display_name_unique") || strings.Contains(err.Error(), "idx_cdn_lines_display_name_unique") {
-			return nil, ErrLineDisplayNameExists
+		if strings.Contains(err.Error(), "cdn_lines_name_unique") || strings.Contains(err.Error(), "idx_cdn_lines_name_unique") {
+			return nil, ErrLineNameExists
 		}
 		return nil, err
 	}

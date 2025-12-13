@@ -117,7 +117,7 @@ export default function VideoStreamEndpointsPage() {
           endpoint.full_url.toLowerCase().includes(searchText.toLowerCase()) ||
           endpoint.provider?.name.toLowerCase().includes(searchText.toLowerCase()) ||
           endpoint.provider?.code.toLowerCase().includes(searchText.toLowerCase()) ||
-          endpoint.line?.display_name.toLowerCase().includes(searchText.toLowerCase()) ||
+          endpoint.line?.name.toLowerCase().includes(searchText.toLowerCase()) ||
           endpoint.domain?.name.toLowerCase().includes(searchText.toLowerCase()) ||
           endpoint.stream?.name.toLowerCase().includes(searchText.toLowerCase()) ||
           endpoint.stream_path?.table_id?.toLowerCase().includes(searchText.toLowerCase())
@@ -285,7 +285,7 @@ export default function VideoStreamEndpointsPage() {
           e.id,
           `"${e.full_url}"`,
           `"${e.provider?.name || 'Unknown'}"`,
-          `"${e.line?.display_name || 'Unknown'}"`,
+          `"${e.line?.name || 'Unknown'}"`,
           `"${e.domain?.name || 'Unknown'}"`,
           `"${e.stream?.name || 'Unknown'}"`,
           `"${e.stream_path?.table_id || 'N/A'}"`,
@@ -348,8 +348,8 @@ export default function VideoStreamEndpointsPage() {
     {
       title: '线路',
       key: 'line',
-      render: (_, record) => record.line?.display_name || 'Unknown',
-      filters: (lines || []).map((l) => ({ text: l.display_name, value: l.id })),
+      render: (_, record) => record.line?.name || 'Unknown',
+      filters: (lines || []).map((l) => ({ text: l.name, value: l.id })),
       onFilter: (value, record) => record.line_id === value,
     },
     {
@@ -489,7 +489,7 @@ export default function VideoStreamEndpointsPage() {
             ))}
           </Select>
           <Select
-            placeholder="筛选 Line"
+            placeholder="筛选厂商线路"
             allowClear
             style={{ width: 150 }}
             onChange={(value) => setFilterLineId(value)}
@@ -497,7 +497,7 @@ export default function VideoStreamEndpointsPage() {
           >
             {(lines || []).map((line) => (
               <Select.Option key={line.id} value={line.id}>
-                {line.display_name}
+                {line.name}
               </Select.Option>
             ))}
           </Select>
@@ -613,7 +613,7 @@ export default function VideoStreamEndpointsPage() {
               {viewingEndpoint.provider?.name || 'Unknown'} ({viewingEndpoint.provider?.code || 'N/A'})
             </Descriptions.Item>
             <Descriptions.Item label="Line">
-              {viewingEndpoint.line?.display_name || 'Unknown'} ({viewingEndpoint.line?.name || 'N/A'})
+              {viewingEndpoint.line?.name || 'Unknown'} ({viewingEndpoint.line?.code || 'N/A'})
             </Descriptions.Item>
             <Descriptions.Item label="域名">{viewingEndpoint.domain?.name || 'Unknown'}</Descriptions.Item>
             <Descriptions.Item label="视频流区域">
@@ -677,7 +677,7 @@ export default function VideoStreamEndpointsPage() {
                 {playingEndpoint.provider?.name || 'Unknown'}
               </Descriptions.Item>
               <Descriptions.Item label="线路">
-                {playingEndpoint.line?.display_name || 'Unknown'}
+                {playingEndpoint.line?.name || 'Unknown'}
               </Descriptions.Item>
               <Descriptions.Item label="域名">
                 {playingEndpoint.domain?.name || 'Unknown'}

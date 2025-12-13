@@ -34,7 +34,7 @@ func (s *CDNLineService) GetByID(ctx context.Context, id int64) (*models.CDNLine
 
 // Create creates a new CDN line
 func (s *CDNLineService) Create(ctx context.Context, req models.CreateCDNLineRequest) (*models.CDNLine, error) {
-	line, err := s.repo.Create(ctx, req.ProviderID, req.Name, req.DisplayName)
+	line, err := s.repo.Create(ctx, req.ProviderID, req.Name, req.Code)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (s *CDNLineService) Create(ctx context.Context, req models.CreateCDNLineReq
 
 // Update updates an existing CDN line
 func (s *CDNLineService) Update(ctx context.Context, id int64, req models.UpdateCDNLineRequest) (*models.CDNLine, error) {
-	line, err := s.repo.Update(ctx, id, req.ProviderID, req.Name, req.DisplayName)
+	line, err := s.repo.Update(ctx, id, req.ProviderID, req.Name, req.Code)
 	if err != nil {
 		return nil, err
 	}

@@ -2553,6 +2553,10 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255,
                     "minLength": 1
+                },
+                "provider_id": {
+                    "description": "Optional: NULL means match all providers",
+                    "type": "integer"
                 }
             }
         },
@@ -2671,6 +2675,13 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "provider": {
+                    "$ref": "#/definitions/models.CDNProvider"
+                },
+                "provider_id": {
+                    "description": "NULL means match all providers",
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -2823,6 +2834,10 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255,
                     "minLength": 1
+                },
+                "provider_id": {
+                    "description": "Optional: NULL means match all providers",
+                    "type": "integer"
                 }
             }
         },

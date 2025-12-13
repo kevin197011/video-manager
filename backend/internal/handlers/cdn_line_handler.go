@@ -106,8 +106,8 @@ func (h *CDNLineHandler) Create(c *gin.Context) {
 	if err != nil {
 		if err == repositories.ErrProviderNotFound {
 			response.BadRequest(c, "厂商不存在")
-		} else if err == repositories.ErrLineDisplayNameExists {
-			response.BadRequest(c, "线路显示名称已存在")
+		} else if err == repositories.ErrLineNameExists {
+			response.BadRequest(c, "线路名称已存在")
 		} else {
 			response.InternalServerError(c, "创建线路失败")
 		}
@@ -149,8 +149,8 @@ func (h *CDNLineHandler) Update(c *gin.Context) {
 			response.NotFound(c, "线路不存在")
 		} else if err == repositories.ErrProviderNotFound {
 			response.BadRequest(c, "厂商不存在")
-		} else if err == repositories.ErrLineDisplayNameExists {
-			response.BadRequest(c, "线路显示名称已存在")
+		} else if err == repositories.ErrLineNameExists {
+			response.BadRequest(c, "线路名称已存在")
 		} else {
 			response.InternalServerError(c, "更新线路失败")
 		}

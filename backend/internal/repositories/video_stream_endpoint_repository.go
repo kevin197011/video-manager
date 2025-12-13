@@ -34,7 +34,7 @@ func (r *VideoStreamEndpointRepository) GetAll(ctx context.Context, filters *Vid
 			vse.id, vse.provider_id, vse.line_id, vse.domain_id, vse.stream_id, vse.stream_path_id,
 			vse.full_url, vse.status, vse.created_at, vse.updated_at,
 			p.id, p.name, p.code, p.created_at, p.updated_at,
-			cl.id, cl.provider_id, cl.name, cl.display_name, cl.created_at, cl.updated_at,
+			cl.id, cl.provider_id, cl.name, cl.code, cl.created_at, cl.updated_at,
 			d.id, d.name, d.created_at, d.updated_at,
 			s.id, s.name, s.code, s.created_at, s.updated_at,
 			sp.id, sp.stream_id, sp.table_id, sp.full_path, sp.created_at, sp.updated_at
@@ -110,7 +110,7 @@ func (r *VideoStreamEndpointRepository) GetAll(ctx context.Context, filters *Vid
 			&vse.ID, &vse.ProviderID, &vse.LineID, &vse.DomainID, &vse.StreamID, &vse.StreamPathID,
 			&vse.FullURL, &vse.Status, &vse.CreatedAt, &vse.UpdatedAt,
 			&p.ID, &p.Name, &p.Code, &p.CreatedAt, &p.UpdatedAt,
-			&cl.ID, &cl.ProviderID, &cl.Name, &cl.DisplayName, &cl.CreatedAt, &cl.UpdatedAt,
+			&cl.ID, &cl.ProviderID, &cl.Name, &cl.Code, &cl.CreatedAt, &cl.UpdatedAt,
 			&d.ID, &d.Name, &d.CreatedAt, &d.UpdatedAt,
 			&s.ID, &s.Name, &s.Code, &s.CreatedAt, &s.UpdatedAt,
 			&sp.ID, &sp.StreamID, &sp.TableID, &sp.FullPath, &sp.CreatedAt, &sp.UpdatedAt,
@@ -137,7 +137,7 @@ func (r *VideoStreamEndpointRepository) GetByID(ctx context.Context, id int64) (
 			vse.id, vse.provider_id, vse.line_id, vse.domain_id, vse.stream_id, vse.stream_path_id,
 			vse.full_url, vse.status, vse.created_at, vse.updated_at,
 			p.id, p.name, p.code, p.created_at, p.updated_at,
-			cl.id, cl.provider_id, cl.name, cl.display_name, cl.created_at, cl.updated_at,
+			cl.id, cl.provider_id, cl.name, cl.code, cl.created_at, cl.updated_at,
 			d.id, d.name, d.created_at, d.updated_at,
 			s.id, s.name, s.code, s.created_at, s.updated_at,
 			sp.id, sp.stream_id, sp.table_id, sp.full_path, sp.created_at, sp.updated_at
@@ -161,7 +161,7 @@ func (r *VideoStreamEndpointRepository) GetByID(ctx context.Context, id int64) (
 		&vse.ID, &vse.ProviderID, &vse.LineID, &vse.DomainID, &vse.StreamID, &vse.StreamPathID,
 		&vse.FullURL, &vse.Status, &vse.CreatedAt, &vse.UpdatedAt,
 		&p.ID, &p.Name, &p.Code, &p.CreatedAt, &p.UpdatedAt,
-		&cl.ID, &cl.ProviderID, &cl.Name, &cl.DisplayName, &cl.CreatedAt, &cl.UpdatedAt,
+		&cl.ID, &cl.ProviderID, &cl.Name, &cl.Code, &cl.CreatedAt, &cl.UpdatedAt,
 		&d.ID, &d.Name, &d.CreatedAt, &d.UpdatedAt,
 		&s.ID, &s.Name, &s.Code, &s.CreatedAt, &s.UpdatedAt,
 		&sp.ID, &sp.StreamID, &sp.TableID, &sp.FullPath, &sp.CreatedAt, &sp.UpdatedAt,
@@ -216,7 +216,7 @@ func (r *VideoStreamEndpointRepository) Create(ctx context.Context, providerID, 
 	}
 
 	// Generate full URL
-	fullURL := url_generator.GenerateEndpointURL(line.DisplayName, domain.Name, streamPath.FullPath)
+	fullURL := url_generator.GenerateEndpointURL(line.Name, domain.Name, streamPath.FullPath)
 
 	// Set default status if not provided
 	if status == 0 {
@@ -289,7 +289,7 @@ func (r *VideoStreamEndpointRepository) Update(ctx context.Context, id int64, pr
 	}
 
 	// Regenerate full URL
-	fullURL := url_generator.GenerateEndpointURL(line.DisplayName, domain.Name, streamPath.FullPath)
+	fullURL := url_generator.GenerateEndpointURL(line.Name, domain.Name, streamPath.FullPath)
 
 	query := `
 		UPDATE video_stream_endpoints
@@ -390,8 +390,8 @@ func (r *VideoStreamEndpointRepository) GenerateAll(ctx context.Context) (int, e
 				continue
 			}
 
-			// Check if line name matches stream code (e.g., line name "kkw" matches stream code "kkw")
-			if line.Name != stream.Code {
+			// Check if line code matches stream code (e.g., line code "kkw" matches stream code "kkw")
+			if line.Code != stream.Code {
 				continue
 			}
 
@@ -403,7 +403,7 @@ func (r *VideoStreamEndpointRepository) GenerateAll(ctx context.Context) (int, e
 
 			for _, domain := range domains {
 				// Generate full URL
-				fullURL := url_generator.GenerateEndpointURL(line.DisplayName, domain.Name, streamPath.FullPath)
+				fullURL := url_generator.GenerateEndpointURL(line.Name, domain.Name, streamPath.FullPath)
 
 				// Create new endpoint (we already deleted all existing ones)
 				_, err := database.DB.Exec(ctx,

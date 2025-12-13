@@ -27,7 +27,7 @@ export default function LineForm({ line, providers, lines = [], open, onClose, o
         form.setFieldsValue({
           provider_id: line.provider_id,
           name: line.name,
-          display_name: line.display_name,
+          code: line.code,
         });
       } else {
         form.resetFields();
@@ -47,14 +47,14 @@ export default function LineForm({ line, providers, lines = [], open, onClose, o
         await lineAPI.update(line.id, {
           provider_id: values.provider_id,
           name: values.name,
-          display_name: values.display_name,
+          code: values.code,
         });
         message.success('Line 更新成功');
       } else {
         await lineAPI.create({
           provider_id: values.provider_id,
           name: values.name,
-          display_name: values.display_name,
+          code: values.code,
         });
         message.success('Line 创建成功');
       }
@@ -102,42 +102,42 @@ export default function LineForm({ line, providers, lines = [], open, onClose, o
         </Form.Item>
 
         <Form.Item
-          name="name"
-          label="名称"
+          name="code"
+          label="代码"
           rules={[
-            { required: true, message: '请输入线路名称' },
-            { min: 1, message: '名称不能为空' },
-            { max: 255, message: '名称不能超过255个字符' },
-            { whitespace: true, message: '名称不能仅为空白字符' },
+            { required: true, message: '请输入线路代码' },
+            { min: 1, message: '代码不能为空' },
+            { max: 255, message: '代码不能超过255个字符' },
+            { whitespace: true, message: '代码不能仅为空白字符' },
           ]}
         >
-          <Input placeholder="输入 line name" showCount maxLength={255} />
+          <Input placeholder="输入线路代码" showCount maxLength={255} />
         </Form.Item>
 
         <Form.Item
-          name="display_name"
-          label="显示名称"
+          name="name"
+          label="名称"
           rules={[
-            { required: true, message: '请输入显示名称' },
-            { min: 1, message: '显示名称不能为空' },
-            { max: 255, message: '显示名称不能超过255个字符' },
-            { whitespace: true, message: '显示名称不能仅为空白字符' },
+            { required: true, message: '请输入名称' },
+            { min: 1, message: '名称不能为空' },
+            { max: 255, message: '名称不能超过255个字符' },
+            { whitespace: true, message: '名称不能仅为空白字符' },
             {
               validator: async (_, value) => {
                 if (!value) return Promise.resolve();
-                // 检查显示名称是否已存在（排除当前编辑的 line）
+                // 检查名称是否已存在（排除当前编辑的 line）
                 const existing = lines.find(
-                  (l) => l.display_name.toLowerCase() === value.toLowerCase().trim() && l.id !== line?.id
+                  (l) => l.name.toLowerCase() === value.toLowerCase().trim() && l.id !== line?.id
                 );
                 if (existing) {
-                  return Promise.reject(new Error('线路显示名称已存在'));
+                  return Promise.reject(new Error('线路名称已存在'));
                 }
                 return Promise.resolve();
               },
             },
           ]}
         >
-          <Input placeholder="输入 display name" showCount maxLength={255} />
+          <Input placeholder="输入线路名称" showCount maxLength={255} />
         </Form.Item>
       </Form>
     </Modal>
