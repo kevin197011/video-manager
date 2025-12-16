@@ -18,9 +18,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
+    image: ghcr.io/kevin197011/video-manager/backend:latest
     container_name: video-manager-backend
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-videomanager}
@@ -49,9 +47,7 @@ services:
     command: air -c .air.toml
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+    image: ghcr.io/kevin197011/video-manager/frontend:latest
     container_name: video-manager-frontend
     environment:
       # 浏览器访问时使用 localhost（通过前端代理）
