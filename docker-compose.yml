@@ -83,7 +83,8 @@ services:
     ports:
       - "${FRONTEND_PORT:-8082}:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - video-manager-network
     restart: unless-stopped
