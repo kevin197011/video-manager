@@ -6,8 +6,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-videomanager}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-videomanager}
       POSTGRES_DB: ${POSTGRES_DB:-videomanager}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -39,8 +37,6 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-text}
-    ports:
-      - "${API_PORT:-8080}:8080"
     volumes:
       - ./backend:/app
       - go_modules:/go/pkg/mod
@@ -58,14 +54,14 @@ services:
       dockerfile: Dockerfile.dev
     container_name: video-manager-frontend
     environment:
-      # 浏览器访问时使用 localhost（端口已映射）
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080/api}
+      # 浏览器访问时使用 localhost（通过前端代理）
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8082/api}
       # 容器内代理使用容器名
       VITE_API_BASE_URL_INTERNAL: http://backend:8080
       # 标识 Docker 环境
       DOCKER_ENV: "true"
     ports:
-      - "${FRONTEND_PORT:-5173}:5173"
+      - "${FRONTEND_PORT:-8082}:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
