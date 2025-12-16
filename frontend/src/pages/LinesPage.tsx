@@ -195,9 +195,9 @@ export default function LinesPage() {
     },
     {
       title: '代码',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      dataIndex: 'code',
+      key: 'code',
+      sorter: (a, b) => a.code.localeCompare(b.code),
     },
     {
       title: '厂商',
