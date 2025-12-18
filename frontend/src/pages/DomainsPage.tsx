@@ -127,7 +127,7 @@ export default function DomainsPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['ID', 'Name', 'Created At', '更新时间'].join(','),
+      ['编号', '名称', '创建时间', '更新时间'].join(','),
       ...(filteredDomains || []).map((d) =>
         [
           d.id,

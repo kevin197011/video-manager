@@ -129,7 +129,7 @@ export default function ProvidersPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['ID', 'Name', 'Code', 'Created At', '更新时间'].join(','),
+      ['编号', '名称', '代码', '创建时间', '更新时间'].join(','),
       ...filteredProviders.map((p) =>
         [
           p.id,

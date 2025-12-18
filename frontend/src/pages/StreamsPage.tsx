@@ -131,7 +131,7 @@ export default function StreamsPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['ID', 'Name', 'Code', 'Provider', 'Created At', '更新时间'].join(','),
+      ['编号', '名称', '代码', '提供商', '创建时间', '更新时间'].join(','),
       ...(filteredStreams || []).map((s) =>
         [
           s.id,

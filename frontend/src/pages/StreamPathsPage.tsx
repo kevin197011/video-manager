@@ -172,7 +172,7 @@ export default function StreamPathsPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['ID', '桌台号', 'Path', 'Stream', 'Created At', '更新时间'].join(','),
+      ['编号', '桌台号', '路径', '流区域', '创建时间', '更新时间'].join(','),
       ...filteredPaths.map((p) =>
         [
           p.id,

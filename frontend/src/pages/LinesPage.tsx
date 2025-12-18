@@ -147,7 +147,7 @@ export default function LinesPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['ID', '名称', '代码', 'Provider', 'Created At', '更新时间'].join(','),
+      ['编号', '名称', '代码', '提供商', '创建时间', '更新时间'].join(','),
       ...filteredLines.map((l) =>
         [
           l.id,

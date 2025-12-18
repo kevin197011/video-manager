@@ -279,7 +279,7 @@ export default function VideoStreamEndpointsPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['ID', 'Full URL', '厂商', 'Line', 'Domain', 'Stream', '桌台号', 'Path', '状态', 'Created At'].join(','),
+      ['编号', '完整URL', '厂商', '线路', '域名', '流区域', '桌台号', '路径', '状态', '创建时间'].join(','),
       ...(filteredEndpoints || []).map((e) =>
         [
           e.id,
