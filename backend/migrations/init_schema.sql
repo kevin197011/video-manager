@@ -159,7 +159,7 @@ BEGIN
         SELECT 1 FROM information_schema.table_constraints 
         WHERE table_name = 'cdn_providers' AND constraint_name = 'cdn_providers_name_unique'
     ) THEN
-        ALTER TABLE cdn_providers ADD CONSTRAINT cdn_providers_name_unique UNIQUE (name);
+ALTER TABLE cdn_providers ADD CONSTRAINT cdn_providers_name_unique UNIQUE (name);
     END IF;
 END $$;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_cdn_providers_name_unique ON cdn_providers(name);
@@ -171,7 +171,7 @@ BEGIN
         SELECT 1 FROM information_schema.table_constraints 
         WHERE table_name = 'cdn_lines' AND constraint_name = 'cdn_lines_name_unique'
     ) THEN
-        ALTER TABLE cdn_lines ADD CONSTRAINT cdn_lines_name_unique UNIQUE (name);
+ALTER TABLE cdn_lines ADD CONSTRAINT cdn_lines_name_unique UNIQUE (name);
     END IF;
 END $$;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_cdn_lines_name_unique ON cdn_lines(name);
@@ -183,7 +183,7 @@ BEGIN
         SELECT 1 FROM information_schema.table_constraints 
         WHERE table_name = 'streams' AND constraint_name = 'streams_name_unique'
     ) THEN
-        ALTER TABLE streams ADD CONSTRAINT streams_name_unique UNIQUE (name);
+ALTER TABLE streams ADD CONSTRAINT streams_name_unique UNIQUE (name);
     END IF;
 END $$;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_streams_name_unique ON streams(name);
@@ -195,7 +195,7 @@ BEGIN
         SELECT 1 FROM information_schema.table_constraints 
         WHERE table_name = 'stream_paths' AND constraint_name = 'stream_paths_table_id_unique'
     ) THEN
-        ALTER TABLE stream_paths ADD CONSTRAINT stream_paths_table_id_unique UNIQUE (table_id);
+ALTER TABLE stream_paths ADD CONSTRAINT stream_paths_table_id_unique UNIQUE (table_id);
     END IF;
 END $$;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_stream_paths_table_id_unique ON stream_paths(table_id);
@@ -207,7 +207,7 @@ BEGIN
         SELECT 1 FROM information_schema.table_constraints 
         WHERE table_name = 'tokens' AND constraint_name = 'tokens_user_name_unique'
     ) THEN
-        ALTER TABLE tokens ADD CONSTRAINT tokens_user_name_unique UNIQUE (user_id, name);
+ALTER TABLE tokens ADD CONSTRAINT tokens_user_name_unique UNIQUE (user_id, name);
     END IF;
 END $$;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tokens_user_name_unique ON tokens(user_id, name);
