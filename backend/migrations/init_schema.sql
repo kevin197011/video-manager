@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS video_stream_endpoints (
     stream_path_id BIGINT NOT NULL REFERENCES stream_paths(id) ON DELETE RESTRICT,
     full_url VARCHAR(1000) NOT NULL,
     status SMALLINT NOT NULL DEFAULT 1,
+    resolution VARCHAR(20) DEFAULT '普清',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(line_id, domain_id, stream_path_id)
@@ -139,6 +140,7 @@ CREATE INDEX IF NOT EXISTS idx_video_stream_endpoints_stream_id ON video_stream_
 CREATE INDEX IF NOT EXISTS idx_video_stream_endpoints_stream_path_id ON video_stream_endpoints(stream_path_id);
 CREATE INDEX IF NOT EXISTS idx_video_stream_endpoints_status ON video_stream_endpoints(status);
 CREATE INDEX IF NOT EXISTS idx_video_stream_endpoints_full_url ON video_stream_endpoints(full_url);
+CREATE INDEX IF NOT EXISTS idx_video_stream_endpoints_resolution ON video_stream_endpoints(resolution);
 
 -- users indexes
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);

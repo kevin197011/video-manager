@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Table, Space, Select, message, Input, Card, Statistic, Row, Col, Modal, Descriptions, Tag, Switch } from 'antd';
-import { SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined, PlayCircleOutlined, ExperimentOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { videoStreamEndpointAPI, lineAPI, domainAPI, streamAPI, providerAPI } from '../lib/api';
 import type { VideoStreamEndpoint, CDNLine, Domain, Stream, CDNProvider } from '../lib/api';
@@ -32,6 +32,8 @@ export default function VideoStreamEndpointsPage() {
   const [filterProviderId, setFilterProviderId] = useState<number | undefined>(undefined);
   const [filterStatus, setFilterStatus] = useState<number | undefined>(undefined);
   const [filterTableId, setFilterTableId] = useState<string | undefined>(undefined);
+  const [filterResolution, setFilterResolution] = useState<string | undefined>(undefined);
+  const [testingResolution, setTestingResolution] = useState<Set<number>>(new Set());
   const [searchText, setSearchText] = useState('');
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
@@ -41,7 +43,7 @@ export default function VideoStreamEndpointsPage() {
 
   useEffect(() => {
     loadEndpoints();
-  }, [filterLineId, filterDomainId, filterStreamId, filterProviderId, filterStatus]);
+  }, [filterLineId, filterDomainId, filterStreamId, filterProviderId, filterStatus, filterResolution]);
 
   useEffect(() => {
     filterEndpoints();
@@ -79,6 +81,7 @@ export default function VideoStreamEndpointsPage() {
       if (filterStreamId) filters.stream_id = filterStreamId;
       if (filterProviderId) filters.provider_id = filterProviderId;
       if (filterStatus !== undefined) filters.status = filterStatus;
+      if (filterResolution) filters.resolution = filterResolution;
 
       const data = await videoStreamEndpointAPI.getAll(Object.keys(filters).length > 0 ? filters : undefined);
       setEndpoints(data || []);
@@ -217,7 +220,7 @@ export default function VideoStreamEndpointsPage() {
 
         // 尝试自动播放
         const playPromise = player.play();
-        if (playPromise !== undefined) {
+        if (playPromise !== undefined && playPromise instanceof Promise) {
           playPromise.catch((err: any) => {
             console.error('Play error:', err);
             message.warning('自动播放失败，请手动点击播放按钮');
@@ -276,10 +279,27 @@ export default function VideoStreamEndpointsPage() {
     }
   };
 
+  const handleTestResolution = async (id: number) => {
+    try {
+      setTestingResolution((prev) => new Set(prev).add(id));
+      const result = await videoStreamEndpointAPI.testResolution(id);
+      message.success(`分辨率检测成功：已更新为 ${result.resolution}`);
+      await loadEndpoints();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || '分辨率检测失败');
+    } finally {
+      setTestingResolution((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
+  };
+
 
   const handleExport = () => {
     const csvContent = [
-      ['编号', '完整URL', '厂商', '线路', '域名', '流区域', '桌台号', '路径', '状态', '创建时间'].join(','),
+      ['编号', '完整URL', '厂商', '线路', '域名', '流区域', '桌台号', '路径', '分辨率', '状态', '创建时间'].join(','),
       ...(filteredEndpoints || []).map((e) =>
         [
           e.id,
@@ -290,6 +310,7 @@ export default function VideoStreamEndpointsPage() {
           `"${e.stream?.name || 'Unknown'}"`,
           `"${e.stream_path?.table_id || 'N/A'}"`,
           `"${e.stream_path?.full_path || 'Unknown'}"`,
+          `"${e.resolution || '普清'}"`,
           e.status === 1 ? '已启用' : '已禁用',
           new Date(e.created_at).toISOString(),
         ].join(',')
@@ -380,6 +401,23 @@ export default function VideoStreamEndpointsPage() {
       render: (_, record) => record.stream_path?.full_path || 'Unknown',
     },
     {
+      title: '分辨率',
+      dataIndex: 'resolution',
+      key: 'resolution',
+      width: 100,
+      render: (resolution: string) => {
+        if (!resolution) return <Tag>普清</Tag>;
+        const color = resolution === '超清' ? 'purple' : resolution === '高清' ? 'blue' : 'default';
+        return <Tag color={color}>{resolution}</Tag>;
+      },
+      filters: [
+        { text: '普清', value: '普清' },
+        { text: '高清', value: '高清' },
+        { text: '超清', value: '超清' },
+      ],
+      onFilter: (value, record) => (record.resolution || '普清') === value,
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
@@ -418,6 +456,16 @@ export default function VideoStreamEndpointsPage() {
             size="small"
           >
             播放
+          </Button>
+          <Button
+            type="link"
+            icon={<ExperimentOutlined />}
+            onClick={() => handleTestResolution(record.id)}
+            loading={testingResolution.has(record.id)}
+            disabled={testingResolution.has(record.id)}
+            size="small"
+          >
+            分辨率检测
           </Button>
           <Switch
             checked={record.status === 1}
@@ -551,6 +599,17 @@ export default function VideoStreamEndpointsPage() {
               </Select.Option>
             ))}
           </Select>
+          <Select
+            placeholder="筛选分辨率"
+            allowClear
+            style={{ width: 120 }}
+            onChange={(value) => setFilterResolution(value)}
+            value={filterResolution}
+          >
+            <Select.Option value="普清">普清</Select.Option>
+            <Select.Option value="高清">高清</Select.Option>
+            <Select.Option value="超清">超清</Select.Option>
+          </Select>
           <Button
             icon={<ReloadOutlined />}
             onClick={handleRefresh}
@@ -622,6 +681,11 @@ export default function VideoStreamEndpointsPage() {
             </Descriptions.Item>
             <Descriptions.Item label="Stream Path">
               {viewingEndpoint.stream_path?.full_path || 'Unknown'} ({viewingEndpoint.stream_path?.table_id || 'N/A'})
+            </Descriptions.Item>
+            <Descriptions.Item label="分辨率">
+              <Tag color={viewingEndpoint.resolution === '超清' ? 'purple' : viewingEndpoint.resolution === '高清' ? 'blue' : 'default'}>
+                {viewingEndpoint.resolution || '普清'}
+              </Tag>
             </Descriptions.Item>
             <Descriptions.Item label="状态">
               <Tag color={viewingEndpoint.status === 1 ? 'green' : 'red'}>

@@ -30,7 +30,11 @@ export default function LoginPage() {
       message.success('登录成功');
       navigate('/dashboard');
     } catch (error: any) {
-      message.error(error.response?.data?.message || '登录失败，请检查用户名和密码');
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          '登录失败，请检查用户名和密码';
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }

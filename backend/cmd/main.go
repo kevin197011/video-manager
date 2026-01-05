@@ -213,12 +213,16 @@ func main() {
 			endpoints.GET("/:id", endpointHandler.GetByID)
 			endpoints.POST("/generate", endpointHandler.GenerateAll)
 			endpoints.PATCH("/:id/status", endpointHandler.UpdateStatus)
+			endpoints.POST("/:id/test-resolution", endpointHandler.TestResolution)
 		}
 	}
 
-	// Health check
+	// Health check (support both GET and HEAD methods)
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
+	})
+	r.HEAD("/health", func(c *gin.Context) {
+		c.Status(200)
 	})
 
 	// Swagger documentation

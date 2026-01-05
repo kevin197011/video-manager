@@ -37,6 +37,7 @@ func NewVideoStreamEndpointHandler() *VideoStreamEndpointHandler {
 // @Param provider_id query int false "Filter by provider ID"
 // @Param status query int false "Filter by status (0=disabled, 1=enabled)"
 // @Param table_id query string false "Filter by table ID (桌台号)"
+// @Param resolution query string false "Filter by resolution (普清, 高清, 超清)"
 // @Success 200 {object} response.Response{data=[]models.VideoStreamEndpoint}
 // @Failure 500 {object} response.Response
 // @Router /api/video-stream-endpoints [get]
@@ -70,6 +71,9 @@ func (h *VideoStreamEndpointHandler) GetAll(c *gin.Context) {
 	}
 	if tableIDStr := c.Query("table_id"); tableIDStr != "" {
 		filters.TableID = &tableIDStr
+	}
+	if resolutionStr := c.Query("resolution"); resolutionStr != "" {
+		filters.Resolution = &resolutionStr
 	}
 
 	endpoints, err := h.service.GetAll(c.Request.Context(), filters)
@@ -276,5 +280,40 @@ func (h *VideoStreamEndpointHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 	response.Success(c, nil)
+}
+
+// TestResolution handles POST /api/video-stream-endpoints/:id/test-resolution
+// @Summary Test video stream and detect resolution
+// @Description Test the video stream URL and automatically detect resolution, then update the endpoint
+// @Tags video-stream-endpoints
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Endpoint ID"
+// @Success 200 {object} response.Response{data=object{resolution=string}}
+// @Failure 400 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /api/video-stream-endpoints/{id}/test-resolution [post]
+func (h *VideoStreamEndpointHandler) TestResolution(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid endpoint ID")
+		return
+	}
+
+	detectedResolution, err := h.service.TestResolution(c.Request.Context(), id)
+	if err != nil {
+		if err == repositories.ErrVideoStreamEndpointNotFound {
+			response.NotFound(c, "Video stream endpoint not found")
+		} else {
+			response.InternalServerError(c, "Failed to test resolution: "+err.Error())
+		}
+		return
+	}
+
+	response.Success(c, gin.H{
+		"resolution": detectedResolution,
+		"message":    "Resolution detected and updated successfully",
+	})
 }
 

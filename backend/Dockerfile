@@ -23,7 +23,9 @@ RUN go install github.com/swaggo/swag/cmd/swag@latest && \
     swag init -g cmd/main.go -o docs || echo "Swagger generation failed, continuing..."
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+# Use TARGETARCH to support multi-architecture builds (amd64, arm64)
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH:-amd64} go build \
     -ldflags='-w -s -extldflags "-static"' \
     -a -installsuffix cgo \
     -o /app/video-manager \

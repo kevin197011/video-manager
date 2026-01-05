@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/video-manager/backend/internal/models"
 	"github.com/video-manager/backend/pkg/database"
+	"github.com/video-manager/backend/pkg/resolution"
 	"github.com/video-manager/backend/pkg/url_generator"
 )
 
@@ -32,7 +33,7 @@ func (r *VideoStreamEndpointRepository) GetAll(ctx context.Context, filters *Vid
 	query := `
 		SELECT
 			vse.id, vse.provider_id, vse.line_id, vse.domain_id, vse.stream_id, vse.stream_path_id,
-			vse.full_url, vse.status, vse.created_at, vse.updated_at,
+			vse.full_url, vse.status, vse.resolution, vse.created_at, vse.updated_at,
 			p.id, p.name, p.code, p.created_at, p.updated_at,
 			cl.id, cl.provider_id, cl.name, cl.code, cl.created_at, cl.updated_at,
 			d.id, d.name, d.created_at, d.updated_at,
@@ -81,6 +82,11 @@ func (r *VideoStreamEndpointRepository) GetAll(ctx context.Context, filters *Vid
 			args = append(args, *filters.TableID)
 			argPos++
 		}
+		if filters.Resolution != nil {
+			conditions = append(conditions, fmt.Sprintf("vse.resolution = $%d", argPos))
+			args = append(args, *filters.Resolution)
+			argPos++
+		}
 		if len(conditions) > 0 {
 			query += " WHERE " + conditions[0]
 			for i := 1; i < len(conditions); i++ {
@@ -108,7 +114,7 @@ func (r *VideoStreamEndpointRepository) GetAll(ctx context.Context, filters *Vid
 
 		err := rows.Scan(
 			&vse.ID, &vse.ProviderID, &vse.LineID, &vse.DomainID, &vse.StreamID, &vse.StreamPathID,
-			&vse.FullURL, &vse.Status, &vse.CreatedAt, &vse.UpdatedAt,
+			&vse.FullURL, &vse.Status, &vse.Resolution, &vse.CreatedAt, &vse.UpdatedAt,
 			&p.ID, &p.Name, &p.Code, &p.CreatedAt, &p.UpdatedAt,
 			&cl.ID, &cl.ProviderID, &cl.Name, &cl.Code, &cl.CreatedAt, &cl.UpdatedAt,
 			&d.ID, &d.Name, &d.CreatedAt, &d.UpdatedAt,
@@ -135,7 +141,7 @@ func (r *VideoStreamEndpointRepository) GetByID(ctx context.Context, id int64) (
 	query := `
 		SELECT
 			vse.id, vse.provider_id, vse.line_id, vse.domain_id, vse.stream_id, vse.stream_path_id,
-			vse.full_url, vse.status, vse.created_at, vse.updated_at,
+			vse.full_url, vse.status, vse.resolution, vse.created_at, vse.updated_at,
 			p.id, p.name, p.code, p.created_at, p.updated_at,
 			cl.id, cl.provider_id, cl.name, cl.code, cl.created_at, cl.updated_at,
 			d.id, d.name, d.created_at, d.updated_at,
@@ -159,7 +165,7 @@ func (r *VideoStreamEndpointRepository) GetByID(ctx context.Context, id int64) (
 
 	err := database.DB.QueryRow(ctx, query, id).Scan(
 		&vse.ID, &vse.ProviderID, &vse.LineID, &vse.DomainID, &vse.StreamID, &vse.StreamPathID,
-		&vse.FullURL, &vse.Status, &vse.CreatedAt, &vse.UpdatedAt,
+		&vse.FullURL, &vse.Status, &vse.Resolution, &vse.CreatedAt, &vse.UpdatedAt,
 		&p.ID, &p.Name, &p.Code, &p.CreatedAt, &p.UpdatedAt,
 		&cl.ID, &cl.ProviderID, &cl.Name, &cl.Code, &cl.CreatedAt, &cl.UpdatedAt,
 		&d.ID, &d.Name, &d.CreatedAt, &d.UpdatedAt,
@@ -218,21 +224,24 @@ func (r *VideoStreamEndpointRepository) Create(ctx context.Context, providerID, 
 	// Generate full URL
 	fullURL := url_generator.GenerateEndpointURL(line.Name, domain.Name, streamPath.FullPath)
 
+	// Detect resolution from stream path
+	detectedResolution := resolution.DetectResolutionFromPath(streamPath.FullPath)
+
 	// Set default status if not provided
 	if status == 0 {
 		status = 1
 	}
 
 	query := `
-		INSERT INTO video_stream_endpoints (provider_id, line_id, domain_id, stream_id, stream_path_id, full_url, status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, provider_id, line_id, domain_id, stream_id, stream_path_id, full_url, status, created_at, updated_at
+		INSERT INTO video_stream_endpoints (provider_id, line_id, domain_id, stream_id, stream_path_id, full_url, status, resolution)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id, provider_id, line_id, domain_id, stream_id, stream_path_id, full_url, status, resolution, created_at, updated_at
 	`
 
 	var vse models.VideoStreamEndpoint
-	err = database.DB.QueryRow(ctx, query, providerID, lineID, domainID, streamID, streamPathID, fullURL, status).Scan(
+	err = database.DB.QueryRow(ctx, query, providerID, lineID, domainID, streamID, streamPathID, fullURL, status, detectedResolution).Scan(
 		&vse.ID, &vse.ProviderID, &vse.LineID, &vse.DomainID, &vse.StreamID, &vse.StreamPathID,
-		&vse.FullURL, &vse.Status, &vse.CreatedAt, &vse.UpdatedAt,
+		&vse.FullURL, &vse.Status, &vse.Resolution, &vse.CreatedAt, &vse.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -291,17 +300,20 @@ func (r *VideoStreamEndpointRepository) Update(ctx context.Context, id int64, pr
 	// Regenerate full URL
 	fullURL := url_generator.GenerateEndpointURL(line.Name, domain.Name, streamPath.FullPath)
 
+	// Re-detect resolution from stream path
+	detectedResolution := resolution.DetectResolutionFromPath(streamPath.FullPath)
+
 	query := `
 		UPDATE video_stream_endpoints
-		SET provider_id = $1, line_id = $2, domain_id = $3, stream_id = $4, stream_path_id = $5, full_url = $6, status = $7, updated_at = NOW()
-		WHERE id = $8
-		RETURNING id, provider_id, line_id, domain_id, stream_id, stream_path_id, full_url, status, created_at, updated_at
+		SET provider_id = $1, line_id = $2, domain_id = $3, stream_id = $4, stream_path_id = $5, full_url = $6, status = $7, resolution = $8, updated_at = NOW()
+		WHERE id = $9
+		RETURNING id, provider_id, line_id, domain_id, stream_id, stream_path_id, full_url, status, resolution, created_at, updated_at
 	`
 
 	var vse models.VideoStreamEndpoint
-	err = database.DB.QueryRow(ctx, query, providerID, lineID, domainID, streamID, streamPathID, fullURL, status, id).Scan(
+	err = database.DB.QueryRow(ctx, query, providerID, lineID, domainID, streamID, streamPathID, fullURL, status, detectedResolution, id).Scan(
 		&vse.ID, &vse.ProviderID, &vse.LineID, &vse.DomainID, &vse.StreamID, &vse.StreamPathID,
-		&vse.FullURL, &vse.Status, &vse.CreatedAt, &vse.UpdatedAt,
+		&vse.FullURL, &vse.Status, &vse.Resolution, &vse.CreatedAt, &vse.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -405,11 +417,14 @@ func (r *VideoStreamEndpointRepository) GenerateAll(ctx context.Context) (int, e
 				// Generate full URL
 				fullURL := url_generator.GenerateEndpointURL(line.Name, domain.Name, streamPath.FullPath)
 
+				// Detect resolution from stream path
+				detectedResolution := resolution.DetectResolutionFromPath(streamPath.FullPath)
+
 				// Create new endpoint (we already deleted all existing ones)
 				_, err := database.DB.Exec(ctx,
-					`INSERT INTO video_stream_endpoints (provider_id, line_id, domain_id, stream_id, stream_path_id, full_url, status)
-					 VALUES ($1, $2, $3, $4, $5, $6, 1)`,
-					line.ProviderID, line.ID, domain.ID, streamID, streamPath.ID, fullURL,
+					`INSERT INTO video_stream_endpoints (provider_id, line_id, domain_id, stream_id, stream_path_id, full_url, status, resolution)
+					 VALUES ($1, $2, $3, $4, $5, $6, 1, $7)`,
+					line.ProviderID, line.ID, domain.ID, streamID, streamPath.ID, fullURL, detectedResolution,
 				)
 				if err == nil {
 					generatedCount++
@@ -434,6 +449,19 @@ func (r *VideoStreamEndpointRepository) UpdateStatus(ctx context.Context, id int
 	return err
 }
 
+// UpdateResolution updates the resolution of a video stream endpoint
+func (r *VideoStreamEndpointRepository) UpdateResolution(ctx context.Context, id int64, resolution string) error {
+	// Check if endpoint exists
+	_, err := r.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	query := `UPDATE video_stream_endpoints SET resolution = $1, updated_at = NOW() WHERE id = $2`
+	_, err = database.DB.Exec(ctx, query, resolution, id)
+	return err
+}
+
 // VideoStreamEndpointFilters represents filters for querying endpoints
 type VideoStreamEndpointFilters struct {
 	ProviderID *int64
@@ -442,5 +470,6 @@ type VideoStreamEndpointFilters struct {
 	StreamID   *int64
 	Status     *int
 	TableID    *string // Filter by table_id (桌台号)
+	Resolution *string // Filter by resolution (普清, 高清, 超清)
 }
 

@@ -3,12 +3,13 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import axios from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
 import { auth } from './auth';
 
-// Use /api for proxy in development, or full URL in production
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? '/api' : 'http://localhost:8080/api');
+// Use /api for proxy (works in both dev and production via Nginx)
+// In development, Vite dev server proxies /api to backend
+// In production, Nginx proxies /api to backend container
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -19,22 +20,22 @@ const api = axios.create({
 
 // Request interceptor to add token
 api.interceptors.request.use(
-  (config) => {
+  (config: AxiosRequestConfig) => {
     const token = auth.getToken();
-    if (token) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
 
 // Response interceptor to handle 401 errors
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
     if (error.response?.status === 401) {
       // Token expired or invalid, logout user
       auth.logout();
@@ -241,12 +242,13 @@ export type VideoStreamEndpoint = {
   stream_path?: StreamPath;
   full_url: string;
   status: number;
+  resolution?: string;
   created_at: string;
   updated_at: string;
 };
 
 export const videoStreamEndpointAPI = {
-  getAll: async (filters?: { provider_id?: number; line_id?: number; domain_id?: number; stream_id?: number; status?: number }): Promise<VideoStreamEndpoint[]> => {
+  getAll: async (filters?: { provider_id?: number; line_id?: number; domain_id?: number; stream_id?: number; status?: number; resolution?: string }): Promise<VideoStreamEndpoint[]> => {
     const params = filters || {};
     const response = await api.get<APIResponse<VideoStreamEndpoint[]>>('/video-stream-endpoints', { params });
     return response.data.data;
@@ -285,6 +287,10 @@ export const videoStreamEndpointAPI = {
   },
   generateAll: async (): Promise<{ message: string; count: number }> => {
     const response = await api.post<APIResponse<{ message: string; count: number }>>('/video-stream-endpoints/generate');
+    return response.data.data;
+  },
+  testResolution: async (id: number): Promise<{ resolution: string; message: string }> => {
+    const response = await api.post<APIResponse<{ resolution: string; message: string }>>(`/video-stream-endpoints/${id}/test-resolution`);
     return response.data.data;
   },
 };

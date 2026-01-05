@@ -7,9 +7,11 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/video-manager/backend/internal/models"
 	"github.com/video-manager/backend/internal/repositories"
+	"github.com/video-manager/backend/pkg/resolution"
 )
 
 type VideoStreamEndpointService struct {
@@ -63,5 +65,33 @@ func (s *VideoStreamEndpointService) GenerateAll(ctx context.Context) (int, erro
 // UpdateStatus updates the status of a video stream endpoint
 func (s *VideoStreamEndpointService) UpdateStatus(ctx context.Context, id int64, status int) error {
 	return s.repo.UpdateStatus(ctx, id, status)
+}
+
+// TestResolution tests video stream and detects resolution, then updates the endpoint
+func (s *VideoStreamEndpointService) TestResolution(ctx context.Context, id int64) (string, error) {
+	// Get endpoint
+	endpoint, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return "", err
+	}
+
+	// Try to detect resolution from stream (with 10 second timeout)
+	detectedResolution, err := resolution.DetectResolutionFromStream(endpoint.FullURL, 10*time.Second)
+	if err != nil {
+		// If stream detection fails, fall back to path-based detection
+		if endpoint.StreamPath != nil {
+			detectedResolution = resolution.DetectResolutionFromPath(endpoint.StreamPath.FullPath)
+		} else {
+			detectedResolution = "普清" // Default
+		}
+	}
+
+	// Update resolution in database
+	err = s.repo.UpdateResolution(ctx, id, detectedResolution)
+	if err != nil {
+		return "", err
+	}
+
+	return detectedResolution, nil
 }
 
