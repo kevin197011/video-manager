@@ -60,3 +60,33 @@ shell-frontend: ## 进入前端容器
 shell-db: ## 进入数据库容器
 	docker-compose exec postgres psql -U videomanager -d videomanager
 
+# OpenSpec commands
+openspec-list: ## 列出所有变更
+	openspec list
+
+openspec-list-specs: ## 列出所有规范
+	openspec list --specs
+
+openspec-show: ## 显示变更或规范详情（需要指定名称，如: make openspec-show CHANGE=add-cdn-line-management）
+	@if [ -z "$(CHANGE)" ]; then \
+		echo "用法: make openspec-show CHANGE=<change-id>"; \
+		echo "示例: make openspec-show CHANGE=add-cdn-line-management"; \
+	else \
+		openspec show $(CHANGE); \
+	fi
+
+openspec-validate: ## 验证变更或规范（需要指定名称，如: make openspec-validate CHANGE=add-cdn-line-management）
+	@if [ -z "$(CHANGE)" ]; then \
+		echo "用法: make openspec-validate CHANGE=<change-id>"; \
+		echo "示例: make openspec-validate CHANGE=add-cdn-line-management"; \
+		echo "或使用: make openspec-validate-all 验证所有"; \
+	else \
+		openspec validate $(CHANGE) --strict; \
+	fi
+
+openspec-validate-all: ## 验证所有变更和规范
+	openspec validate --all --strict
+
+openspec-update: ## 更新 OpenSpec 指令文件
+	openspec update
+
