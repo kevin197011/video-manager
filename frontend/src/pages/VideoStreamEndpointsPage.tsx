@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Table, Space, Select, message, Input, Card, Statistic, Row, Col, Modal, Descriptions, Tag, Switch } from 'antd';
-import { SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined, PlayCircleOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined, PlayCircleOutlined, ExperimentOutlined, CopyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { videoStreamEndpointAPI, lineAPI, domainAPI, streamAPI, providerAPI } from '../lib/api';
 import type { VideoStreamEndpoint, CDNLine, Domain, Stream, CDNProvider } from '../lib/api';
@@ -296,6 +296,28 @@ export default function VideoStreamEndpointsPage() {
     }
   };
 
+  const handleCopyUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      message.success('URL 已复制到剪贴板');
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        message.success('URL 已复制到剪贴板');
+      } catch (e) {
+        message.error('复制失败，请手动复制');
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
 
   const handleExport = () => {
     const csvContent = [
@@ -354,9 +376,18 @@ export default function VideoStreamEndpointsPage() {
       dataIndex: 'full_url',
       key: 'full_url',
       render: (url: string) => (
-        <a href={url} target="_blank" rel="noopener noreferrer">
-          {url}
-        </a>
+        <Space>
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            {url}
+          </a>
+          <Button
+            type="text"
+            icon={<CopyOutlined />}
+            size="small"
+            onClick={() => handleCopyUrl(url)}
+            title="复制URL"
+          />
+        </Space>
       ),
       ellipsis: true,
     },
@@ -665,9 +696,18 @@ export default function VideoStreamEndpointsPage() {
           <Descriptions column={1} bordered>
             <Descriptions.Item label="ID">{viewingEndpoint.id}</Descriptions.Item>
             <Descriptions.Item label="完整URL">
-              <a href={viewingEndpoint.full_url} target="_blank" rel="noopener noreferrer">
-                {viewingEndpoint.full_url}
-              </a>
+              <Space>
+                <a href={viewingEndpoint.full_url} target="_blank" rel="noopener noreferrer">
+                  {viewingEndpoint.full_url}
+                </a>
+                <Button
+                  type="text"
+                  icon={<CopyOutlined />}
+                  size="small"
+                  onClick={() => handleCopyUrl(viewingEndpoint.full_url)}
+                  title="复制URL"
+                />
+              </Space>
             </Descriptions.Item>
             <Descriptions.Item label="厂商">
               {viewingEndpoint.provider?.name || 'Unknown'} ({viewingEndpoint.provider?.code || 'N/A'})
