@@ -26,6 +26,12 @@ export default function VideoStreamEndpointsPage() {
   const [playModalVisible, setPlayModalVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const flvPlayerRef = useRef<flvjs.Player | null>(null);
+  const errorShownRef = useRef<boolean>(false);
+  const retryCountRef = useRef<number>(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const playingEndpointRef = useRef<VideoStreamEndpoint | null>(null);
+  const MAX_RETRIES = 3; // 最大重试次数
+  const RETRY_DELAY = 2000; // 重试延迟（毫秒）
   const [filterLineId, setFilterLineId] = useState<number | undefined>(undefined);
   const [filterDomainId, setFilterDomainId] = useState<number | undefined>(undefined);
   const [filterStreamId, setFilterStreamId] = useState<number | undefined>(undefined);
@@ -162,6 +168,11 @@ export default function VideoStreamEndpointsPage() {
 
   const handleClosePlayModal = () => {
     setPlayModalVisible(false);
+    // 清理重试定时器
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
     // 清理 FLV 播放器
     if (flvPlayerRef.current) {
       flvPlayerRef.current.pause();
@@ -170,7 +181,122 @@ export default function VideoStreamEndpointsPage() {
       flvPlayerRef.current.destroy();
       flvPlayerRef.current = null;
     }
+    // 重置错误显示标志和重试计数
+    errorShownRef.current = false;
+    retryCountRef.current = 0;
+    playingEndpointRef.current = null;
     setPlayingEndpoint(null);
+  };
+
+  // 初始化 FLV 播放器的函数
+  const initializePlayer = () => {
+    // 使用 ref 获取最新的 playingEndpoint，避免闭包问题
+    const currentEndpoint = playingEndpointRef.current;
+    if (!videoRef.current || !flvjs.isSupported() || !currentEndpoint) {
+      if (!flvjs.isSupported()) {
+        console.warn('FLV.js is not supported in this browser');
+      }
+      return;
+    }
+
+    const videoElement = videoRef.current;
+
+    // 清理之前的播放器
+    if (flvPlayerRef.current) {
+      try {
+        flvPlayerRef.current.pause();
+        flvPlayerRef.current.unload();
+        flvPlayerRef.current.detachMediaElement();
+        flvPlayerRef.current.destroy();
+      } catch (e) {
+        console.error('Error destroying previous player:', e);
+      }
+      flvPlayerRef.current = null;
+    }
+
+    try {
+      const player = flvjs.createPlayer({
+        type: 'flv',
+        url: currentEndpoint.full_url,
+        isLive: true,
+      }, {
+        enableWorker: false,
+        enableStashBuffer: false,
+        stashInitialSize: 128,
+        autoCleanupSourceBuffer: true,
+      });
+
+      player.attachMediaElement(videoElement);
+      player.load();
+
+      // 尝试自动播放
+      const playPromise = player.play();
+      if (playPromise !== undefined && playPromise instanceof Promise) {
+        playPromise.catch((err: any) => {
+          console.error('Play error:', err);
+          message.warning('自动播放失败，请手动点击播放按钮');
+        });
+      }
+
+      flvPlayerRef.current = player;
+
+      // 错误处理 - 自动重试机制
+      player.on(flvjs.Events.ERROR, (errorType: any, errorDetail: any, errorInfo: any) => {
+        console.error('FLV Player Error:', errorType, errorDetail, errorInfo);
+        
+        // 如果已经显示过错误，不再重复显示
+        if (errorShownRef.current) {
+          return;
+        }
+        
+        errorShownRef.current = true;
+        let errorMsg = '播放失败';
+        if (errorType === flvjs.ErrorTypes.NETWORK_ERROR) {
+          errorMsg = '网络错误，请检查流地址是否可访问';
+        } else if (errorType === flvjs.ErrorTypes.MEDIA_ERROR) {
+          errorMsg = '媒体格式错误，请检查流格式是否正确';
+        }
+
+        // 检查是否可以重试
+        if (retryCountRef.current < MAX_RETRIES) {
+          retryCountRef.current += 1;
+          message.warning(`${errorMsg}，正在重试 (${retryCountRef.current}/${MAX_RETRIES})...`);
+          
+          // 清理当前播放器
+          if (flvPlayerRef.current) {
+            try {
+              flvPlayerRef.current.pause();
+              flvPlayerRef.current.unload();
+              flvPlayerRef.current.detachMediaElement();
+              flvPlayerRef.current.destroy();
+            } catch (e) {
+              console.error('Error destroying player before retry:', e);
+            }
+            flvPlayerRef.current = null;
+          }
+
+          // 延迟后重试
+          retryTimerRef.current = setTimeout(() => {
+            errorShownRef.current = false; // 重置错误标志，允许重试时显示错误
+            initializePlayer();
+          }, RETRY_DELAY);
+        } else {
+          // 达到最大重试次数，显示最终错误
+          message.error(`${errorMsg}，已重试 ${MAX_RETRIES} 次，请检查流地址或稍后再试`);
+        }
+      });
+
+      // 监听加载完成 - 重置重试计数
+      player.on(flvjs.Events.LOADING_COMPLETE, () => {
+        console.log('FLV stream loaded');
+        // 加载成功，重置重试计数和错误标志
+        retryCountRef.current = 0;
+        errorShownRef.current = false;
+      });
+    } catch (err) {
+      console.error('Error creating FLV player:', err);
+      message.error('创建播放器失败：' + (err instanceof Error ? err.message : String(err)));
+    }
   };
 
   // 初始化 FLV 播放器
@@ -179,80 +305,25 @@ export default function VideoStreamEndpointsPage() {
       return;
     }
 
+    // 更新 playingEndpoint ref
+    playingEndpointRef.current = playingEndpoint;
+    
+    // 重置重试计数和错误标志
+    retryCountRef.current = 0;
+    errorShownRef.current = false;
+
     // 等待 Modal 完全打开后再初始化播放器
     const timer = setTimeout(() => {
-      if (!videoRef.current || !flvjs.isSupported()) {
-        if (!flvjs.isSupported()) {
-          console.warn('FLV.js is not supported in this browser');
-        }
-        return;
-      }
-
-      const videoElement = videoRef.current;
-
-      // 清理之前的播放器
-      if (flvPlayerRef.current) {
-        try {
-          flvPlayerRef.current.pause();
-          flvPlayerRef.current.unload();
-          flvPlayerRef.current.detachMediaElement();
-          flvPlayerRef.current.destroy();
-        } catch (e) {
-          console.error('Error destroying previous player:', e);
-        }
-        flvPlayerRef.current = null;
-      }
-
-      try {
-        const player = flvjs.createPlayer({
-          type: 'flv',
-          url: playingEndpoint.full_url,
-          isLive: true,
-        }, {
-          enableWorker: false,
-          enableStashBuffer: false,
-          stashInitialSize: 128,
-          autoCleanupSourceBuffer: true,
-        });
-
-        player.attachMediaElement(videoElement);
-        player.load();
-
-        // 尝试自动播放
-        const playPromise = player.play();
-        if (playPromise !== undefined && playPromise instanceof Promise) {
-          playPromise.catch((err: any) => {
-            console.error('Play error:', err);
-            message.warning('自动播放失败，请手动点击播放按钮');
-          });
-        }
-
-        flvPlayerRef.current = player;
-
-        // 错误处理
-        player.on(flvjs.Events.ERROR, (errorType: any, errorDetail: any, errorInfo: any) => {
-          console.error('FLV Player Error:', errorType, errorDetail, errorInfo);
-          let errorMsg = '播放失败';
-          if (errorType === flvjs.ErrorTypes.NETWORK_ERROR) {
-            errorMsg = '网络错误，请检查流地址是否可访问';
-          } else if (errorType === flvjs.ErrorTypes.MEDIA_ERROR) {
-            errorMsg = '媒体格式错误，请检查流格式是否正确';
-          }
-          message.error(errorMsg);
-        });
-
-        // 监听加载完成
-        player.on(flvjs.Events.LOADING_COMPLETE, () => {
-          console.log('FLV stream loaded');
-        });
-      } catch (err) {
-        console.error('Error creating FLV player:', err);
-        message.error('创建播放器失败：' + (err instanceof Error ? err.message : String(err)));
-      }
+      initializePlayer();
     }, 300); // 延迟 300ms 确保 DOM 已渲染
 
     return () => {
       clearTimeout(timer);
+      // 清理重试定时器
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = null;
+      }
       if (flvPlayerRef.current) {
         try {
           flvPlayerRef.current.pause();
@@ -264,6 +335,9 @@ export default function VideoStreamEndpointsPage() {
         }
         flvPlayerRef.current = null;
       }
+      // 重置错误显示标志和重试计数
+      errorShownRef.current = false;
+      retryCountRef.current = 0;
     };
   }, [playModalVisible, playingEndpoint]);
 
@@ -789,6 +863,9 @@ export default function VideoStreamEndpointsPage() {
               </Descriptions.Item>
               <Descriptions.Item label="视频流区域">
                 {playingEndpoint.stream?.name || 'Unknown'}
+              </Descriptions.Item>
+              <Descriptions.Item label="桌台号">
+                {playingEndpoint.stream_path?.table_id || 'N/A'}
               </Descriptions.Item>
             </Descriptions>
             <div style={{ marginTop: 16, textAlign: 'center' }}>
