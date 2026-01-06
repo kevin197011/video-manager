@@ -273,33 +273,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             borderTop: '1px solid rgba(0,0,0,0.1)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
             padding: '0 24px',
             zIndex: 100,
             boxShadow: '0 -2px 8px rgba(0,0,0,0.1)',
           }}
         >
-          <Space size="large">
-            <Space>
-              <CheckCircleOutlined style={{ color: systemStatus === 'online' ? '#52c41a' : '#ff4d4f' }} />
-              <Text style={{ color: 'rgba(255,255,255,0.9)' }}>
-                系统状态: <Tag color={systemStatus === 'online' ? 'success' : 'error'} style={{ marginLeft: 4 }}>
-                  {systemStatus === 'online' ? '运行中' : '离线'}
-                </Tag>
-              </Text>
-            </Space>
-            <Space>
-              <ClockCircleOutlined style={{ color: 'rgba(255,255,255,0.9)' }} />
-              <Text style={{ color: 'rgba(255,255,255,0.9)' }}>
-                运行时间: {formatUptime(uptime)}
-              </Text>
-            </Space>
-          </Space>
-          <Space>
-            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}>
-              © 2025 视频管理系统 v1.0.0
-            </Text>
-          </Space>
+          <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>
+            系统运行部驱动
+          </Text>
         </Footer>
       </Layout>
 
