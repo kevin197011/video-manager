@@ -30,6 +30,7 @@ export default function VideoStreamEndpointsPage() {
   const retryCountRef = useRef<number>(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playingEndpointRef = useRef<VideoStreamEndpoint | null>(null);
+  const initialLoadRef = useRef<boolean>(false); // 跟踪是否已完成初始加载
   const MAX_RETRIES = 3; // 最大重试次数
   const RETRY_DELAY = 2000; // 重试延迟（毫秒）
   const [filterLineId, setFilterLineId] = useState<number | undefined>(undefined);
@@ -43,12 +44,17 @@ export default function VideoStreamEndpointsPage() {
   const [searchText, setSearchText] = useState('');
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
+  // 初始加载：只加载一次基础数据和 endpoints
   useEffect(() => {
     load全部Data();
   }, []);
 
+  // 当筛选条件改变时，重新加载 endpoints（但不包括初始加载）
   useEffect(() => {
-    loadEndpoints();
+    // 只有在完成初始加载后才响应筛选条件的变化
+    if (initialLoadRef.current) {
+      loadEndpoints();
+    }
   }, [filterLineId, filterDomainId, filterStreamId, filterProviderId, filterStatus, filterResolution]);
 
   useEffect(() => {
@@ -57,6 +63,8 @@ export default function VideoStreamEndpointsPage() {
 
   const load全部Data = async () => {
     try {
+      setLoading(true);
+      initialLoadRef.current = false; // 重置初始加载标志
       const [linesData, domainsData, streamsData, providersData] = await Promise.all([
         lineAPI.getAll(),
         domainAPI.getAll(),
@@ -67,7 +75,9 @@ export default function VideoStreamEndpointsPage() {
       setDomains(domainsData || []);
       setStreams(streamsData || []);
       setProviders(providersData || []);
+      // 确保在基础数据加载完成后再加载 endpoints，避免数据不一致
       await loadEndpoints();
+      initialLoadRef.current = true; // 标记初始加载完成
     } catch (err: any) {
       message.error(err.response?.data?.message || '加载失败 data');
       // Set empty arrays on error to prevent null errors
@@ -75,12 +85,26 @@ export default function VideoStreamEndpointsPage() {
       setDomains([]);
       setStreams([]);
       setProviders([]);
+      // 即使基础数据加载失败，也尝试加载 endpoints
+      try {
+        await loadEndpoints();
+        initialLoadRef.current = true; // 即使部分失败，也标记为完成
+      } catch (endpointErr: any) {
+        console.error('Failed to load endpoints:', endpointErr);
+        initialLoadRef.current = true; // 标记为完成，避免阻塞后续操作
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   const loadEndpoints = async () => {
     try {
-      setLoading(true);
+      // 只有在不是从 load全部Data 调用时才设置 loading
+      // 避免在初始加载时重复设置 loading 状态
+      if (!initialLoadRef.current) {
+        setLoading(true);
+      }
       const filters: any = {};
       if (filterLineId) filters.line_id = filterLineId;
       if (filterDomainId) filters.domain_id = filterDomainId;
@@ -90,12 +114,20 @@ export default function VideoStreamEndpointsPage() {
       if (filterResolution) filters.resolution = filterResolution;
 
       const data = await videoStreamEndpointAPI.getAll(Object.keys(filters).length > 0 ? filters : undefined);
-      setEndpoints(data || []);
+      // 确保数据被正确设置，包括 resolution 字段
+      if (data && Array.isArray(data)) {
+        setEndpoints(data);
+      } else {
+        setEndpoints([]);
+      }
     } catch (err: any) {
       message.error(err.response?.data?.message || '加载失败 endpoints');
       setEndpoints([]);
     } finally {
-      setLoading(false);
+      // 只有在不是从 load全部Data 调用时才取消 loading
+      if (!initialLoadRef.current) {
+        setLoading(false);
+      }
     }
   };
 
