@@ -200,6 +200,7 @@ func main() {
 		streamPaths := protected.Group("/stream-paths")
 		{
 			streamPaths.GET("", streamPathHandler.GetAll)
+			streamPaths.POST("/import", streamPathHandler.Import)
 			streamPaths.GET("/:id", streamPathHandler.GetByID)
 			streamPaths.POST("", streamPathHandler.Create)
 			streamPaths.PUT("/:id", streamPathHandler.Update)

@@ -76,6 +76,18 @@ func (r *StreamPathRepository) GetAll(ctx context.Context, streamID *int64) ([]m
 	return paths, rows.Err()
 }
 
+// LookupIDByTableID returns the stream path primary key for a table_id, if any.
+func (r *StreamPathRepository) LookupIDByTableID(ctx context.Context, tableID string) (id int64, found bool, err error) {
+	err = database.DB.QueryRow(ctx, `SELECT id FROM stream_paths WHERE table_id = $1`, tableID).Scan(&id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, false, nil
+		}
+		return 0, false, err
+	}
+	return id, true, nil
+}
+
 // GetByID retrieves a stream path by ID
 func (r *StreamPathRepository) GetByID(ctx context.Context, id int64) (*models.StreamPath, error) {
 	query := `

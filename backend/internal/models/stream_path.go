@@ -32,3 +32,26 @@ type UpdateStreamPathRequest struct {
 	FullPath string `json:"full_path" binding:"required,min=1,max=500"`
 }
 
+// StreamPathImportItem is one CSV row after parsing (table_id is the upsert key).
+type StreamPathImportItem struct {
+	Line       int    `json:"-"`
+	TableID    string `json:"table_id"`
+	FullPath   string `json:"full_path"`
+	StreamID   int64  `json:"stream_id,omitempty"`
+	StreamName string `json:"stream_name,omitempty"`
+}
+
+// StreamPathImportResult is returned by POST /api/stream-paths/import.
+type StreamPathImportResult struct {
+	Created int                        `json:"created"`
+	Updated int                        `json:"updated"`
+	Errors  []StreamPathImportRowError `json:"errors"`
+}
+
+// StreamPathImportRowError describes a row that was skipped during import.
+type StreamPathImportRowError struct {
+	Line    int    `json:"line"`
+	TableID string `json:"table_id,omitempty"`
+	Message string `json:"message"`
+}
+

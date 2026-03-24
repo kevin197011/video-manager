@@ -4,11 +4,11 @@
 // https://opensource.org/licenses/MIT
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Table, Space, Select, message, Popconfirm, Input, Card, Statistic, Row, Col, Modal, Descriptions } from 'antd';
+import { Button, Table, Space, Select, message, Popconfirm, Input, Card, Statistic, Row, Col, Modal, Descriptions, Typography } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { streamPathAPI, streamAPI } from '../lib/api';
-import type { StreamPath, Stream } from '../lib/api';
+import type { StreamPath, Stream, StreamPathImportResult } from '../lib/api';
 import StreamPathForm from '../components/StreamPathForm';
 
 const { Search } = Input;
@@ -25,6 +25,11 @@ export default function StreamPathsPage() {
   const [searchText, setSearchText] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+  const [importOpen, setImportOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importSummaryOpen, setImportSummaryOpen] = useState(false);
+  const [importSummaryText, setImportSummaryText] = useState('');
 
   useEffect(() => {
     loadStreams();
@@ -198,6 +203,65 @@ export default function StreamPathsPage() {
     message.success('Data 导出成功');
   };
 
+  const downloadImportTemplate = () => {
+    const header = ['桌台号', '路径', '流区域'].join(',');
+    const example = ['T01', '/live/example/stream', '与「视频流区域」名称一致'].join(',');
+    const csv = `\uFEFF${header}\n${example}\n`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'stream-paths-import-template.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
+  const showImportSummary = (result: StreamPathImportResult) => {
+    const lines = [
+      `新增 ${result.created} 条`,
+      `更新 ${result.updated} 条`,
+    ];
+    if (result.errors.length > 0) {
+      lines.push('', '失败行：');
+      result.errors.slice(0, 30).forEach((e) => {
+        lines.push(`第 ${e.line} 行${e.table_id ? `（${e.table_id}）` : ''}: ${e.message}`);
+      });
+      if (result.errors.length > 30) {
+        lines.push(`… 另有 ${result.errors.length - 30} 条错误未显示`);
+      }
+    }
+    setImportSummaryText(lines.join('\n'));
+    setImportSummaryOpen(true);
+  };
+
+  const runImport = async () => {
+    if (!importFile) {
+      message.warning('请选择 CSV 文件');
+      return;
+    }
+    setImporting(true);
+    try {
+      const result = await streamPathAPI.importCsv(importFile);
+      if (result.errors.length === 0) {
+        message.success(`新增 ${result.created} 条，更新 ${result.updated} 条`);
+      } else {
+        if (result.created === 0 && result.updated === 0) {
+          message.error(`导入未写入任何行，共 ${result.errors.length} 处错误`);
+        } else {
+          message.warning(`新增 ${result.created} 条，更新 ${result.updated} 条；${result.errors.length} 行失败`);
+        }
+        showImportSummary(result);
+      }
+      setImportOpen(false);
+      setImportFile(null);
+      await loadPaths();
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      message.error(ax.response?.data?.message || '导入失败');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const rowSelection = useMemo(() => ({
     selectedRowKeys,
     onChange: (selectedKeys: React.Key[]) => {
@@ -350,6 +414,7 @@ export default function StreamPathsPage() {
           >
             导出
           </Button>
+          <Button onClick={() => setImportOpen(true)}>导入</Button>
           {selectedRowKeys.length > 0 && (
             <Popconfirm
               title={`删除 ${selectedRowKeys.length} 流路径?`}
@@ -410,6 +475,60 @@ export default function StreamPathsPage() {
           onSubmit={handleFormSubmit}
         />
       )}
+
+      <Modal
+        title="批量导入流路径"
+        open={importOpen}
+        onCancel={() => {
+          setImportOpen(false);
+          setImportFile(null);
+        }}
+        footer={[
+          <Button key="tpl" onClick={downloadImportTemplate}>
+            下载模板
+          </Button>,
+          <Button key="cancel" onClick={() => { setImportOpen(false); setImportFile(null); }}>
+            取消
+          </Button>,
+          <Button key="ok" type="primary" loading={importing} onClick={runImport}>
+            开始导入
+          </Button>,
+        ]}
+        destroyOnClose
+      >
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 12 }}>
+          以<strong>桌台号</strong>为唯一键：已存在则更新路径与视频流区域，否则新增。支持与导出相同的列（编号、创建时间等列可忽略）。
+          必填列：<strong>桌台号</strong>、<strong>路径</strong>，以及 <strong>流区域</strong>（名称，与列表一致）或 <strong>stream_id</strong>（数字）。
+        </Typography.Paragraph>
+        <input
+          type="file"
+          accept=".csv,text/csv"
+          style={{ marginBottom: 8 }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            setImportFile(f ?? null);
+          }}
+        />
+        {importFile ? (
+          <Typography.Text type="secondary">已选择：{importFile.name}</Typography.Text>
+        ) : null}
+      </Modal>
+
+      <Modal
+        title="导入结果"
+        open={importSummaryOpen}
+        onCancel={() => setImportSummaryOpen(false)}
+        footer={[
+          <Button key="ok" type="primary" onClick={() => setImportSummaryOpen(false)}>
+            确定
+          </Button>,
+        ]}
+        width={560}
+      >
+        <Typography.Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
+          {importSummaryText}
+        </Typography.Paragraph>
+      </Modal>
 
       <Modal
         title="流路径详情"

@@ -25,6 +25,16 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Default Content-Type is application/json; FormData must set multipart boundary itself.
+    if (config.data instanceof FormData && config.headers) {
+      const h = config.headers as { delete?: (name: string) => boolean } & Record<string, unknown>;
+      if (typeof h.delete === 'function') {
+        h.delete('Content-Type');
+      } else {
+        delete h['Content-Type'];
+        delete h['content-type'];
+      }
+    }
     return config;
   },
   (error: AxiosError) => {
@@ -194,6 +204,18 @@ export type StreamPath = {
   updated_at: string;
 };
 
+export type StreamPathImportRowError = {
+  line: number;
+  table_id?: string;
+  message: string;
+};
+
+export type StreamPathImportResult = {
+  created: number;
+  updated: number;
+  errors: StreamPathImportRowError[];
+};
+
 export const streamPathAPI = {
   getAll: async (streamId?: number): Promise<StreamPath[]> => {
     const params = streamId ? { stream_id: streamId } : {};
@@ -214,6 +236,13 @@ export const streamPathAPI = {
   },
   delete: async (id: number): Promise<void> => {
     await api.delete<APIResponse<null>>(`/stream-paths/${id}`);
+  },
+  /** Multipart upload; upsert by table_id (桌台号). */
+  importCsv: async (file: File): Promise<StreamPathImportResult> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post<APIResponse<StreamPathImportResult>>('/stream-paths/import', formData);
+    return response.data.data;
   },
 };
 
