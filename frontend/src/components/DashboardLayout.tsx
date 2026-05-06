@@ -288,6 +288,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <Modal
         title="修改密码"
         open={changePasswordVisible}
+        destroyOnHidden
         onCancel={() => {
           setChangePasswordVisible(false);
           form.resetFields();

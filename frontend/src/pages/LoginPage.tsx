@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Card, message, Typography } from 'antd';
+import { App, Form, Input, Button, Card, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { authAPI } from '../lib/api';
 import { auth } from '../lib/auth';
@@ -14,6 +14,7 @@ import Logo from '../components/Logo';
 const { Title } = Typography;
 
 export default function LoginPage() {
+  const { message } = App.useApp();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 

@@ -142,14 +142,23 @@ declare module 'antd' {
 
   export const Spin: ComponentType<SpinProps>;
 
-  export interface message {
+  export interface MessageInstance {
     success: (content: string, duration?: number) => void;
     error: (content: string, duration?: number) => void;
     info: (content: string, duration?: number) => void;
     warning: (content: string, duration?: number) => void;
   }
 
-  export const message: message;
+  export const message: MessageInstance;
+
+  /** Ant Design 应用容器：为静态 message/modal 等提供正确上下文（见官方 App 组件文档） */
+  export const App: ComponentType<{ children?: ReactNode; [key: string]: any }> & {
+    useApp: () => {
+      message: MessageInstance;
+      modal: any;
+      notification: any;
+    };
+  };
 
   export interface PaginationProps {
     current?: number;
