@@ -8,6 +8,7 @@ import { Modal, Form, Input, Select, message } from 'antd';
 import { streamPathAPI } from '../lib/api';
 import type { StreamPath, Stream } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
+import { streamSeriesLabel } from '../lib/streamSeries';
 
 interface StreamPathFormProps {
   path: StreamPath | null;
@@ -129,7 +130,22 @@ export default function StreamPathForm({ path, streams, paths = [], open, onClos
             },
           ]}
         >
-          <Input placeholder="输入桌台号 (e.g., k001)" showCount maxLength={255} />
+          <Input placeholder="输入桌台号 (e.g., L001, D001)" showCount maxLength={255} />
+        </Form.Item>
+
+        <Form.Item noStyle shouldUpdate={(prev, cur) => prev.table_id !== cur.table_id}>
+          {() => {
+            const tid = form.getFieldValue('table_id') as string | undefined;
+            const text = streamSeriesLabel(String(tid ?? '').trim()) || '—';
+            return (
+              <Form.Item
+                label="系列"
+                tooltip="由桌台号自动推导：开头连续字母 +「系列」（如 L001 → L系列）。无需手动填写。"
+              >
+                <Input readOnly value={text} tabIndex={-1} />
+              </Form.Item>
+            );
+          }}
         </Form.Item>
 
         <Form.Item

@@ -5,7 +5,11 @@
 
 package models
 
-import "time"
+import (
+	"strings"
+	"time"
+	"unicode"
+)
 
 // StreamPath represents a stream path entity
 type StreamPath struct {
@@ -14,8 +18,26 @@ type StreamPath struct {
 	Stream    *Stream   `json:"stream,omitempty"`
 	TableID   string    `json:"table_id" db:"table_id"`
 	FullPath  string    `json:"full_path" db:"full_path"`
+	Series    string    `json:"series" db:"-"` // derived from table_id, e.g. L001 -> "L系列"
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// StreamSeriesLabel returns a display label from table_id: leading letters become "L系列", "D系列".
+// Stops at the first non-letter (e.g. L001 -> L系列, D001 -> D系列).
+func StreamSeriesLabel(tableID string) string {
+	var b strings.Builder
+	for _, r := range tableID {
+		if unicode.IsLetter(r) {
+			b.WriteRune(r)
+			continue
+		}
+		break
+	}
+	if b.Len() == 0 {
+		return ""
+	}
+	return b.String() + "系列"
 }
 
 // CreateStreamPathRequest represents the request payload for creating a stream path
@@ -54,4 +76,3 @@ type StreamPathImportRowError struct {
 	TableID string `json:"table_id,omitempty"`
 	Message string `json:"message"`
 }
-

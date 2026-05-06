@@ -10,6 +10,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { streamPathAPI, streamAPI } from '../lib/api';
 import type { StreamPath, Stream, StreamPathImportResult } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
+import { displayStreamSeries, streamSeriesLabel } from '../lib/streamSeries';
 import StreamPathForm from '../components/StreamPathForm';
 
 const { Search } = Input;
@@ -23,6 +24,7 @@ export default function StreamPathsPage() {
   const [editingPath, setEditingPath] = useState<StreamPath | null>(null);
   const [viewingPath, setViewingPath] = useState<StreamPath | null>(null);
   const [filterStreamId, setFilterStreamId] = useState<number | undefined>(undefined);
+  const [filterSeries, setFilterSeries] = useState<string | undefined>(undefined);
   const [searchText, setSearchText] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
@@ -56,7 +58,7 @@ export default function StreamPathsPage() {
 
   useEffect(() => {
     filterPaths();
-  }, [searchText, paths]);
+  }, [searchText, paths, filterSeries]);
 
   const loadStreams = async () => {
     try {
@@ -71,13 +73,24 @@ export default function StreamPathsPage() {
   const filterPaths = () => {
     let filtered = paths || [];
 
-    if (searchText.trim()) {
+    if (filterSeries) {
       filtered = filtered.filter(
-        (path) =>
-          path.table_id.toLowerCase().includes(searchText.toLowerCase()) ||
-          path.full_path.toLowerCase().includes(searchText.toLowerCase()) ||
-          path.stream?.name.toLowerCase().includes(searchText.toLowerCase())
+        (path) => displayStreamSeries(path) === filterSeries
       );
+    }
+
+    if (searchText.trim()) {
+      const q = searchText.toLowerCase();
+      filtered = filtered.filter((path) => {
+        const seriesQ = (path.series || streamSeriesLabel(path.table_id)).toLowerCase();
+        return (
+          path.table_id.toLowerCase().includes(q) ||
+          path.full_path.toLowerCase().includes(q) ||
+          path.stream?.name.toLowerCase().includes(q) ||
+          seriesQ.includes(q) ||
+          displayStreamSeries(path).toLowerCase().includes(q)
+        );
+      });
     }
 
     setFilteredPaths(filtered);
@@ -178,11 +191,12 @@ export default function StreamPathsPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['编号', '桌台号', '路径', '流区域', '创建时间', '更新时间'].join(','),
+      ['编号', '桌台号', '系列', '路径', '流区域', '创建时间', '更新时间'].join(','),
       ...filteredPaths.map((p) =>
         [
           p.id,
           `"${p.table_id}"`,
+          `"${displayStreamSeries(p)}"`,
           `"${p.full_path}"`,
           `"${p.stream?.name || 'Unknown'}"`,
           new Date(p.created_at).toISOString(),
@@ -270,6 +284,14 @@ export default function StreamPathsPage() {
     },
   }), [selectedRowKeys]);
 
+  const seriesFilterOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of paths) {
+      set.add(displayStreamSeries(p));
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'zh-CN'));
+  }, [paths]);
+
   const columns: ColumnsType<StreamPath> = useMemo(() => [
     {
       title: 'ID',
@@ -283,6 +305,14 @@ export default function StreamPathsPage() {
       dataIndex: 'table_id',
       key: 'table_id',
       sorter: (a, b) => a.table_id.localeCompare(b.table_id),
+    },
+    {
+      title: '系列',
+      key: 'series',
+      width: 120,
+      render: (_, record) => displayStreamSeries(record),
+      sorter: (a, b) =>
+        displayStreamSeries(a).localeCompare(displayStreamSeries(b), 'zh-CN'),
     },
     {
       title: '路径',
@@ -381,13 +411,27 @@ export default function StreamPathsPage() {
         <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>流路径</h2>
         <Space>
           <Search
-            placeholder="搜索桌台号、路径或视频流区域"
+            placeholder="搜索桌台号、系列、路径或视频流区域"
             allowClear
             style={{ width: 280 }}
             prefix={<SearchOutlined />}
             onSearch={setSearchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
+          <Select
+            placeholder="筛选系列"
+            allowClear
+            style={{ width: 140 }}
+            value={filterSeries}
+            onChange={(v) => setFilterSeries(v)}
+            {...selectSearchableProps}
+          >
+            {seriesFilterOptions.map((s) => (
+              <Select.Option key={s} value={s} label={s}>
+                {s}
+              </Select.Option>
+            ))}
+          </Select>
           <Select
             placeholder="筛选视频流区域"
             allowClear
@@ -563,6 +607,7 @@ export default function StreamPathsPage() {
           <Descriptions column={1} bordered>
             <Descriptions.Item label="ID">{viewingPath.id}</Descriptions.Item>
             <Descriptions.Item label="桌台号">{viewingPath.table_id}</Descriptions.Item>
+            <Descriptions.Item label="系列">{displayStreamSeries(viewingPath)}</Descriptions.Item>
             <Descriptions.Item label="路径">{viewingPath.full_path}</Descriptions.Item>
             <Descriptions.Item label="视频流区域">
               {viewingPath.stream?.name || 'Unknown'} ({viewingPath.stream?.code || 'N/A'})

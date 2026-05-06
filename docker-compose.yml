@@ -85,7 +85,7 @@ services:
       dockerfile: Dockerfile
     container_name: video-manager-frontend
     ports:
-      - "${FRONTEND_PORT:-8082}:80"
+      - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       backend:
         condition: service_healthy

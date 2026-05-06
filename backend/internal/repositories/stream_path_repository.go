@@ -70,6 +70,7 @@ func (r *StreamPathRepository) GetAll(ctx context.Context, streamID *int64) ([]m
 			return nil, err
 		}
 		sp.Stream = &s
+		sp.Series = models.StreamSeriesLabel(sp.TableID)
 		paths = append(paths, sp)
 	}
 
@@ -110,6 +111,7 @@ func (r *StreamPathRepository) GetByID(ctx context.Context, id int64) (*models.S
 		return nil, err
 	}
 	sp.Stream = &s
+	sp.Series = models.StreamSeriesLabel(sp.TableID)
 	return &sp, nil
 }
 
@@ -147,6 +149,7 @@ func (r *StreamPathRepository) Create(ctx context.Context, streamID int64, table
 
 	// Load stream information
 	sp.Stream, _ = streamRepo.GetByID(ctx, streamID)
+	sp.Series = models.StreamSeriesLabel(sp.TableID)
 	return &sp, nil
 }
 
@@ -190,6 +193,7 @@ func (r *StreamPathRepository) Update(ctx context.Context, id int64, streamID in
 
 	// Load stream information
 	sp.Stream, _ = streamRepo.GetByID(ctx, streamID)
+	sp.Series = models.StreamSeriesLabel(sp.TableID)
 	return &sp, nil
 }
 
@@ -201,7 +205,6 @@ func (r *StreamPathRepository) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 
-
 	// Delete associated video stream endpoints first (they are auto-generated)
 	_, err = database.DB.Exec(ctx, `DELETE FROM video_stream_endpoints WHERE stream_path_id = $1`, id)
 	if err != nil {
@@ -212,4 +215,3 @@ func (r *StreamPathRepository) Delete(ctx context.Context, id int64) error {
 	_, err = database.DB.Exec(ctx, query, id)
 	return err
 }
-

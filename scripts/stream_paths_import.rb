@@ -9,7 +9,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 
-BASE = 'http://localhost:8082'
+BASE = 'http://localhost:3000'
 TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwiaXNfYWRtaW4iOnRydWUsImlzcyI6InZpZGVvLW1hbmFnZXIiLCJzdWIiOiJhZG1pbiIsImV4cCI6NDkyNzkyMjA5MCwibmJmIjoxNzc0MzIyMDkwLCJpYXQiOjE3NzQzMjIwOTB9.qDkHD3QUxZAmzPd1n5mECNxNLoOr5yXrQu0vuib2wKY'
 # 每行: :table_id, :full_path，以及 :stream_name 或 :stream_id（二选一即可）
 ROWS = [

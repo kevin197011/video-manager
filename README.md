@@ -98,9 +98,9 @@ make down        # 停止服务
 
 #### 4. 访问应用
 
-- **前端**: http://localhost:5173
+- **前端**: http://localhost:3000
 - **后端 API**: http://localhost:8080/api
-- **Swagger UI**: http://localhost:5173/swagger/index.html
+- **Swagger UI**: http://localhost:3000/swagger/index.html
 - **默认账号**: admin / admin123
 
 ### 生产环境
@@ -272,7 +272,7 @@ npm install
 npm run dev
 ```
 
-前端应用将在 `http://localhost:5173` 启动。
+前端应用将在 `http://localhost:3000` 启动。
 
 ### 调试技巧
 
@@ -345,7 +345,7 @@ docker-compose exec backend sh
 | `POSTGRES_PASSWORD` | PostgreSQL 密码 | `videomanager` |
 | `POSTGRES_DB` | 数据库名 | `videomanager` |
 | `API_PORT` | 后端 API 端口 | `8080` |
-| `FRONTEND_PORT` | 前端端口 | `5173` |
+| `FRONTEND_PORT` | 前端端口 | `3000` |
 | `GIN_MODE` | Gin 模式 | `debug` |
 | `JWT_SECRET` | JWT 密钥 | `your-secret-key-change-in-production` |
 | `ADMIN_USERNAME` | 管理员用户名 | `admin` |
@@ -386,7 +386,7 @@ https://{line_display_name}.{domain}/{stream_path_full_path}.flv
    ```bash
    # 检查端口占用
    lsof -i :8080
-   lsof -i :5173
+   lsof -i :3000
 
    # 修改 docker-compose.yml 中的端口映射
    ```

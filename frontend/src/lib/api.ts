@@ -199,6 +199,8 @@ export type StreamPath = {
   stream_id: number;
   stream?: Stream;
   table_id: string;
+  /** 系列展示名，由桌台号前缀推导，如 L001 -> L系列 */
+  series?: string;
   full_path: string;
   created_at: string;
   updated_at: string;

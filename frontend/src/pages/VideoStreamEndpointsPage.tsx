@@ -10,6 +10,14 @@ import type { ColumnsType } from 'antd/es/table';
 import { videoStreamEndpointAPI, lineAPI, domainAPI, streamAPI, providerAPI } from '../lib/api';
 import type { VideoStreamEndpoint, CDNLine, Domain, Stream, CDNProvider } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
+import { displayStreamSeries } from '../lib/streamSeries';
+
+/** 端点嵌套的 stream_path 推导系列展示文案 */
+function endpointSeriesLabel(e: VideoStreamEndpoint): string {
+  const sp = e.stream_path;
+  if (!sp) return '—';
+  return displayStreamSeries(sp);
+}
 import flvjs from 'flv.js';
 
 const { Search } = Input;
@@ -40,6 +48,7 @@ export default function VideoStreamEndpointsPage() {
   const [filterProviderId, setFilterProviderId] = useState<number | undefined>(undefined);
   const [filterStatus, setFilterStatus] = useState<number | undefined>(undefined);
   const [filterTableId, setFilterTableId] = useState<string | undefined>(undefined);
+  const [filterSeries, setFilterSeries] = useState<string | undefined>(undefined);
   const [filterResolution, setFilterResolution] = useState<string | undefined>(undefined);
   const [testingResolution, setTestingResolution] = useState<Set<number>>(new Set());
   const [searchText, setSearchText] = useState('');
@@ -60,7 +69,7 @@ export default function VideoStreamEndpointsPage() {
 
   useEffect(() => {
     filterEndpoints();
-  }, [searchText, endpoints, filterTableId]);
+  }, [searchText, endpoints, filterTableId, filterSeries]);
 
   const load全部Data = async () => {
     try {
@@ -153,17 +162,25 @@ export default function VideoStreamEndpointsPage() {
     const endpointsList = endpoints || [];
     let filtered = endpointsList;
 
+    if (filterSeries) {
+      filtered = filtered.filter((endpoint) => endpointSeriesLabel(endpoint) === filterSeries);
+    }
+
     if (searchText.trim()) {
-      filtered = filtered.filter(
-        (endpoint) =>
-          endpoint.full_url.toLowerCase().includes(searchText.toLowerCase()) ||
-          endpoint.provider?.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          endpoint.provider?.code.toLowerCase().includes(searchText.toLowerCase()) ||
-          endpoint.line?.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          endpoint.domain?.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          endpoint.stream?.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          endpoint.stream_path?.table_id?.toLowerCase().includes(searchText.toLowerCase())
-      );
+      const q = searchText.toLowerCase();
+      filtered = filtered.filter((endpoint) => {
+        const seriesText = endpointSeriesLabel(endpoint);
+        return (
+          endpoint.full_url.toLowerCase().includes(q) ||
+          endpoint.provider?.name.toLowerCase().includes(q) ||
+          endpoint.provider?.code.toLowerCase().includes(q) ||
+          endpoint.line?.name.toLowerCase().includes(q) ||
+          endpoint.domain?.name.toLowerCase().includes(q) ||
+          endpoint.stream?.name.toLowerCase().includes(q) ||
+          endpoint.stream_path?.table_id?.toLowerCase().includes(q) ||
+          seriesText.toLowerCase().includes(q)
+        );
+      });
     }
 
     if (filterTableId) {
@@ -428,7 +445,7 @@ export default function VideoStreamEndpointsPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['编号', '完整URL', '厂商', '线路', '域名', '流区域', '桌台号', '路径', '分辨率', '状态', '创建时间'].join(','),
+      ['编号', '完整URL', '厂商', '线路', '域名', '流区域', '桌台号', '系列', '路径', '分辨率', '状态', '创建时间'].join(','),
       ...(filteredEndpoints || []).map((e) =>
         [
           e.id,
@@ -438,6 +455,7 @@ export default function VideoStreamEndpointsPage() {
           `"${e.domain?.name || 'Unknown'}"`,
           `"${e.stream?.name || 'Unknown'}"`,
           `"${e.stream_path?.table_id || 'N/A'}"`,
+          `"${endpointSeriesLabel(e)}"`,
           `"${e.stream_path?.full_path || 'Unknown'}"`,
           `"${e.resolution || '普清'}"`,
           e.status === 1 ? '已启用' : '已禁用',
@@ -468,6 +486,14 @@ export default function VideoStreamEndpointsPage() {
       }
     });
     return Array.from(tableIds).sort().map((id) => ({ text: id, value: id }));
+  }, [endpoints]);
+
+  const seriesFilterOptions = useMemo(() => {
+    const labels = new Set<string>();
+    (endpoints || []).forEach((e) => {
+      labels.add(endpointSeriesLabel(e));
+    });
+    return Array.from(labels).sort((a, b) => a.localeCompare(b, 'zh-CN'));
   }, [endpoints]);
 
   const columns: ColumnsType<VideoStreamEndpoint> = useMemo(() => [
@@ -532,6 +558,14 @@ export default function VideoStreamEndpointsPage() {
       render: (_, record) => record.stream_path?.table_id || 'N/A',
       filters: tableIdFilters,
       onFilter: (value, record) => record.stream_path?.table_id === value,
+    },
+    {
+      title: '系列',
+      key: 'series',
+      width: 100,
+      render: (_, record) => endpointSeriesLabel(record),
+      sorter: (a, b) =>
+        endpointSeriesLabel(a).localeCompare(endpointSeriesLabel(b), 'zh-CN'),
     },
     {
       title: '路径',
@@ -651,13 +685,21 @@ export default function VideoStreamEndpointsPage() {
         </Col>
       </Row>
 
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>视频流端点</h2>
-        <Space>
+      <div style={{ marginBottom: 16, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+        <h2 style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 'bold' }}>视频流端点</h2>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px 12px',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
           <Search
-            placeholder="搜索 URL、厂商、线路、域名或视频流区域"
+            placeholder="搜索 URL、厂商、线路、域名、视频流区域、桌台号或系列"
             allowClear
-            style={{ width: 300 }}
+            style={{ flex: '1 1 220px', minWidth: 160, maxWidth: 420 }}
             prefix={<SearchOutlined />}
             onSearch={setSearchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -665,7 +707,7 @@ export default function VideoStreamEndpointsPage() {
           <Select
             placeholder="筛选厂商"
             allowClear
-            style={{ width: 150 }}
+            style={{ flex: '1 1 128px', minWidth: 112, maxWidth: 180 }}
             onChange={(value) => setFilterProviderId(value)}
             value={filterProviderId}
             {...selectSearchableProps}
@@ -683,7 +725,7 @@ export default function VideoStreamEndpointsPage() {
           <Select
             placeholder="筛选厂商线路"
             allowClear
-            style={{ width: 150 }}
+            style={{ flex: '1 1 128px', minWidth: 112, maxWidth: 180 }}
             onChange={(value) => setFilterLineId(value)}
             value={filterLineId}
             {...selectSearchableProps}
@@ -701,7 +743,7 @@ export default function VideoStreamEndpointsPage() {
           <Select
             placeholder="筛选 Domain"
             allowClear
-            style={{ width: 150 }}
+            style={{ flex: '1 1 128px', minWidth: 112, maxWidth: 180 }}
             onChange={(value) => setFilterDomainId(value)}
             value={filterDomainId}
             {...selectSearchableProps}
@@ -715,7 +757,7 @@ export default function VideoStreamEndpointsPage() {
           <Select
             placeholder="筛选视频流区域"
             allowClear
-            style={{ width: 150 }}
+            style={{ flex: '1 1 128px', minWidth: 112, maxWidth: 200 }}
             onChange={(value) => setFilterStreamId(value)}
             value={filterStreamId}
             {...selectSearchableProps}
@@ -733,7 +775,7 @@ export default function VideoStreamEndpointsPage() {
           <Select
             placeholder="筛选 状态"
             allowClear
-            style={{ width: 120 }}
+            style={{ flex: '0 1 108px', minWidth: 100, maxWidth: 140 }}
             onChange={(value) => setFilterStatus(value)}
             value={filterStatus}
             {...selectSearchableProps}
@@ -748,7 +790,7 @@ export default function VideoStreamEndpointsPage() {
           <Select
             placeholder="筛选桌台号"
             allowClear
-            style={{ width: 150 }}
+            style={{ flex: '1 1 128px', minWidth: 112, maxWidth: 180 }}
             onChange={(value) => setFilterTableId(value)}
             value={filterTableId}
             {...selectSearchableProps}
@@ -760,9 +802,23 @@ export default function VideoStreamEndpointsPage() {
             ))}
           </Select>
           <Select
+            placeholder="筛选系列"
+            allowClear
+            style={{ flex: '1 1 128px', minWidth: 112, maxWidth: 180 }}
+            onChange={(value) => setFilterSeries(value)}
+            value={filterSeries}
+            {...selectSearchableProps}
+          >
+            {seriesFilterOptions.map((s) => (
+              <Select.Option key={s} value={s} label={s}>
+                {s}
+              </Select.Option>
+            ))}
+          </Select>
+          <Select
             placeholder="筛选分辨率"
             allowClear
-            style={{ width: 120 }}
+            style={{ flex: '0 1 108px', minWidth: 100, maxWidth: 140 }}
             onChange={(value) => setFilterResolution(value)}
             value={filterResolution}
             {...selectSearchableProps}
@@ -791,7 +847,7 @@ export default function VideoStreamEndpointsPage() {
           >
             导出
           </Button>
-        </Space>
+        </div>
       </div>
 
       <Table
@@ -855,8 +911,12 @@ export default function VideoStreamEndpointsPage() {
             <Descriptions.Item label="视频流区域">
               {viewingEndpoint.stream?.name || 'Unknown'} ({viewingEndpoint.stream?.code || 'N/A'})
             </Descriptions.Item>
+            <Descriptions.Item label="桌台号">
+              {viewingEndpoint.stream_path?.table_id || 'N/A'}
+            </Descriptions.Item>
+            <Descriptions.Item label="系列">{endpointSeriesLabel(viewingEndpoint)}</Descriptions.Item>
             <Descriptions.Item label="Stream Path">
-              {viewingEndpoint.stream_path?.full_path || 'Unknown'} ({viewingEndpoint.stream_path?.table_id || 'N/A'})
+              {viewingEndpoint.stream_path?.full_path || 'Unknown'}
             </Descriptions.Item>
             <Descriptions.Item label="分辨率">
               <Tag color={viewingEndpoint.resolution === '超清' ? 'purple' : viewingEndpoint.resolution === '高清' ? 'blue' : 'default'}>
@@ -929,6 +989,7 @@ export default function VideoStreamEndpointsPage() {
               <Descriptions.Item label="桌台号">
                 {playingEndpoint.stream_path?.table_id || 'N/A'}
               </Descriptions.Item>
+              <Descriptions.Item label="系列">{endpointSeriesLabel(playingEndpoint)}</Descriptions.Item>
             </Descriptions>
             <div style={{ marginTop: 16, textAlign: 'center' }}>
               {flvjs.isSupported() ? (

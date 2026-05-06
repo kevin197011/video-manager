@@ -125,6 +125,7 @@ func (r *VideoStreamEndpointRepository) GetAll(ctx context.Context, filters *Vid
 			return nil, err
 		}
 
+		sp.Series = models.StreamSeriesLabel(sp.TableID)
 		vse.Provider = &p
 		vse.Line = &cl
 		vse.Domain = &d
@@ -179,6 +180,7 @@ func (r *VideoStreamEndpointRepository) GetByID(ctx context.Context, id int64) (
 		return nil, err
 	}
 
+	sp.Series = models.StreamSeriesLabel(sp.TableID)
 	vse.Provider = &p
 	vse.Line = &cl
 	vse.Domain = &d
@@ -472,4 +474,3 @@ type VideoStreamEndpointFilters struct {
 	TableID    *string // Filter by table_id (桌台号)
 	Resolution *string // Filter by resolution (普清, 高清, 超清)
 }
-
