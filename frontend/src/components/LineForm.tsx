@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, message } from 'antd';
 import { lineAPI } from '../lib/api';
 import type { CDNLine, CDNProvider } from '../lib/api';
+import { selectSearchableProps } from '../lib/selectSearchProps';
 
 interface LineFormProps {
   line: CDNLine | null;
@@ -92,9 +93,9 @@ export default function LineForm({ line, providers, lines = [], open, onClose, o
           label="厂商"
           rules={[{ required: true, message: '请选择厂商' }]}
         >
-          <Select placeholder="选择 a provider">
+          <Select placeholder="选择 a provider" {...selectSearchableProps}>
             {providers.map((provider) => (
-              <Select.Option key={provider.id} value={provider.id}>
+              <Select.Option key={provider.id} value={provider.id} label={provider.name}>
                 {provider.name}
               </Select.Option>
             ))}

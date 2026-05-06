@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, message } from 'antd';
 import { streamPathAPI } from '../lib/api';
 import type { StreamPath, Stream } from '../lib/api';
+import { selectSearchableProps } from '../lib/selectSearchProps';
 
 interface StreamPathFormProps {
   path: StreamPath | null;
@@ -92,9 +93,13 @@ export default function StreamPathForm({ path, streams, paths = [], open, onClos
           label="视频流区域"
           rules={[{ required: true, message: '请选择视频流区域' }]}
         >
-          <Select placeholder="选择视频流区域">
+          <Select placeholder="选择视频流区域" {...selectSearchableProps}>
             {streams.map((stream) => (
-              <Select.Option key={stream.id} value={stream.id}>
+              <Select.Option
+                key={stream.id}
+                value={stream.id}
+                label={`${stream.name} ${stream.code}`}
+              >
                 {stream.name} ({stream.code})
               </Select.Option>
             ))}

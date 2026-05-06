@@ -9,6 +9,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutli
 import type { ColumnsType } from 'antd/es/table';
 import { lineAPI, providerAPI } from '../lib/api';
 import type { CDNLine, CDNProvider } from '../lib/api';
+import { selectSearchableProps } from '../lib/selectSearchProps';
 import LineForm from '../components/LineForm';
 
 const { Search } = Input;
@@ -304,9 +305,10 @@ export default function LinesPage() {
             style={{ width: 200 }}
             onChange={(value) => setFilterProviderId(value)}
             value={filterProviderId}
+            {...selectSearchableProps}
           >
             {providers.map((provider) => (
-              <Select.Option key={provider.id} value={provider.id}>
+              <Select.Option key={provider.id} value={provider.id} label={provider.name}>
                 {provider.name}
               </Select.Option>
             ))}

@@ -9,6 +9,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutli
 import type { ColumnsType } from 'antd/es/table';
 import { streamPathAPI, streamAPI } from '../lib/api';
 import type { StreamPath, Stream, StreamPathImportResult } from '../lib/api';
+import { selectSearchableProps } from '../lib/selectSearchProps';
 import StreamPathForm from '../components/StreamPathForm';
 
 const { Search } = Input;
@@ -393,10 +394,15 @@ export default function StreamPathsPage() {
             style={{ width: 200 }}
             onChange={(value) => setFilterStreamId(value)}
             value={filterStreamId}
+            {...selectSearchableProps}
           >
             {(streams || []).map((stream) => (
-              <Select.Option key={stream.id} value={stream.id}>
-                {stream.name}
+              <Select.Option
+                key={stream.id}
+                value={stream.id}
+                label={`${stream.name} ${stream.code}`}
+              >
+                {stream.name} ({stream.code})
               </Select.Option>
             ))}
           </Select>

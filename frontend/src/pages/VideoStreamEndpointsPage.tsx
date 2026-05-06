@@ -9,6 +9,7 @@ import { SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined, PlayCircle
 import type { ColumnsType } from 'antd/es/table';
 import { videoStreamEndpointAPI, lineAPI, domainAPI, streamAPI, providerAPI } from '../lib/api';
 import type { VideoStreamEndpoint, CDNLine, Domain, Stream, CDNProvider } from '../lib/api';
+import { selectSearchableProps } from '../lib/selectSearchProps';
 import flvjs from 'flv.js';
 
 const { Search } = Input;
@@ -667,10 +668,15 @@ export default function VideoStreamEndpointsPage() {
             style={{ width: 150 }}
             onChange={(value) => setFilterProviderId(value)}
             value={filterProviderId}
+            {...selectSearchableProps}
           >
             {(providers || []).map((provider) => (
-              <Select.Option key={provider.id} value={provider.id}>
-                {provider.name}
+              <Select.Option
+                key={provider.id}
+                value={provider.id}
+                label={`${provider.name} ${provider.code}`}
+              >
+                {provider.name} ({provider.code})
               </Select.Option>
             ))}
           </Select>
@@ -680,10 +686,15 @@ export default function VideoStreamEndpointsPage() {
             style={{ width: 150 }}
             onChange={(value) => setFilterLineId(value)}
             value={filterLineId}
+            {...selectSearchableProps}
           >
             {(lines || []).map((line) => (
-              <Select.Option key={line.id} value={line.id}>
-                {line.name}
+              <Select.Option
+                key={line.id}
+                value={line.id}
+                label={`${line.name} ${line.code}`}
+              >
+                {line.name} ({line.code})
               </Select.Option>
             ))}
           </Select>
@@ -693,9 +704,10 @@ export default function VideoStreamEndpointsPage() {
             style={{ width: 150 }}
             onChange={(value) => setFilterDomainId(value)}
             value={filterDomainId}
+            {...selectSearchableProps}
           >
             {(domains || []).map((domain) => (
-              <Select.Option key={domain.id} value={domain.id}>
+              <Select.Option key={domain.id} value={domain.id} label={domain.name}>
                 {domain.name}
               </Select.Option>
             ))}
@@ -706,10 +718,15 @@ export default function VideoStreamEndpointsPage() {
             style={{ width: 150 }}
             onChange={(value) => setFilterStreamId(value)}
             value={filterStreamId}
+            {...selectSearchableProps}
           >
             {(streams || []).map((stream) => (
-              <Select.Option key={stream.id} value={stream.id}>
-                {stream.name}
+              <Select.Option
+                key={stream.id}
+                value={stream.id}
+                label={`${stream.name} ${stream.code}`}
+              >
+                {stream.name} ({stream.code})
               </Select.Option>
             ))}
           </Select>
@@ -719,9 +736,14 @@ export default function VideoStreamEndpointsPage() {
             style={{ width: 120 }}
             onChange={(value) => setFilterStatus(value)}
             value={filterStatus}
+            {...selectSearchableProps}
           >
-            <Select.Option value={1}>已启用</Select.Option>
-            <Select.Option value={0}>已禁用</Select.Option>
+            <Select.Option value={1} label="已启用">
+              已启用
+            </Select.Option>
+            <Select.Option value={0} label="已禁用">
+              已禁用
+            </Select.Option>
           </Select>
           <Select
             placeholder="筛选桌台号"
@@ -729,9 +751,10 @@ export default function VideoStreamEndpointsPage() {
             style={{ width: 150 }}
             onChange={(value) => setFilterTableId(value)}
             value={filterTableId}
+            {...selectSearchableProps}
           >
             {tableIdFilters.map((filter) => (
-              <Select.Option key={filter.value} value={filter.value}>
+              <Select.Option key={filter.value} value={filter.value} label={filter.text}>
                 {filter.text}
               </Select.Option>
             ))}
@@ -742,10 +765,17 @@ export default function VideoStreamEndpointsPage() {
             style={{ width: 120 }}
             onChange={(value) => setFilterResolution(value)}
             value={filterResolution}
+            {...selectSearchableProps}
           >
-            <Select.Option value="普清">普清</Select.Option>
-            <Select.Option value="高清">高清</Select.Option>
-            <Select.Option value="超清">超清</Select.Option>
+            <Select.Option value="普清" label="普清">
+              普清
+            </Select.Option>
+            <Select.Option value="高清" label="高清">
+              高清
+            </Select.Option>
+            <Select.Option value="超清" label="超清">
+              超清
+            </Select.Option>
           </Select>
           <Button
             icon={<ReloadOutlined />}

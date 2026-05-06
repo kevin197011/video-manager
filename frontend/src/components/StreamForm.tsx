@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, message } from 'antd';
 import { streamAPI, providerAPI } from '../lib/api';
 import type { Stream, CDNProvider } from '../lib/api';
+import { selectSearchableProps } from '../lib/selectSearchProps';
 
 interface StreamFormProps {
   stream: Stream | null;
@@ -145,12 +146,7 @@ export default function StreamForm({ stream, streams = [], open, onClose, onSubm
             placeholder="选择厂商（可选，留空则匹配所有厂商）"
             allowClear
             loading={loadingProviders}
-            showSearch
-            optionFilterProp="label"
-            filterOption={(input, option) => {
-              const label = typeof option?.label === 'string' ? option.label : String(option?.label || '');
-              return label.toLowerCase().includes(input.toLowerCase());
-            }}
+            {...selectSearchableProps}
           >
             {providers.map((provider) => (
               <Select.Option key={provider.id} value={provider.id} label={`${provider.name} ${provider.code}`}>

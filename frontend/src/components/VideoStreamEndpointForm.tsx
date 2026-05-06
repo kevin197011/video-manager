@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Modal, Form, Select, message, Switch } from 'antd';
 import { videoStreamEndpointAPI, streamPathAPI } from '../lib/api';
 import type { VideoStreamEndpoint, CDNProvider, CDNLine, Domain, Stream, StreamPath } from '../lib/api';
+import { selectSearchableProps } from '../lib/selectSearchProps';
 
 interface VideoStreamEndpointFormProps {
   endpoint: VideoStreamEndpoint | null;
@@ -148,9 +149,14 @@ export default function VideoStreamEndpointForm({
             onChange={() => {
               form.setFieldsValue({ line_id: undefined });
             }}
+            {...selectSearchableProps}
           >
             {providers.map((provider) => (
-              <Select.Option key={provider.id} value={provider.id}>
+              <Select.Option
+                key={provider.id}
+                value={provider.id}
+                label={`${provider.name} ${provider.code}`}
+              >
                 {provider.name} ({provider.code})
               </Select.Option>
             ))}
@@ -163,9 +169,13 @@ export default function VideoStreamEndpointForm({
           rules={[{ required: true, message: 'Please select a CDN line' }]}
           dependencies={['provider_id']}
         >
-          <Select placeholder="Select a CDN line">
+          <Select placeholder="Select a CDN line" {...selectSearchableProps}>
             {filteredLines.map((line) => (
-              <Select.Option key={line.id} value={line.id}>
+              <Select.Option
+                key={line.id}
+                value={line.id}
+                label={`${line.name} ${line.code}`}
+              >
                 {line.name} ({line.code})
               </Select.Option>
             ))}
@@ -177,9 +187,9 @@ export default function VideoStreamEndpointForm({
           label="Domain"
           rules={[{ required: true, message: 'Please select a domain' }]}
         >
-          <Select placeholder="Select a domain">
+          <Select placeholder="Select a domain" {...selectSearchableProps}>
             {domains.map((domain) => (
-              <Select.Option key={domain.id} value={domain.id}>
+              <Select.Option key={domain.id} value={domain.id} label={domain.name}>
                 {domain.name}
               </Select.Option>
             ))}
@@ -194,9 +204,14 @@ export default function VideoStreamEndpointForm({
           <Select
             placeholder="Select a stream"
             onChange={handleStreamChange}
+            {...selectSearchableProps}
           >
             {streams.map((stream) => (
-              <Select.Option key={stream.id} value={stream.id}>
+              <Select.Option
+                key={stream.id}
+                value={stream.id}
+                label={`${stream.name} ${stream.code}`}
+              >
                 {stream.name} ({stream.code})
               </Select.Option>
             ))}
@@ -212,9 +227,14 @@ export default function VideoStreamEndpointForm({
             placeholder="Select a stream path"
             disabled={!selectedStreamId || availablePaths.length === 0}
             loading={!selectedStreamId}
+            {...selectSearchableProps}
           >
             {availablePaths.map((path) => (
-              <Select.Option key={path.id} value={path.id}>
+              <Select.Option
+                key={path.id}
+                value={path.id}
+                label={`${path.full_path} ${path.table_id}`}
+              >
                 {path.full_path} ({path.table_id})
               </Select.Option>
             ))}
