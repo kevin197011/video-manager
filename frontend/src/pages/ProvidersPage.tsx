@@ -3,13 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Table, Space, message, Popconfirm, Input, Card, Statistic, Row, Col, Modal, Descriptions } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { providerAPI } from '../lib/api';
 import type { CDNProvider } from '../lib/api';
 import ProviderForm from '../components/ProviderForm';
+import { getApiErrorMessage } from '../lib/httpError';
 
 const { Search } = Input;
 
@@ -24,28 +25,20 @@ export default function ProvidersPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
-  useEffect(() => {
-    loadProviders();
-  }, []);
-
-  useEffect(() => {
-    filterProviders();
-  }, [searchText, providers]);
-
-  const loadProviders = async () => {
+  const loadProviders = useCallback(async () => {
     try {
       setLoading(true);
       const data = await providerAPI.getAll();
       setProviders(data || []);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 providers');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 providers'));
       setProviders([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterProviders = () => {
+  const filterProviders = useCallback(() => {
     if (!searchText.trim()) {
       setFilteredProviders(providers || []);
       return;
@@ -57,7 +50,15 @@ export default function ProvidersPage() {
         provider.code.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredProviders(filtered);
-  };
+  }, [searchText, providers]);
+
+  useEffect(() => {
+    void loadProviders();
+  }, [loadProviders]);
+
+  useEffect(() => {
+    filterProviders();
+  }, [filterProviders]);
 
   const handleCreate = () => {
     setEditingProvider(null);
@@ -73,8 +74,8 @@ export default function ProvidersPage() {
     try {
       const provider = await providerAPI.getById(id);
       setViewingProvider(provider);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 provider details');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 provider details'));
     }
   };
 
@@ -83,9 +84,8 @@ export default function ProvidersPage() {
       await providerAPI.delete(id);
       message.success('Provider 删除成功');
       await loadProviders();
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.message || '删除失败 provider';
-      message.error(errorMsg);
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '删除失败 provider'));
     }
   };
 
@@ -103,10 +103,9 @@ export default function ProvidersPage() {
       try {
         await providerAPI.delete(Number(key));
         successCount++;
-      } catch (err: any) {
+      } catch (err: unknown) {
         failCount++;
-        const errorMsg = err.response?.data?.message || '删除失败';
-        errors.push(`ID ${key}: ${errorMsg}`);
+        errors.push(`ID ${key}: ${getApiErrorMessage(err, '删除失败')}`);
       }
     }
 
@@ -237,8 +236,8 @@ export default function ProvidersPage() {
   }, [providers.length, filteredProviders.length]);
 
   return (
-    <div>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+    <div className="vm-page">
+      <Row gutter={16} className="vm-stat-row" style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Card>
             <Statistic title="厂商总数" value={stats.total} />
@@ -251,9 +250,19 @@ export default function ProvidersPage() {
         </Col>
       </Row>
 
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>CDN 厂商</h2>
-        <Space>
+      <div
+        className="vm-toolbar-panel"
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <h2 className="vm-page-title">CDN 厂商</h2>
+        <Space wrap>
           <Search
             placeholder="搜索 name or code"
             allowClear

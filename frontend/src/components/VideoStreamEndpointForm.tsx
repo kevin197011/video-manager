@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Modal, Form, Select, message, Switch } from 'antd';
 import { videoStreamEndpointAPI, streamPathAPI } from '../lib/api';
 import type { VideoStreamEndpoint, CDNProvider, CDNLine, Domain, Stream, StreamPath } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
+import { getApiErrorMessage, isAntdFormValidateError } from '../lib/httpError';
 
 interface VideoStreamEndpointFormProps {
   endpoint: VideoStreamEndpoint | null;
@@ -34,6 +35,21 @@ export default function VideoStreamEndpointForm({
   const [loading, setLoading] = useState(false);
   const [availablePaths, setAvailablePaths] = useState<StreamPath[]>([]);
   const [selectedStreamId, setSelectedStreamId] = useState<number | undefined>(undefined);
+
+  const loadPaths = useCallback(
+    async (streamId: number) => {
+      try {
+        const paths = await streamPathAPI.getAll(streamId);
+        setAvailablePaths(paths);
+        if (paths.length > 0 && !endpoint) {
+          form.setFieldsValue({ stream_path_id: paths[0].id });
+        }
+      } catch (err: unknown) {
+        message.error(getApiErrorMessage(err, 'Failed to load stream paths'));
+      }
+    },
+    [endpoint, form]
+  );
 
   useEffect(() => {
     if (open) {
@@ -63,19 +79,7 @@ export default function VideoStreamEndpointForm({
         }
       }
     }
-  }, [open, endpoint, providers, lines, domains, streams, form]);
-
-  const loadPaths = async (streamId: number) => {
-    try {
-      const paths = await streamPathAPI.getAll(streamId);
-      setAvailablePaths(paths);
-      if (paths.length > 0 && !endpoint) {
-        form.setFieldsValue({ stream_path_id: paths[0].id });
-      }
-    } catch (err: any) {
-      message.error('Failed to load stream paths');
-    }
-  };
+  }, [open, endpoint, providers, lines, domains, streams, form, loadPaths]);
 
   const handleStreamChange = (streamId: number) => {
     setSelectedStreamId(streamId);
@@ -107,12 +111,11 @@ export default function VideoStreamEndpointForm({
 
       onSubmit();
       onClose();
-    } catch (err: any) {
-      if (err.errorFields) {
-        // Form validation errors
+    } catch (err: unknown) {
+      if (isAntdFormValidateError(err)) {
         return;
       }
-      message.error(err.response?.data?.message || 'Failed to save endpoint');
+      message.error(getApiErrorMessage(err, 'Failed to save endpoint'));
     } finally {
       setLoading(false);
     }

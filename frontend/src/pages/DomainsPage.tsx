@@ -3,13 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Table, Space, message, Popconfirm, Input, Card, Statistic, Row, Col, Modal, Descriptions } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { domainAPI } from '../lib/api';
 import type { Domain } from '../lib/api';
 import DomainForm from '../components/DomainForm';
+import { getApiErrorMessage } from '../lib/httpError';
 
 const { Search } = Input;
 
@@ -24,28 +25,20 @@ export default function DomainsPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
-  useEffect(() => {
-    loadDomains();
-  }, []);
-
-  useEffect(() => {
-    filterDomains();
-  }, [searchText, domains]);
-
-  const loadDomains = async () => {
+  const loadDomains = useCallback(async () => {
     try {
       setLoading(true);
       const data = await domainAPI.getAll();
       setDomains(data || []);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 domains');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 domains'));
       setDomains([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterDomains = () => {
+  const filterDomains = useCallback(() => {
     if (!searchText.trim()) {
       setFilteredDomains(domains || []);
       return;
@@ -55,7 +48,15 @@ export default function DomainsPage() {
       (domain) => domain.name.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredDomains(filtered);
-  };
+  }, [searchText, domains]);
+
+  useEffect(() => {
+    void loadDomains();
+  }, [loadDomains]);
+
+  useEffect(() => {
+    filterDomains();
+  }, [filterDomains]);
 
   const handleCreate = () => {
     setEditingDomain(null);
@@ -71,8 +72,8 @@ export default function DomainsPage() {
     try {
       const domain = await domainAPI.getById(id);
       setViewingDomain(domain);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 domain details');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 domain details'));
     }
   };
 
@@ -81,9 +82,8 @@ export default function DomainsPage() {
       await domainAPI.delete(id);
       message.success('Domain 删除成功');
       await loadDomains();
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.message || '删除失败 domain';
-      message.error(errorMsg);
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '删除失败 domain'));
     }
   };
 
@@ -101,10 +101,9 @@ export default function DomainsPage() {
       try {
         await domainAPI.delete(Number(key));
         successCount++;
-      } catch (err: any) {
+      } catch (err: unknown) {
         failCount++;
-        const errorMsg = err.response?.data?.message || '删除失败';
-        errors.push(`ID ${key}: ${errorMsg}`);
+        errors.push(`ID ${key}: ${getApiErrorMessage(err, '删除失败')}`);
       }
     }
 
@@ -228,8 +227,8 @@ export default function DomainsPage() {
   }, [domains, filteredDomains]);
 
   return (
-    <div>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+    <div className="vm-page">
+      <Row gutter={16} className="vm-stat-row" style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Card>
             <Statistic title="域名总数" value={stats.total} />
@@ -242,9 +241,19 @@ export default function DomainsPage() {
         </Col>
       </Row>
 
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>Domains</h2>
-        <Space>
+      <div
+        className="vm-toolbar-panel"
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <h2 className="vm-page-title">Domains</h2>
+        <Space wrap>
           <Search
             placeholder="搜索 name"
             allowClear

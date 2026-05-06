@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Modal, Form, Input, message } from 'antd';
 import { domainAPI } from '../lib/api';
 import type { Domain } from '../lib/api';
+import { getApiErrorMessage, isAntdFormValidateError } from '../lib/httpError';
 
 interface DomainFormProps {
   domain: Domain | null;
@@ -47,12 +48,11 @@ export default function DomainForm({ domain, domains = [], open, onClose, onSubm
 
       onSubmit();
       onClose();
-    } catch (err: any) {
-      if (err.errorFields) {
-        // Form validation errors
+    } catch (err: unknown) {
+      if (isAntdFormValidateError(err)) {
         return;
       }
-      message.error(err.response?.data?.message || '保存失败 domain');
+      message.error(getApiErrorMessage(err, '保存失败 domain'));
     } finally {
       setLoading(false);
     }

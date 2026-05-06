@@ -3,13 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Table, Space, message, Popconfirm, Input, Card, Statistic, Row, Col, Modal, Descriptions } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { streamAPI } from '../lib/api';
 import type { Stream } from '../lib/api';
 import StreamForm from '../components/StreamForm';
+import { getApiErrorMessage } from '../lib/httpError';
 
 const { Search } = Input;
 
@@ -24,28 +25,20 @@ export default function StreamsPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
-  useEffect(() => {
-    loadStreams();
-  }, []);
-
-  useEffect(() => {
-    filterStreams();
-  }, [searchText, streams]);
-
-  const loadStreams = async () => {
+  const loadStreams = useCallback(async () => {
     try {
       setLoading(true);
       const data = await streamAPI.getAll();
       setStreams(data || []);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 streams');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 streams'));
       setStreams([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterStreams = () => {
+  const filterStreams = useCallback(() => {
     if (!searchText.trim()) {
       setFilteredStreams(streams || []);
       return;
@@ -59,7 +52,15 @@ export default function StreamsPage() {
         stream.provider?.code.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredStreams(filtered);
-  };
+  }, [searchText, streams]);
+
+  useEffect(() => {
+    void loadStreams();
+  }, [loadStreams]);
+
+  useEffect(() => {
+    filterStreams();
+  }, [filterStreams]);
 
   const handleCreate = () => {
     setEditingStream(null);
@@ -75,8 +76,8 @@ export default function StreamsPage() {
     try {
       const stream = await streamAPI.getById(id);
       setViewingStream(stream);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 stream details');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 stream details'));
     }
   };
 
@@ -85,9 +86,8 @@ export default function StreamsPage() {
       await streamAPI.delete(id);
       message.success('Stream 删除成功');
       await loadStreams();
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.message || '删除失败 stream';
-      message.error(errorMsg);
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '删除失败 stream'));
     }
   };
 
@@ -105,10 +105,9 @@ export default function StreamsPage() {
       try {
         await streamAPI.delete(Number(key));
         successCount++;
-      } catch (err: any) {
+      } catch (err: unknown) {
         failCount++;
-        const errorMsg = err.response?.data?.message || '删除失败';
-        errors.push(`ID ${key}: ${errorMsg}`);
+        errors.push(`ID ${key}: ${getApiErrorMessage(err, '删除失败')}`);
       }
     }
 
@@ -256,8 +255,8 @@ export default function StreamsPage() {
   }, [streams, filteredStreams]);
 
   return (
-    <div>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+    <div className="vm-page">
+      <Row gutter={16} className="vm-stat-row" style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Card>
             <Statistic title="视频流区域总数" value={stats.total} />
@@ -270,9 +269,19 @@ export default function StreamsPage() {
         </Col>
       </Row>
 
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>视频流区域</h2>
-        <Space>
+      <div
+        className="vm-toolbar-panel"
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <h2 className="vm-page-title">视频流区域</h2>
+        <Space wrap>
           <Search
             placeholder="搜索名称、代码或厂商"
             allowClear

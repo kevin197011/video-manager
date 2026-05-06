@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Button, Table, Space, Select, message, Input, Card, Statistic, Row, Col, Modal, Descriptions, Tag, Switch } from 'antd';
 import { SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined, PlayCircleOutlined, ExperimentOutlined, CopyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -11,6 +11,10 @@ import { videoStreamEndpointAPI, lineAPI, domainAPI, streamAPI, providerAPI } fr
 import type { VideoStreamEndpoint, CDNLine, Domain, Stream, CDNProvider } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
 import { displayStreamSeries } from '../lib/streamSeries';
+import { getApiErrorMessage } from '../lib/httpError';
+import flvjs from 'flv.js';
+
+const { Search } = Input;
 
 /** 端点嵌套的 stream_path 推导系列展示文案 */
 function endpointSeriesLabel(e: VideoStreamEndpoint): string {
@@ -18,9 +22,6 @@ function endpointSeriesLabel(e: VideoStreamEndpoint): string {
   if (!sp) return '—';
   return displayStreamSeries(sp);
 }
-import flvjs from 'flv.js';
-
-const { Search } = Input;
 
 export default function VideoStreamEndpointsPage() {
   const [endpoints, setEndpoints] = useState<VideoStreamEndpoint[]>([]);
@@ -54,68 +55,25 @@ export default function VideoStreamEndpointsPage() {
   const [searchText, setSearchText] = useState('');
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
-  // 初始加载：只加载一次基础数据和 endpoints
-  useEffect(() => {
-    load全部Data();
+  const fetchBaseResources = useCallback(async () => {
+    const [linesData, domainsData, streamsData, providersData] = await Promise.all([
+      lineAPI.getAll(),
+      domainAPI.getAll(),
+      streamAPI.getAll(),
+      providerAPI.getAll(),
+    ]);
+    setLines(linesData || []);
+    setDomains(domainsData || []);
+    setStreams(streamsData || []);
+    setProviders(providersData || []);
   }, []);
 
-  // 当筛选条件改变时，重新加载 endpoints（但不包括初始加载）
-  useEffect(() => {
-    // 只有在完成初始加载后才响应筛选条件的变化
-    if (initialLoadRef.current) {
-      loadEndpoints();
-    }
-  }, [filterLineId, filterDomainId, filterStreamId, filterProviderId, filterStatus, filterResolution]);
-
-  useEffect(() => {
-    filterEndpoints();
-  }, [searchText, endpoints, filterTableId, filterSeries]);
-
-  const load全部Data = async () => {
+  const loadEndpoints = useCallback(async () => {
     try {
-      setLoading(true);
-      initialLoadRef.current = false; // 重置初始加载标志
-      const [linesData, domainsData, streamsData, providersData] = await Promise.all([
-        lineAPI.getAll(),
-        domainAPI.getAll(),
-        streamAPI.getAll(),
-        providerAPI.getAll(),
-      ]);
-      setLines(linesData || []);
-      setDomains(domainsData || []);
-      setStreams(streamsData || []);
-      setProviders(providersData || []);
-      // 确保在基础数据加载完成后再加载 endpoints，避免数据不一致
-      await loadEndpoints();
-      initialLoadRef.current = true; // 标记初始加载完成
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 data');
-      // Set empty arrays on error to prevent null errors
-      setLines([]);
-      setDomains([]);
-      setStreams([]);
-      setProviders([]);
-      // 即使基础数据加载失败，也尝试加载 endpoints
-      try {
-        await loadEndpoints();
-        initialLoadRef.current = true; // 即使部分失败，也标记为完成
-      } catch (endpointErr: any) {
-        console.error('Failed to load endpoints:', endpointErr);
-        initialLoadRef.current = true; // 标记为完成，避免阻塞后续操作
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadEndpoints = async () => {
-    try {
-      // 只有在不是从 load全部Data 调用时才设置 loading
-      // 避免在初始加载时重复设置 loading 状态
       if (!initialLoadRef.current) {
         setLoading(true);
       }
-      const filters: any = {};
+      const filters: Record<string, number | string> = {};
       if (filterLineId) filters.line_id = filterLineId;
       if (filterDomainId) filters.domain_id = filterDomainId;
       if (filterStreamId) filters.stream_id = filterStreamId;
@@ -124,41 +82,79 @@ export default function VideoStreamEndpointsPage() {
       if (filterResolution) filters.resolution = filterResolution;
 
       const data = await videoStreamEndpointAPI.getAll(Object.keys(filters).length > 0 ? filters : undefined);
-      // 确保数据被正确设置，包括 resolution 字段
       if (data && Array.isArray(data)) {
         setEndpoints(data);
       } else {
         setEndpoints([]);
       }
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 endpoints');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 endpoints'));
       setEndpoints([]);
     } finally {
-      // 只有在不是从 load全部Data 调用时才取消 loading
       if (!initialLoadRef.current) {
         setLoading(false);
       }
     }
-  };
+  }, [
+    filterLineId,
+    filterDomainId,
+    filterStreamId,
+    filterProviderId,
+    filterStatus,
+    filterResolution,
+  ]);
 
-  const handleRefresh = async () => {
-    try {
-      setLoading(true);
-      // 先调用 GenerateAll 重新生成所有 endpoints
-      const result = await videoStreamEndpointAPI.generateAll();
-      message.success(`已重新生成 ${result.count} 个端点`);
-      // 然后刷新列表
-      await loadEndpoints();
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '重新生成端点失败');
-      // 即使生成失败，也尝试加载现有数据
-      await loadEndpoints();
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        setLoading(true);
+        initialLoadRef.current = false;
+        await fetchBaseResources();
+        if (cancelled) return;
+        await loadEndpoints();
+        if (cancelled) return;
+        initialLoadRef.current = true;
+      } catch (err: unknown) {
+        message.error(getApiErrorMessage(err, '加载失败 data'));
+        setLines([]);
+        setDomains([]);
+        setStreams([]);
+        setProviders([]);
+        try {
+          await loadEndpoints();
+          initialLoadRef.current = true;
+        } catch (endpointErr: unknown) {
+          console.error('Failed to load endpoints:', endpointErr);
+          initialLoadRef.current = true;
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-time bootstrap; loadEndpoints/filters captured at mount
+  }, []);
+
+  useEffect(() => {
+    if (initialLoadRef.current) {
+      void loadEndpoints();
     }
-  };
+  }, [
+    filterLineId,
+    filterDomainId,
+    filterStreamId,
+    filterProviderId,
+    filterStatus,
+    filterResolution,
+    loadEndpoints,
+  ]);
 
-  const filterEndpoints = () => {
+  const filterEndpoints = useCallback(() => {
     const endpointsList = endpoints || [];
     let filtered = endpointsList;
 
@@ -184,25 +180,43 @@ export default function VideoStreamEndpointsPage() {
     }
 
     if (filterTableId) {
-      filtered = filtered.filter(
-        (endpoint) => endpoint.stream_path?.table_id === filterTableId
-      );
+      filtered = filtered.filter((endpoint) => endpoint.stream_path?.table_id === filterTableId);
     }
 
     setFilteredEndpoints(filtered);
-  };
+  }, [searchText, endpoints, filterTableId, filterSeries]);
 
+  useEffect(() => {
+    filterEndpoints();
+  }, [filterEndpoints]);
 
-  const handleView = async (id: number) => {
+  const handleRefresh = async () => {
     try {
-      const endpoint = await videoStreamEndpointAPI.getById(id);
-      setViewingEndpoint(endpoint);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 endpoint details');
+      setLoading(true);
+      // 先调用 GenerateAll 重新生成所有 endpoints
+      const result = await videoStreamEndpointAPI.generateAll();
+      message.success(`已重新生成 ${result.count} 个端点`);
+      // 然后刷新列表
+      await loadEndpoints();
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '重新生成端点失败'));
+      // 即使生成失败，也尝试加载现有数据
+      await loadEndpoints();
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handlePlay = async (id: number) => {
+  const handleView = useCallback(async (id: number) => {
+    try {
+      const endpoint = await videoStreamEndpointAPI.getById(id);
+      setViewingEndpoint(endpoint);
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 endpoint details'));
+    }
+  }, []);
+
+  const handlePlay = useCallback(async (id: number) => {
     try {
       const endpoint = await videoStreamEndpointAPI.getById(id);
       if (!endpoint.full_url) {
@@ -211,10 +225,10 @@ export default function VideoStreamEndpointsPage() {
       }
       setPlayingEndpoint(endpoint);
       setPlayModalVisible(true);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 endpoint details');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 endpoint details'));
     }
-  };
+  }, []);
 
   const handleClosePlayModal = () => {
     setPlayModalVisible(false);
@@ -239,7 +253,7 @@ export default function VideoStreamEndpointsPage() {
   };
 
   // 初始化 FLV 播放器的函数
-  const initializePlayer = () => {
+  const initializePlayer = useCallback(() => {
     // 使用 ref 获取最新的 playingEndpoint，避免闭包问题
     const currentEndpoint = playingEndpointRef.current;
     if (!videoRef.current || !flvjs.isSupported() || !currentEndpoint) {
@@ -282,7 +296,7 @@ export default function VideoStreamEndpointsPage() {
       // 尝试自动播放
       const playPromise = player.play();
       if (playPromise !== undefined && playPromise instanceof Promise) {
-        playPromise.catch((err: any) => {
+        playPromise.catch((err: unknown) => {
           console.error('Play error:', err);
           message.warning('自动播放失败，请手动点击播放按钮');
         });
@@ -291,7 +305,7 @@ export default function VideoStreamEndpointsPage() {
       flvPlayerRef.current = player;
 
       // 错误处理 - 自动重试机制
-      player.on(flvjs.Events.ERROR, (errorType: any, errorDetail: any, errorInfo: any) => {
+      player.on(flvjs.Events.ERROR, (errorType: unknown, errorDetail: unknown, errorInfo: unknown) => {
         console.error('FLV Player Error:', errorType, errorDetail, errorInfo);
         
         // 如果已经显示过错误，不再重复显示
@@ -343,11 +357,11 @@ export default function VideoStreamEndpointsPage() {
         retryCountRef.current = 0;
         errorShownRef.current = false;
       });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error creating FLV player:', err);
       message.error('创建播放器失败：' + (err instanceof Error ? err.message : String(err)));
     }
-  };
+  }, []);
 
   // 初始化 FLV 播放器
   useEffect(() => {
@@ -389,43 +403,48 @@ export default function VideoStreamEndpointsPage() {
       errorShownRef.current = false;
       retryCountRef.current = 0;
     };
-  }, [playModalVisible, playingEndpoint]);
+  }, [playModalVisible, playingEndpoint, initializePlayer]);
 
 
-  const handleToggle状态 = async (id: number, current状态: number) => {
-    try {
-      const newStatus = current状态 === 1 ? 0 : 1;
-      await videoStreamEndpointAPI.updateStatus(id, newStatus);
-      message.success(`Endpoint ${newStatus === 1 ? 'enabled' : 'disabled'} successfully`);
-      await loadEndpoints();
-    } catch (err: any) {
-      message.error(err.response?.data?.message || 'Failed to update status');
-    }
-  };
+  const handleToggleStatus = useCallback(
+    async (id: number, currentStatus: number) => {
+      try {
+        const newStatus = currentStatus === 1 ? 0 : 1;
+        await videoStreamEndpointAPI.updateStatus(id, newStatus);
+        message.success(`Endpoint ${newStatus === 1 ? 'enabled' : 'disabled'} successfully`);
+        await loadEndpoints();
+      } catch (err: unknown) {
+        message.error(getApiErrorMessage(err, 'Failed to update status'));
+      }
+    },
+    [loadEndpoints]
+  );
 
-  const handleTestResolution = async (id: number) => {
-    try {
-      setTestingResolution((prev) => new Set(prev).add(id));
-      const result = await videoStreamEndpointAPI.testResolution(id);
-      message.success(`分辨率检测成功：已更新为 ${result.resolution}`);
-      await loadEndpoints();
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '分辨率检测失败');
-    } finally {
-      setTestingResolution((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    }
-  };
+  const handleTestResolution = useCallback(
+    async (id: number) => {
+      try {
+        setTestingResolution((prev) => new Set(prev).add(id));
+        const result = await videoStreamEndpointAPI.testResolution(id);
+        message.success(`分辨率检测成功：已更新为 ${result.resolution}`);
+        await loadEndpoints();
+      } catch (err: unknown) {
+        message.error(getApiErrorMessage(err, '分辨率检测失败'));
+      } finally {
+        setTestingResolution((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      }
+    },
+    [loadEndpoints]
+  );
 
-  const handleCopyUrl = async (url: string) => {
+  const handleCopyUrl = useCallback(async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
       message.success('URL 已复制到剪贴板');
-    } catch (err) {
-      // Fallback for older browsers
+    } catch {
       const textArea = document.createElement('textarea');
       textArea.value = url;
       textArea.style.position = 'fixed';
@@ -435,12 +454,12 @@ export default function VideoStreamEndpointsPage() {
       try {
         document.execCommand('copy');
         message.success('URL 已复制到剪贴板');
-      } catch (e) {
+      } catch {
         message.error('复制失败，请手动复制');
       }
       document.body.removeChild(textArea);
     }
-  };
+  }, []);
 
 
   const handleExport = () => {
@@ -641,13 +660,25 @@ export default function VideoStreamEndpointsPage() {
           </Button>
           <Switch
             checked={record.status === 1}
-            onChange={() => handleToggle状态(record.id, record.status)}
+            onChange={() => handleToggleStatus(record.id, record.status)}
             size="small"
           />
         </Space>
       ),
     },
-  ], [lines, domains, streams, providers, tableIdFilters]);
+  ], [
+    lines,
+    domains,
+    streams,
+    providers,
+    tableIdFilters,
+    handleView,
+    handlePlay,
+    handleTestResolution,
+    testingResolution,
+    handleToggleStatus,
+    handleCopyUrl,
+  ]);
 
   const stats = useMemo(() => {
     const endpointsList = endpoints || [];
@@ -661,8 +692,8 @@ export default function VideoStreamEndpointsPage() {
   }, [endpoints, filteredEndpoints]);
 
   return (
-    <div>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+    <div className="vm-page">
+      <Row gutter={16} className="vm-stat-row" style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Card>
             <Statistic title="端点总数" value={stats.total} />
@@ -685,8 +716,13 @@ export default function VideoStreamEndpointsPage() {
         </Col>
       </Row>
 
-      <div style={{ marginBottom: 16, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 'bold' }}>视频流端点</h2>
+      <div
+        className="vm-toolbar-panel"
+        style={{ marginBottom: 16, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+      >
+        <h2 className="vm-page-title" style={{ margin: '0 0 12px' }}>
+          视频流端点
+        </h2>
         <div
           style={{
             display: 'flex',

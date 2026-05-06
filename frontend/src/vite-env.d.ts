@@ -5,7 +5,7 @@ interface ImportMetaEnv {
   readonly DEV: boolean;
   readonly PROD: boolean;
   readonly MODE: string;
-  [key: string]: any;
+  readonly [key: string]: string | boolean | undefined;
 }
 
 // Extend ImportMeta interface globally

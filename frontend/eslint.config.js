@@ -20,4 +20,13 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  /** Ambient / shim `.d.ts` files use loose `any`; runtime types come from dependencies */
+  {
+    files: ['src/**/*.d.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
 ])

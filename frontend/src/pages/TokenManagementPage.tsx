@@ -4,12 +4,11 @@
 // https://opensource.org/licenses/MIT
 
 import { useState, useEffect } from 'react';
-import { Card, Tag, Button, Space, message, Typography, Alert, Modal, Form, Input, Switch, InputNumber, Table, Popconfirm } from 'antd';
+import { Card, Tag, Button, Space, message, Alert, Modal, Form, Input, Switch, InputNumber, Table, Popconfirm } from 'antd';
 import { KeyOutlined, CopyOutlined, ReloadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { authAPI } from '../lib/api';
+import { getApiErrorMessage } from '../lib/httpError';
 import type { Token } from '../lib/api';
-
-const { Title } = Typography;
 
 export default function TokenManagementPage() {
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -35,8 +34,8 @@ export default function TokenManagementPage() {
           !token.name.toLowerCase().includes('login')
       );
       setTokens(filteredTokens);
-    } catch (error: any) {
-      message.error(error.response?.data?.message || '获取 Token 列表失败');
+    } catch (error: unknown) {
+      message.error(getApiErrorMessage(error, '获取 Token 列表失败'));
       setTokens([]);
     } finally {
       setTokensLoading(false);
@@ -70,8 +69,8 @@ export default function TokenManagementPage() {
       message.success('Token 创建成功');
       form.resetFields();
       await fetchTokens(); // Refresh token list
-    } catch (error: any) {
-      message.error(error.response?.data?.message || '创建 Token 失败');
+    } catch (error: unknown) {
+      message.error(getApiErrorMessage(error, '创建 Token 失败'));
     } finally {
       setCreating(false);
     }
@@ -95,8 +94,8 @@ export default function TokenManagementPage() {
       await authAPI.deleteToken(id);
       message.success('Token 删除成功');
       await fetchTokens();
-    } catch (error: any) {
-      message.error(error.response?.data?.message || '删除 Token 失败');
+    } catch (error: unknown) {
+      message.error(getApiErrorMessage(error, '删除 Token 失败'));
     }
   };
 
@@ -114,13 +113,15 @@ export default function TokenManagementPage() {
   };
 
   return (
-    <div>
-      <Title level={2}>
-        <KeyOutlined /> Token 管理
-      </Title>
+    <div className="vm-page">
+      <h2 className="vm-page-title">
+        <KeyOutlined style={{ marginRight: 8 }} />
+        Token 管理
+      </h2>
 
       <Card
-        style={{ marginTop: 24 }}
+        className="vm-panel-card"
+        style={{ marginTop: 16 }}
         title="已创建的 Token 列表"
         extra={
           <Space>

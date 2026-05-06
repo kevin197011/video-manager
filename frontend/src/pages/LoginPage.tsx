@@ -5,13 +5,13 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { App, Form, Input, Button, Card, Typography } from 'antd';
+import { App, Form, Input, Button, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { authAPI } from '../lib/api';
 import { auth } from '../lib/auth';
 import Logo from '../components/Logo';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export default function LoginPage() {
   const { message } = App.useApp();
@@ -24,17 +24,17 @@ export default function LoginPage() {
       const response = await authAPI.login(values.username, values.password);
       auth.setToken(response.token);
       auth.setUser({
-        id: 0, // Will be fetched from /auth/me
+        id: 0,
         username: response.username,
         is_admin: response.is_admin,
       });
       message.success('登录成功');
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          '登录失败，请检查用户名和密码';
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      const errorMessage =
+        err.response?.data?.message || err.message || '登录失败，请检查用户名和密码';
       message.error(errorMessage);
     } finally {
       setLoading(false);
@@ -42,76 +42,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '20px',
-      }}
-    >
-      <Card
+    <div className="vm-login-bg" style={{ display: 'flex', minHeight: '100vh' }}>
+      <div
         style={{
-          width: '100%',
-          maxWidth: 400,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-          borderRadius: '12px',
+          flex: '1 1 42%',
+          minWidth: 280,
+          padding: '48px 40px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          color: '#e2e8f0',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <Logo size={64} />
-          <Title level={2} style={{ marginTop: 16, marginBottom: 8 }}>
+        <div style={{ maxWidth: 400 }}>
+          <Logo size={56} />
+          <Title
+            level={2}
+            style={{
+              color: '#f8fafc',
+              marginTop: 28,
+              marginBottom: 12,
+              fontWeight: 700,
+              letterSpacing: '-0.03em',
+            }}
+          >
             视频管理系统
           </Title>
-          <p style={{ color: '#666', margin: 0 }}>请登录您的账号</p>
+          <Text style={{ color: 'rgba(148, 163, 184, 0.95)', fontSize: 15, lineHeight: 1.7 }}>
+            统一管理 CDN、域名、流路径与播放端点。面向运营与工程团队的内部控制台。
+          </Text>
+          <div
+            style={{
+              marginTop: 36,
+              paddingTop: 28,
+              borderTop: '1px solid rgba(255,255,255,0.08)',
+              fontSize: 12,
+              color: 'rgba(148, 163, 184, 0.85)',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Secure ops console
+          </div>
         </div>
+      </div>
 
-        <Form
-          name="login"
-          onFinish={onFinish}
-          autoComplete="off"
-          size="large"
+      <div
+        style={{
+          flex: '1 1 58%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '32px 24px',
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 420,
+            padding: '40px 36px',
+            borderRadius: 16,
+            background: 'rgba(255,255,255,0.96)',
+            border: '1px solid rgba(255,255,255,0.65)',
+            boxShadow:
+              '0 4px 24px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.04)',
+            backdropFilter: 'blur(12px)',
+          }}
         >
-          <Form.Item
-            name="username"
-            rules={[{ required: true, message: '请输入用户名' }]}
-          >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="用户名"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: '请输入密码' }]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="密码"
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-              style={{
-                height: 44,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none',
-              }}
-            >
+          <div style={{ marginBottom: 28 }}>
+            <Text strong style={{ fontSize: 18, color: 'var(--vm-text)' }}>
               登录
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+            </Text>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--vm-muted)' }}>
+              使用管理员账号进入控制台
+            </div>
+          </div>
+
+          <Form name="login" onFinish={onFinish} autoComplete="off" layout="vertical" size="large">
+            <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
+              <Input prefix={<UserOutlined style={{ color: 'var(--vm-muted)' }} />} placeholder="用户名" />
+            </Form.Item>
+
+            <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
+              <Input.Password
+                prefix={<LockOutlined style={{ color: 'var(--vm-muted)' }} />}
+                placeholder="密码"
+              />
+            </Form.Item>
+
+            <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
+              <Button type="primary" htmlType="submit" loading={loading} block size="large">
+                进入控制台
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 }
-

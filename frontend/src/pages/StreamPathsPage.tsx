@@ -12,6 +12,7 @@ import type { StreamPath, Stream, StreamPathImportResult } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
 import { displayStreamSeries, streamSeriesLabel } from '../lib/streamSeries';
 import StreamPathForm from '../components/StreamPathForm';
+import { getApiErrorMessage } from '../lib/httpError';
 
 const { Search } = Input;
 
@@ -34,9 +35,14 @@ export default function StreamPathsPage() {
   const [importSummaryOpen, setImportSummaryOpen] = useState(false);
   const [importSummaryText, setImportSummaryText] = useState('');
 
-  useEffect(() => {
-    loadStreams();
-    loadPaths();
+  const loadStreams = useCallback(async () => {
+    try {
+      const data = await streamAPI.getAll();
+      setStreams(data || []);
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 streams'));
+      setStreams([]);
+    }
   }, []);
 
   const loadPaths = useCallback(async () => {
@@ -44,33 +50,15 @@ export default function StreamPathsPage() {
       setLoading(true);
       const data = await streamPathAPI.getAll(filterStreamId);
       setPaths(data || []);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 stream paths');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 stream paths'));
       setPaths([]);
     } finally {
       setLoading(false);
     }
   }, [filterStreamId]);
 
-  useEffect(() => {
-    loadPaths();
-  }, [loadPaths]);
-
-  useEffect(() => {
-    filterPaths();
-  }, [searchText, paths, filterSeries]);
-
-  const loadStreams = async () => {
-    try {
-      const data = await streamAPI.getAll();
-      setStreams(data || []);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 streams');
-      setStreams([]);
-    }
-  };
-
-  const filterPaths = () => {
+  const filterPaths = useCallback(() => {
     let filtered = paths || [];
 
     if (filterSeries) {
@@ -94,7 +82,19 @@ export default function StreamPathsPage() {
     }
 
     setFilteredPaths(filtered);
-  };
+  }, [searchText, paths, filterSeries]);
+
+  useEffect(() => {
+    void loadStreams();
+  }, [loadStreams]);
+
+  useEffect(() => {
+    void loadPaths();
+  }, [loadPaths]);
+
+  useEffect(() => {
+    filterPaths();
+  }, [filterPaths]);
 
   const handleCreate = () => {
     setEditingPath(null);
@@ -110,52 +110,29 @@ export default function StreamPathsPage() {
     try {
       const path = await streamPathAPI.getById(id);
       setViewingPath(path);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 stream path details');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 stream path details'));
     }
   }, []);
 
-  const handleDelete = useCallback(async (id: number) => {
-    const loadPathsFn = async () => {
+  const handleDelete = useCallback(
+    async (id: number) => {
       try {
-        setLoading(true);
-        const data = await streamPathAPI.getAll(filterStreamId);
-        setPaths(data || []);
-      } catch (err: any) {
-        message.error(err.response?.data?.message || '加载失败 stream paths');
-        setPaths([]);
-      } finally {
-        setLoading(false);
+        await streamPathAPI.delete(id);
+        message.success('Stream path 删除成功');
+        await loadPaths();
+      } catch (err: unknown) {
+        message.error(getApiErrorMessage(err, '删除失败 stream path'));
       }
-    };
-    try {
-      await streamPathAPI.delete(id);
-      message.success('Stream path 删除成功');
-      await loadPathsFn();
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.message || '删除失败 stream path';
-      message.error(errorMsg);
-    }
-  }, [filterStreamId]);
+    },
+    [loadPaths]
+  );
 
   const handleBatchDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
       message.warning('请至少选择一个流路径');
       return;
     }
-
-    const loadPathsFn = async () => {
-      try {
-        setLoading(true);
-        const data = await streamPathAPI.getAll(filterStreamId);
-        setPaths(data || []);
-      } catch (err: any) {
-        message.error(err.response?.data?.message || '加载失败 stream paths');
-        setPaths([]);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     let successCount = 0;
     let failCount = 0;
@@ -165,10 +142,9 @@ export default function StreamPathsPage() {
       try {
         await streamPathAPI.delete(Number(key));
         successCount++;
-      } catch (err: any) {
+      } catch (err: unknown) {
         failCount++;
-        const errorMsg = err.response?.data?.message || '删除失败';
-        errors.push(`ID ${key}: ${errorMsg}`);
+        errors.push(`ID ${key}: ${getApiErrorMessage(err, '删除失败')}`);
       }
     }
 
@@ -180,8 +156,8 @@ export default function StreamPathsPage() {
     }
 
     setSelectedRowKeys([]);
-    await loadPathsFn();
-  }, [selectedRowKeys, filterStreamId]);
+    await loadPaths();
+  }, [selectedRowKeys, loadPaths]);
 
   const handleFormSubmit = async () => {
     setShowForm(false);
@@ -270,8 +246,7 @@ export default function StreamPathsPage() {
       setImportFile(null);
       await loadPaths();
     } catch (err: unknown) {
-      const ax = err as { response?: { data?: { message?: string } } };
-      message.error(ax.response?.data?.message || '导入失败');
+      message.error(getApiErrorMessage(err, '导入失败'));
     } finally {
       setImporting(false);
     }
@@ -383,11 +358,11 @@ export default function StreamPathsPage() {
         ? paths.filter((p) => p.stream_id === filterStreamId).length
         : undefined,
     };
-  }, [paths.length, filteredPaths.length, filterStreamId, paths]);
+  }, [paths, filteredPaths, filterStreamId]);
 
   return (
-    <div>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+    <div className="vm-page">
+      <Row gutter={16} className="vm-stat-row" style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Card>
             <Statistic title="Total Paths" value={stats.total} />
@@ -407,9 +382,19 @@ export default function StreamPathsPage() {
         )}
       </Row>
 
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>流路径</h2>
-        <Space>
+      <div
+        className="vm-toolbar-panel"
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <h2 className="vm-page-title">流路径</h2>
+        <Space wrap>
           <Search
             placeholder="搜索桌台号、系列、路径或视频流区域"
             allowClear

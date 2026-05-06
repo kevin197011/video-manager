@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Modal, Form, Input, message } from 'antd';
 import { providerAPI } from '../lib/api';
 import type { CDNProvider } from '../lib/api';
+import { getApiErrorMessage, isAntdFormValidateError } from '../lib/httpError';
 
 interface ProviderFormProps {
   provider: CDNProvider | null;
@@ -48,12 +49,11 @@ export default function ProviderForm({ provider, open, onClose, onSubmit, provid
 
       onSubmit();
       onClose();
-    } catch (err: any) {
-      if (err.errorFields) {
-        // Form validation errors
+    } catch (err: unknown) {
+      if (isAntdFormValidateError(err)) {
         return;
       }
-      message.error(err.response?.data?.message || '保存失败 provider');
+      message.error(getApiErrorMessage(err, '保存失败 provider'));
     } finally {
       setLoading(false);
     }

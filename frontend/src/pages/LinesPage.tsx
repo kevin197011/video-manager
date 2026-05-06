@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Table, Space, Select, message, Popconfirm, Input, Card, Statistic, Row, Col, Modal, Descriptions } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined, EyeOutlined, ExportOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -11,6 +11,7 @@ import { lineAPI, providerAPI } from '../lib/api';
 import type { CDNLine, CDNProvider } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
 import LineForm from '../components/LineForm';
+import { getApiErrorMessage } from '../lib/httpError';
 
 const { Search } = Input;
 
@@ -27,43 +28,30 @@ export default function LinesPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
-  useEffect(() => {
-    loadProviders();
-    loadLines();
-  }, []);
-
-  useEffect(() => {
-    loadLines();
-  }, [filterProviderId]);
-
-  useEffect(() => {
-    filterLines();
-  }, [searchText, lines]);
-
-  const loadProviders = async () => {
+  const loadProviders = useCallback(async () => {
     try {
       const data = await providerAPI.getAll();
       setProviders(data || []);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 providers');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 providers'));
       setProviders([]);
     }
-  };
+  }, []);
 
-  const loadLines = async () => {
+  const loadLines = useCallback(async () => {
     try {
       setLoading(true);
       const data = await lineAPI.getAll(filterProviderId);
       setLines(data || []);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 lines');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 lines'));
       setLines([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterProviderId]);
 
-  const filterLines = () => {
+  const filterLines = useCallback(() => {
     let filtered = lines || [];
 
     if (searchText.trim()) {
@@ -76,7 +64,19 @@ export default function LinesPage() {
     }
 
     setFilteredLines(filtered);
-  };
+  }, [searchText, lines]);
+
+  useEffect(() => {
+    void loadProviders();
+  }, [loadProviders]);
+
+  useEffect(() => {
+    void loadLines();
+  }, [loadLines]);
+
+  useEffect(() => {
+    filterLines();
+  }, [filterLines]);
 
   const handleCreate = () => {
     setEditingLine(null);
@@ -92,8 +92,8 @@ export default function LinesPage() {
     try {
       const line = await lineAPI.getById(id);
       setViewingLine(line);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载失败 line details');
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载失败 line details'));
     }
   };
 
@@ -102,9 +102,8 @@ export default function LinesPage() {
       await lineAPI.delete(id);
       message.success('Line 删除成功');
       await loadLines();
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.message || '删除失败 line';
-      message.error(errorMsg);
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '删除失败 line'));
     }
   };
 
@@ -122,10 +121,9 @@ export default function LinesPage() {
       try {
         await lineAPI.delete(Number(key));
         successCount++;
-      } catch (err: any) {
+      } catch (err: unknown) {
         failCount++;
-        const errorMsg = err.response?.data?.message || '删除失败';
-        errors.push(`ID ${key}: ${errorMsg}`);
+        errors.push(`ID ${key}: ${getApiErrorMessage(err, '删除失败')}`);
       }
     }
 
@@ -264,11 +262,11 @@ export default function LinesPage() {
         ? lines.filter((l) => l.provider_id === filterProviderId).length
         : undefined,
     };
-  }, [lines.length, filteredLines.length, filterProviderId, lines]);
+  }, [lines, filteredLines, filterProviderId]);
 
   return (
-    <div>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+    <div className="vm-page">
+      <Row gutter={16} className="vm-stat-row" style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Card>
             <Statistic title="线路总数" value={stats.total} />
@@ -288,9 +286,19 @@ export default function LinesPage() {
         )}
       </Row>
 
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>CDN 线路</h2>
-        <Space>
+      <div
+        className="vm-toolbar-panel"
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <h2 className="vm-page-title">CDN 线路</h2>
+        <Space wrap>
           <Search
             placeholder="搜索名称、代码或厂商"
             allowClear

@@ -8,6 +8,7 @@ import { Modal, Form, Input, Select, message } from 'antd';
 import { lineAPI } from '../lib/api';
 import type { CDNLine, CDNProvider } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
+import { getApiErrorMessage, isAntdFormValidateError } from '../lib/httpError';
 
 interface LineFormProps {
   line: CDNLine | null;
@@ -62,12 +63,11 @@ export default function LineForm({ line, providers, lines = [], open, onClose, o
 
       onSubmit();
       onClose();
-    } catch (err: any) {
-      if (err.errorFields) {
-        // Form validation errors
+    } catch (err: unknown) {
+      if (isAntdFormValidateError(err)) {
         return;
       }
-      message.error(err.response?.data?.message || '保存失败 line');
+      message.error(getApiErrorMessage(err, '保存失败 line'));
     } finally {
       setLoading(false);
     }

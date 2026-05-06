@@ -1,14 +1,32 @@
-// Type declarations for antd (Ant Design)
-// This ensures TypeScript recognizes antd components when node_modules is not available
+// Copyright (c) 2025 kk
+//
+// Loose ambient typings for `antd` — avoids JSX/ForwardRef edge cases with @types/react 19
+// while the project relies on runtime antd behavior. Prefer tightening when upstream aligns.
 
 declare module 'antd' {
   import { ReactNode, ComponentType } from 'react';
+
+  /** Theme tokens passed to ConfigProvider */
+  export interface ThemeConfig {
+    token?: Record<string, unknown>;
+    components?: Record<string, unknown>;
+    [key: string]: unknown;
+  }
+
+  export interface ConfigProviderProps {
+    theme?: ThemeConfig;
+    children?: ReactNode;
+    [key: string]: unknown;
+  }
+
+  export const ConfigProvider: ComponentType<ConfigProviderProps>;
 
   export interface CardProps {
     title?: ReactNode;
     extra?: ReactNode;
     children?: ReactNode;
-    [key: string]: any;
+    className?: string;
+    [key: string]: unknown;
   }
 
   export const Card: ComponentType<CardProps> & {
@@ -23,7 +41,7 @@ declare module 'antd' {
     loading?: boolean;
     onClick?: (e: any) => void;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Button: ComponentType<ButtonProps>;
@@ -33,7 +51,7 @@ declare module 'antd' {
     columns?: any[];
     loading?: boolean;
     pagination?: any;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Table: ComponentType<TableProps>;
@@ -45,18 +63,18 @@ declare module 'antd' {
     allowClear?: boolean;
     style?: any;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Select: ComponentType<SelectProps> & {
-    Option: ComponentType<{ value: any; children?: ReactNode; [key: string]: any }>;
+    Option: ComponentType<{ value: any; children?: ReactNode; [key: string]: unknown }>;
   };
 
   export interface FormProps {
     form?: any;
     onFinish?: (values: any) => void;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Form: ComponentType<FormProps> & {
@@ -68,7 +86,7 @@ declare module 'antd' {
     value?: string;
     onChange?: (e: any) => void;
     placeholder?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Input: ComponentType<InputProps> & {
@@ -83,7 +101,7 @@ declare module 'antd' {
     onCancel?: () => void;
     title?: ReactNode;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Modal: ComponentType<ModalProps>;
@@ -91,17 +109,17 @@ declare module 'antd' {
   export interface DescriptionsProps {
     title?: ReactNode;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Descriptions: ComponentType<DescriptionsProps> & {
-    Item: ComponentType<{ label: ReactNode; children?: ReactNode; [key: string]: any }>;
+    Item: ComponentType<{ label: ReactNode; children?: ReactNode; [key: string]: unknown }>;
   };
 
   export interface TagProps {
     color?: string;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Tag: ComponentType<TagProps>;
@@ -110,15 +128,18 @@ declare module 'antd' {
     checked?: boolean;
     onChange?: (checked: boolean) => void;
     size?: 'small' | 'default';
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Switch: ComponentType<SwitchProps>;
 
+  export type SpaceSizeToken = number | 'small' | 'middle' | 'large';
+
   export interface SpaceProps {
-    size?: number | 'small' | 'middle' | 'large';
+    size?: SpaceSizeToken | [SpaceSizeToken, SpaceSizeToken];
     children?: ReactNode;
-    [key: string]: any;
+    wrap?: boolean;
+    [key: string]: unknown;
   }
 
   export const Space: ComponentType<SpaceProps>;
@@ -129,7 +150,7 @@ declare module 'antd' {
     subTitle?: ReactNode;
     extra?: ReactNode;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Result: ComponentType<ResultProps>;
@@ -137,7 +158,7 @@ declare module 'antd' {
   export interface SpinProps {
     spinning?: boolean;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Spin: ComponentType<SpinProps>;
@@ -151,8 +172,7 @@ declare module 'antd' {
 
   export const message: MessageInstance;
 
-  /** Ant Design 应用容器：为静态 message/modal 等提供正确上下文（见官方 App 组件文档） */
-  export const App: ComponentType<{ children?: ReactNode; [key: string]: any }> & {
+  export const App: ComponentType<{ children?: ReactNode; [key: string]: unknown }> & {
     useApp: () => {
       message: MessageInstance;
       modal: any;
@@ -168,7 +188,7 @@ declare module 'antd' {
     onShowSizeChange?: (current: number, size: number) => void;
     showSizeChanger?: boolean;
     showTotal?: (total: number, range: [number, number]) => ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Pagination: ComponentType<PaginationProps>;
@@ -178,7 +198,8 @@ declare module 'antd' {
     value?: number | string;
     prefix?: ReactNode;
     suffix?: ReactNode;
-    [key: string]: any;
+    styles?: { content?: React.CSSProperties };
+    [key: string]: unknown;
   }
 
   export const Statistic: ComponentType<StatisticProps>;
@@ -186,7 +207,8 @@ declare module 'antd' {
   export interface RowProps {
     gutter?: number | [number, number];
     children?: ReactNode;
-    [key: string]: any;
+    className?: string;
+    [key: string]: unknown;
   }
 
   export const Row: ComponentType<RowProps>;
@@ -194,7 +216,7 @@ declare module 'antd' {
   export interface ColProps {
     span?: number;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Col: ComponentType<ColProps>;
@@ -208,14 +230,15 @@ declare module 'antd' {
   export interface ProgressProps {
     percent?: number;
     status?: 'success' | 'exception' | 'active' | 'normal';
-    [key: string]: any;
+    strokeColor?: string | Record<string, string>;
+    [key: string]: unknown;
   }
 
   export const Progress: ComponentType<ProgressProps>;
 
   export interface LayoutProps {
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Layout: ComponentType<LayoutProps> & {
@@ -230,7 +253,8 @@ declare module 'antd' {
     mode?: 'horizontal' | 'vertical' | 'inline';
     selectedKeys?: string[];
     onClick?: (e: any) => void;
-    [key: string]: any;
+    theme?: 'light' | 'dark';
+    [key: string]: unknown;
   }
 
   export const Menu: ComponentType<MenuProps>;
@@ -238,7 +262,7 @@ declare module 'antd' {
   export interface DropdownProps {
     menu?: any;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Dropdown: ComponentType<DropdownProps>;
@@ -248,7 +272,7 @@ declare module 'antd' {
     onConfirm?: () => void;
     onCancel?: () => void;
     children?: ReactNode;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Popconfirm: ComponentType<PopconfirmProps>;
@@ -258,7 +282,7 @@ declare module 'antd' {
     description?: ReactNode;
     type?: 'success' | 'info' | 'warning' | 'error';
     showIcon?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const Alert: ComponentType<AlertProps>;
@@ -268,9 +292,8 @@ declare module 'antd' {
     onChange?: (value: number | null) => void;
     min?: number;
     max?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export const InputNumber: ComponentType<InputNumberProps>;
 }
-

@@ -5,14 +5,39 @@
 
 import { useState, useEffect, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Space, Typography, Tag, Dropdown, Button, Modal, Form, Input, message } from 'antd';
-import { DashboardOutlined, CloudServerOutlined, LinkOutlined, GlobalOutlined, PlayCircleOutlined, FileTextOutlined, ApiOutlined, CheckCircleOutlined, ClockCircleOutlined, UserOutlined, LogoutOutlined, LockOutlined, KeyOutlined, BookOutlined } from '@ant-design/icons';
+import { Layout, Menu, Space, Typography, Dropdown, Button, Modal, Form, Input, message } from 'antd';
+import {
+  DashboardOutlined,
+  CloudServerOutlined,
+  LinkOutlined,
+  GlobalOutlined,
+  PlayCircleOutlined,
+  FileTextOutlined,
+  ApiOutlined,
+  UserOutlined,
+  LogoutOutlined,
+  LockOutlined,
+  KeyOutlined,
+  BookOutlined,
+} from '@ant-design/icons';
 import Logo from './Logo';
 import { auth } from '../lib/auth';
 import { authAPI } from '../lib/api';
 
 const { Sider, Content, Footer } = Layout;
 const { Text } = Typography;
+
+const ROUTE_TITLES: Record<string, string> = {
+  '/dashboard': '仪表板',
+  '/providers': 'CDN 厂商',
+  '/lines': 'CDN 线路',
+  '/domains': '域名',
+  '/stream-regions': '视频流区域',
+  '/stream-paths': '流路径',
+  '/endpoints': '视频流端点',
+  '/token-management': 'Token 管理',
+  '/swagger': 'API 文档',
+};
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -21,107 +46,42 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [systemStatus, setSystemStatus] = useState<'online' | 'offline'>('online');
-  const [uptime, setUptime] = useState(0);
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [form] = Form.useForm();
   const user = auth.getUser();
 
   useEffect(() => {
-    // 计算运行时间
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      setUptime(Math.floor((Date.now() - startTime) / 1000));
-    }, 1000);
-
-    // 检查系统状态（可以扩展为检查后端连接）
     const checkSystemStatus = async () => {
       try {
-        // 这里可以添加实际的后端健康检查
-        setSystemStatus('online');
+        await Promise.resolve();
       } catch {
-        setSystemStatus('offline');
+        /* noop */
       }
     };
-
     checkSystemStatus();
-    const statusInterval = setInterval(checkSystemStatus, 30000); // 每30秒检查一次
-
-    return () => {
-      clearInterval(interval);
-      clearInterval(statusInterval);
-    };
+    const statusInterval = setInterval(checkSystemStatus, 30000);
+    return () => clearInterval(statusInterval);
   }, []);
 
-  const formatUptime = (seconds: number) => {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (days > 0) {
-      return `${days}天 ${hours}小时 ${minutes}分钟`;
-    } else if (hours > 0) {
-      return `${hours}小时 ${minutes}分钟 ${secs}秒`;
-    } else if (minutes > 0) {
-      return `${minutes}分钟 ${secs}秒`;
-    } else {
-      return `${secs}秒`;
-    }
-  };
-
   const menuItems = [
-    {
-      key: '/dashboard',
-      icon: <DashboardOutlined />,
-      label: '仪表板',
-    },
-    {
-      key: '/providers',
-      icon: <CloudServerOutlined />,
-      label: 'CDN 厂商',
-    },
-    {
-      key: '/lines',
-      icon: <LinkOutlined />,
-      label: 'CDN 线路',
-    },
-    {
-      key: '/domains',
-      icon: <GlobalOutlined />,
-      label: '域名',
-    },
-    {
-      key: '/stream-regions',
-      icon: <PlayCircleOutlined />,
-      label: '视频流区域',
-    },
-    {
-      key: '/stream-paths',
-      icon: <FileTextOutlined />,
-      label: '流路径',
-    },
-    {
-      key: '/endpoints',
-      icon: <ApiOutlined />,
-      label: '视频流端点',
-    },
-    {
-      key: '/token-management',
-      icon: <KeyOutlined />,
-      label: 'Token 管理',
-    },
-    {
-      key: '/swagger',
-      icon: <BookOutlined />,
-      label: 'API 文档',
-    },
+    { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表板' },
+    { key: '/providers', icon: <CloudServerOutlined />, label: 'CDN 厂商' },
+    { key: '/lines', icon: <LinkOutlined />, label: 'CDN 线路' },
+    { key: '/domains', icon: <GlobalOutlined />, label: '域名' },
+    { key: '/stream-regions', icon: <PlayCircleOutlined />, label: '视频流区域' },
+    { key: '/stream-paths', icon: <FileTextOutlined />, label: '流路径' },
+    { key: '/endpoints', icon: <ApiOutlined />, label: '视频流端点' },
+    { key: '/token-management', icon: <KeyOutlined />, label: 'Token 管理' },
+    { key: '/swagger', icon: <BookOutlined />, label: 'API 文档' },
   ];
 
-  const selectedKey = menuItems.find(
-    (item) => location.pathname === item.key || location.pathname.startsWith(item.key + '/')
-  )?.key || '/dashboard';
+  const selectedKey =
+    menuItems.find(
+      (item) => location.pathname === item.key || location.pathname.startsWith(`${item.key}/`)
+    )?.key || '/dashboard';
+
+  const pageTitle = ROUTE_TITLES[location.pathname] ?? ROUTE_TITLES[selectedKey] ?? '控制台';
 
   const handleLogout = () => {
     auth.logout();
@@ -135,8 +95,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       message.success('密码修改成功');
       setChangePasswordVisible(false);
       form.resetFields();
-    } catch (error: any) {
-      message.error(error.response?.data?.message || '密码修改失败');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err.response?.data?.message || '密码修改失败');
     } finally {
       setChangePasswordLoading(false);
     }
@@ -158,13 +119,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--vm-bg)' }}>
       <Sider
         theme="dark"
-        width={256}
+        width={232}
         style={{
-          background: 'linear-gradient(180deg, #1f2937 0%, #111827 100%)',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
+          background: 'linear-gradient(180deg, #0c1222 0%, #0a0f18 100%)',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
         }}
       >
         <div
@@ -172,37 +133,49 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             height: 64,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'flex-start',
-            padding: '0 20px',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(0,0,0,0.2)',
+            padding: '0 18px',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
             gap: 12,
             cursor: 'pointer',
           }}
           onClick={() => navigate('/dashboard')}
         >
           <Logo size={36} />
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 20,
-              fontWeight: 'bold',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            视频管理系统
-          </h1>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                color: '#f8fafc',
+                lineHeight: 1.2,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              视频管理
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: 'rgba(148, 163, 184, 0.95)',
+                marginTop: 2,
+                letterSpacing: '0.04em',
+              }}
+            >
+              VIDEO OPS
+            </div>
+          </div>
         </div>
         <Menu
           mode="inline"
+          className="vm-sider-menu"
           selectedKeys={[selectedKey === '/swagger' ? '' : selectedKey]}
           items={menuItems}
           onClick={({ key }) => {
             if (key === '/swagger') {
-              // 在新标签页中打开 Swagger
               window.open('/swagger/index.html', '_blank');
             } else {
               navigate(key);
@@ -212,52 +185,67 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             borderRight: 0,
             height: 'calc(100vh - 64px)',
             background: 'transparent',
-            color: 'rgba(255,255,255,0.85)',
+            padding: '12px 8px',
           }}
           theme="dark"
         />
       </Sider>
-      <Layout>
-        <div
+      <Layout style={{ background: 'transparent' }}>
+        <header
           style={{
             position: 'fixed',
             top: 0,
-            left: 256,
+            left: 232,
             right: 0,
-            height: 64,
-            background: '#fff',
-            borderBottom: '1px solid #e8e8e8',
+            height: 56,
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderBottom: '1px solid var(--vm-border)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'flex-end',
+            justifyContent: 'space-between',
             padding: '0 24px',
             zIndex: 100,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            boxShadow: '0 1px 0 rgba(15, 23, 42, 0.04)',
           }}
         >
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+          <div>
+            <Text strong style={{ fontSize: 17, color: 'var(--vm-text)', letterSpacing: '-0.02em' }}>
+              {pageTitle}
+            </Text>
+            <div style={{ fontSize: 12, color: 'var(--vm-muted)', marginTop: 2 }}>控制台 · 配置与端点</div>
+          </div>
+          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
             <Button
               type="text"
               icon={<UserOutlined />}
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
+                height: 40,
+                padding: '0 14px',
+                borderRadius: 10,
+                border: '1px solid var(--vm-border)',
+                background: '#fff',
               }}
             >
               {user?.username || '用户'}
             </Button>
           </Dropdown>
-        </div>
+        </header>
         <Content
           style={{
             margin: '24px',
-            marginTop: '88px', // 为顶部栏留出空间
-            padding: '24px',
-            background: '#f0f2f5',
+            marginTop: 80,
+            marginBottom: 56,
+            padding: '28px',
+            background: '#fff',
             minHeight: 280,
-            borderRadius: '8px',
-            marginBottom: '60px', // 为底部栏留出空间
+            borderRadius: 14,
+            border: '1px solid var(--vm-border)',
+            boxShadow: 'var(--vm-card-shadow)',
           }}
         >
           {children}
@@ -266,21 +254,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           style={{
             position: 'fixed',
             bottom: 0,
-            left: 256,
+            left: 232,
             right: 0,
-            height: 50,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderTop: '1px solid rgba(0,0,0,0.1)',
+            height: 44,
+            padding: '0 24px',
+            background: 'rgba(255,255,255,0.92)',
+            backdropFilter: 'blur(8px)',
+            borderTop: '1px solid var(--vm-border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '0 24px',
             zIndex: 100,
-            boxShadow: '0 -2px 8px rgba(0,0,0,0.1)',
           }}
         >
-          <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>
-            系统运行部驱动
+          <Text style={{ color: 'var(--vm-muted)', fontSize: 12 }}>
+            视频管理系统 · 内部运营配置台
           </Text>
         </Footer>
       </Layout>
@@ -295,11 +283,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }}
         footer={null}
       >
-        <Form
-          form={form}
-          onFinish={handleChangePassword}
-          layout="vertical"
-        >
+        <Form form={form} onFinish={handleChangePassword} layout="vertical">
           <Form.Item
             name="old_password"
             label="当前密码"
@@ -337,10 +321,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </Form.Item>
           <Form.Item>
             <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-              <Button onClick={() => {
-                setChangePasswordVisible(false);
-                form.resetFields();
-              }}>
+              <Button
+                onClick={() => {
+                  setChangePasswordVisible(false);
+                  form.resetFields();
+                }}
+              >
                 取消
               </Button>
               <Button type="primary" htmlType="submit" loading={changePasswordLoading}>

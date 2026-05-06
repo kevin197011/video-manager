@@ -408,34 +408,36 @@ export const authAPI = {
   },
 };
 
+export type DashboardStats = {
+  providers: number;
+  lines: number;
+  domains: number;
+  streams: number;
+  stream_paths: number;
+  endpoints: number;
+  endpoints_enabled: number;
+  endpoints_disabled: number;
+  lines_by_provider: Array<{
+    provider_id: number;
+    provider_name: string;
+    line_count: number;
+  }>;
+  endpoints_by_stream: Array<{
+    stream_id: number;
+    stream_name: string;
+    stream_code: string;
+    endpoint_count: number;
+  }>;
+  endpoints_by_domain: Array<{
+    domain_id: number;
+    domain_name: string;
+    endpoint_count: number;
+  }>;
+};
+
 export const statsAPI = {
-  getStats: async (): Promise<{
-    providers: number;
-    lines: number;
-    domains: number;
-    streams: number;
-    stream_paths: number;
-    endpoints: number;
-    endpoints_enabled: number;
-    endpoints_disabled: number;
-    lines_by_provider: Array<{
-      provider_id: number;
-      provider_name: string;
-      line_count: number;
-    }>;
-    endpoints_by_stream: Array<{
-      stream_id: number;
-      stream_name: string;
-      stream_code: string;
-      endpoint_count: number;
-    }>;
-    endpoints_by_domain: Array<{
-      domain_id: number;
-      domain_name: string;
-      endpoint_count: number;
-    }>;
-  }> => {
-    const response = await api.get<APIResponse<any>>('/stats');
+  getStats: async (): Promise<DashboardStats> => {
+    const response = await api.get<APIResponse<DashboardStats>>('/stats');
     return response.data.data;
   },
 };

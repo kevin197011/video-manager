@@ -4,23 +4,21 @@
 // https://opensource.org/licenses/MIT
 
 import { useState, useEffect, useMemo } from 'react';
-import { Card, Statistic, Row, Col, Table, Spin, message, Switch, Space, Typography, Tag, Progress } from 'antd';
+import { Card, Statistic, Row, Col, Table, Spin, message, Switch, Space, Typography, Tag, Progress, Select, Button } from 'antd';
 import {
   CloudServerOutlined,
   LinkOutlined,
   GlobalOutlined,
   PlayCircleOutlined,
-  FileTextOutlined,
   ApiOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
   ReloadOutlined,
   ClockCircleOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { statsAPI } from '../lib/api';
+import { getApiErrorMessage } from '../lib/httpError';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface Stats {
   providers: number;
@@ -54,6 +52,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(30); // seconds
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     loadStats();
@@ -74,8 +73,9 @@ export default function DashboardPage() {
       setLoading(true);
       const data = await statsAPI.getStats();
       setStats(data);
-    } catch (err: any) {
-      message.error(err.response?.data?.message || '加载统计数据失败');
+      setLastUpdatedAt(new Date());
+    } catch (err: unknown) {
+      message.error(getApiErrorMessage(err, '加载统计数据失败'));
     } finally {
       setLoading(false);
     }
@@ -97,11 +97,9 @@ export default function DashboardPage() {
         const total = stats?.lines || 1;
         const percentage = Math.round((count / total) * 100);
         return (
-          <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-            <Tag color="blue" style={{ fontSize: '14px', padding: '4px 12px' }}>
-              {count}
-            </Tag>
-            <Progress percent={percentage} size="small" showInfo={false} strokeColor="#1890ff" />
+          <Space size={8}>
+            <Tag color="blue">{count}</Tag>
+            <Text type="secondary">{percentage}%</Text>
           </Space>
         );
       },
@@ -125,11 +123,9 @@ export default function DashboardPage() {
         const total = stats?.endpoints || 1;
         const percentage = Math.round((count / total) * 100);
         return (
-          <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-            <Tag color="green" style={{ fontSize: '14px', padding: '4px 12px' }}>
-              {count}
-            </Tag>
-            <Progress percent={percentage} size="small" showInfo={false} strokeColor="#52c41a" />
+          <Space size={8}>
+            <Tag color="green">{count}</Tag>
+            <Text type="secondary">{percentage}%</Text>
           </Space>
         );
       },
@@ -148,11 +144,7 @@ export default function DashboardPage() {
       dataIndex: 'endpoint_count',
       key: 'endpoint_count',
       sorter: (a, b) => a.endpoint_count - b.endpoint_count,
-      render: (count: number) => (
-        <Tag color="cyan" style={{ fontSize: '14px', padding: '4px 12px' }}>
-          {count}
-        </Tag>
-      ),
+      render: (count: number) => <Tag color="cyan">{count}</Tag>,
     },
   ];
 
@@ -160,6 +152,16 @@ export default function DashboardPage() {
     if (!stats || stats.endpoints === 0) return 0;
     return Math.round((stats.endpoints_enabled / stats.endpoints) * 100);
   }, [stats]);
+
+  const coreMetrics = useMemo(
+    () => [
+      { title: 'CDN 厂商', value: stats?.providers || 0, icon: <CloudServerOutlined />, strip: 'vm-dash-strip-teal' },
+      { title: 'CDN 线路', value: stats?.lines || 0, icon: <LinkOutlined />, strip: 'vm-dash-strip-sky' },
+      { title: '域名', value: stats?.domains || 0, icon: <GlobalOutlined />, strip: 'vm-dash-strip-violet' },
+      { title: '端点总数', value: stats?.endpoints || 0, icon: <ApiOutlined />, strip: 'vm-dash-strip-slate' },
+    ],
+    [stats]
+  );
 
   if (loading && !stats) {
     return (
@@ -173,233 +175,98 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Title level={2} style={{ margin: 0, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          仪表板
-        </Title>
-        <Space>
+    <div className="vm-page">
+      <div
+        style={{
+          marginBottom: 24,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          gap: 16,
+        }}
+      >
+        <div className="vm-page-head">
+          <h1 className="vm-page-title">仪表盘</h1>
+          <p className="vm-page-desc">核心资源与端点分布总览</p>
+        </div>
+        <Space wrap size={[8, 8]}>
           <Space>
-            <Text type="secondary">自动刷新：</Text>
+            <Text type="secondary">自动刷新</Text>
             <Switch checked={autoRefresh} onChange={setAutoRefresh} />
           </Space>
+          <Select
+            value={refreshInterval}
+            disabled={!autoRefresh}
+            style={{ width: 112 }}
+            onChange={(v) => setRefreshInterval(v)}
+            options={[
+              { value: 10, label: '10 秒' },
+              { value: 30, label: '30 秒' },
+              { value: 60, label: '60 秒' },
+              { value: 120, label: '2 分钟' },
+            ]}
+          />
           <Space>
-            <Text type="secondary">间隔：</Text>
-            <select
-              value={refreshInterval}
-              onChange={(e) => setRefreshInterval(Number(e.target.value))}
-              style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #d9d9d9' }}
-              disabled={!autoRefresh}
-            >
-              <option value={10}>10秒</option>
-              <option value={30}>30秒</option>
-              <option value={60}>60秒</option>
-              <option value={120}>2分钟</option>
-            </select>
-          </Space>
-          <Space>
-            <ClockCircleOutlined style={{ color: autoRefresh ? '#52c41a' : '#d9d9d9' }} />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {autoRefresh ? `每 ${refreshInterval} 秒刷新一次` : '自动刷新已禁用'}
+            <ClockCircleOutlined style={{ color: autoRefresh ? '#059669' : '#cbd5e1' }} />
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {autoRefresh ? `每 ${refreshInterval} 秒刷新` : '已关闭'}
             </Text>
           </Space>
-          <button
-            onClick={loadStats}
-            style={{
-              padding: '4px 12px',
-              border: '1px solid #d9d9d9',
-              borderRadius: '4px',
-              background: '#fff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <ReloadOutlined spin={loading} />
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            {lastUpdatedAt ? `更新于 ${lastUpdatedAt.toLocaleTimeString()}` : '尚未更新'}
+          </Text>
+          <Button icon={<ReloadOutlined spin={loading} />} onClick={() => loadStats()}>
             刷新
-          </button>
+          </Button>
         </Space>
       </div>
 
-      {/* Main Statistics Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card
-            hoverable
-            style={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              border: 'none',
-            }}
-            styles={{ body: { padding: '20px' } }}
-          >
-            <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>CDN 厂商</span>}
-              value={stats?.providers || 0}
-              prefix={<CloudServerOutlined style={{ color: '#fff' }} />}
-              styles={{ content: { color: '#fff', fontSize: '32px', fontWeight: 'bold' } }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card
-            hoverable
-            style={{
-              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-              border: 'none',
-            }}
-            styles={{ body: { padding: '20px' } }}
-          >
-            <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>CDN 线路</span>}
-              value={stats?.lines || 0}
-              prefix={<LinkOutlined style={{ color: '#fff' }} />}
-              styles={{ content: { color: '#fff', fontSize: '32px', fontWeight: 'bold' } }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card
-            hoverable
-            style={{
-              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              border: 'none',
-            }}
-            styles={{ body: { padding: '20px' } }}
-          >
-            <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>域名</span>}
-              value={stats?.domains || 0}
-              prefix={<GlobalOutlined style={{ color: '#fff' }} />}
-              styles={{ content: { color: '#fff', fontSize: '32px', fontWeight: 'bold' } }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card
-            hoverable
-            style={{
-              background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-              border: 'none',
-            }}
-            styles={{ body: { padding: '20px' } }}
-          >
-            <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>视频流区域</span>}
-              value={stats?.streams || 0}
-              prefix={<PlayCircleOutlined style={{ color: '#fff' }} />}
-              styles={{ content: { color: '#fff', fontSize: '32px', fontWeight: 'bold' } }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card
-            hoverable
-            style={{
-              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-              border: 'none',
-            }}
-            styles={{ body: { padding: '20px' } }}
-          >
-            <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>流路径</span>}
-              value={stats?.stream_paths || 0}
-              prefix={<FileTextOutlined style={{ color: '#fff' }} />}
-              styles={{ content: { color: '#fff', fontSize: '32px', fontWeight: 'bold' } }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card
-            hoverable
-            style={{
-              background: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
-              border: 'none',
-            }}
-            styles={{ body: { padding: '20px' } }}
-          >
-            <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>端点总数</span>}
-              value={stats?.endpoints || 0}
-              prefix={<ApiOutlined style={{ color: '#fff' }} />}
-              styles={{ content: { color: '#fff', fontSize: '32px', fontWeight: 'bold' } }}
-            />
+      <Row gutter={[16, 16]} className="vm-stat-row" style={{ marginBottom: 24 }}>
+        {coreMetrics.map((item) => (
+          <Col key={item.title} xs={24} sm={12} lg={6}>
+            <Card hoverable className={`vm-dash-stat ${item.strip}`} styles={{ body: { padding: '20px' } }}>
+              <Statistic
+                title={item.title}
+                value={item.value}
+                prefix={<span className="vm-dash-stat-icon">{item.icon}</span>}
+                styles={{ content: { fontSize: 28, fontWeight: 700 } }}
+              />
+            </Card>
+          </Col>
+        ))}
+        <Col xs={24} sm={12} lg={12}>
+          <Card hoverable className="vm-panel-card" styles={{ body: { padding: '18px 20px' } }}>
+            <Space direction="vertical" size={10} style={{ width: '100%' }}>
+              <Space style={{ justifyContent: 'space-between', width: '100%' }}>
+                <Text strong>端点健康度</Text>
+                <Text type="secondary">{enabledPercentage}% 启用</Text>
+              </Space>
+              <Progress percent={enabledPercentage} strokeColor="#0d9488" showInfo={false} />
+              <Space size={18}>
+                <Tag color="green">启用 {stats?.endpoints_enabled || 0}</Tag>
+                <Tag color="red">禁用 {stats?.endpoints_disabled || 0}</Tag>
+                <Tag color="blue">视频流区域 {stats?.streams || 0}</Tag>
+              </Space>
+            </Space>
           </Card>
         </Col>
       </Row>
 
-      {/* Endpoint Status Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12}>
-          <Card
-            hoverable
-            style={{
-              background: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
-              border: 'none',
-            }}
-            styles={{ body: { padding: '20px' } }}
-          >
-            <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>已启用端点</span>}
-              value={stats?.endpoints_enabled || 0}
-              prefix={<CheckCircleOutlined style={{ color: '#fff' }} />}
-              styles={{ content: { color: '#fff', fontSize: '32px', fontWeight: 'bold' } }}
-            />
-            <Progress
-              percent={enabledPercentage}
-              strokeColor="#fff"
-              showInfo={false}
-              style={{ marginTop: 12 }}
-            />
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '12px', marginTop: 8, display: 'block' }}>
-              占全部端点的 {enabledPercentage}%
-            </Text>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12}>
-          <Card
-            hoverable
-            style={{
-              background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-              border: 'none',
-            }}
-            styles={{ body: { padding: '20px' } }}
-          >
-            <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>已禁用端点</span>}
-              value={stats?.endpoints_disabled || 0}
-              prefix={<CloseCircleOutlined style={{ color: '#fff' }} />}
-              styles={{ content: { color: '#fff', fontSize: '32px', fontWeight: 'bold' } }}
-            />
-            <Progress
-              percent={100 - enabledPercentage}
-              strokeColor="#fff"
-              showInfo={false}
-              style={{ marginTop: 12 }}
-            />
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '12px', marginTop: 8, display: 'block' }}>
-              占全部端点的 {100 - enabledPercentage}%
-            </Text>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Charts Section */}
       <Row gutter={[16, 16]} style={{ display: 'flex', alignItems: 'stretch' }}>
         <Col xs={24} lg={12} style={{ display: 'flex' }}>
           <Card
+            className="vm-panel-card"
             title={
               <Space>
-                <CloudServerOutlined style={{ color: '#667eea' }} />
+                <CloudServerOutlined style={{ color: '#0d9488' }} />
                 <Text strong>按厂商统计线路</Text>
               </Space>
             }
             style={{
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
               width: '100%',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
             }}
             styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', minHeight: '400px' } }}
           >
@@ -416,18 +283,17 @@ export default function DashboardPage() {
         </Col>
         <Col xs={24} lg={12} style={{ display: 'flex' }}>
           <Card
+            className="vm-panel-card"
             title={
               <Space>
-                <PlayCircleOutlined style={{ color: '#43e97b' }} />
+                <PlayCircleOutlined style={{ color: '#059669' }} />
                 <Text strong>按视频流区域统计端点</Text>
               </Space>
             }
             style={{
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
               width: '100%',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
             }}
             styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', minHeight: '400px' } }}
           >
@@ -444,13 +310,13 @@ export default function DashboardPage() {
         </Col>
         <Col xs={24}>
           <Card
+            className="vm-panel-card"
             title={
               <Space>
-                <GlobalOutlined style={{ color: '#4facfe' }} />
+                <GlobalOutlined style={{ color: '#0284c7' }} />
                 <Text strong>按域名统计端点</Text>
               </Space>
             }
-            style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
           >
             <Table
               columns={domainColumns}

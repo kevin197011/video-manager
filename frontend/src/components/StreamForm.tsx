@@ -8,6 +8,7 @@ import { Modal, Form, Input, Select, message } from 'antd';
 import { streamAPI, providerAPI } from '../lib/api';
 import type { Stream, CDNProvider } from '../lib/api';
 import { selectSearchableProps } from '../lib/selectSearchProps';
+import { getApiErrorMessage, isAntdFormValidateError } from '../lib/httpError';
 
 interface StreamFormProps {
   stream: Stream | null;
@@ -43,7 +44,7 @@ export default function StreamForm({ stream, streams = [], open, onClose, onSubm
       setLoadingProviders(true);
       const data = await providerAPI.getAll();
       setProviders(data || []);
-    } catch (err: any) {
+    } catch {
       message.error('加载厂商列表失败');
     } finally {
       setLoadingProviders(false);
@@ -71,12 +72,11 @@ export default function StreamForm({ stream, streams = [], open, onClose, onSubm
 
       onSubmit();
       onClose();
-    } catch (err: any) {
-      if (err.errorFields) {
-        // Form validation errors
+    } catch (err: unknown) {
+      if (isAntdFormValidateError(err)) {
         return;
       }
-      message.error(err.response?.data?.message || '保存失败视频流区域');
+      message.error(getApiErrorMessage(err, '保存失败视频流区域'));
     } finally {
       setLoading(false);
     }
