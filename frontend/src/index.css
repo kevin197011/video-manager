@@ -220,12 +220,29 @@ code {
 /* Ensure fixed action columns don't bleed underlying row content on hover */
 .ant-table-wrapper .ant-table-cell-fix-left,
 .ant-table-wrapper .ant-table-cell-fix-right {
-  background: #fff;
+  z-index: 3;
+  background: #fff !important;
+  background-clip: padding-box;
+  overflow: hidden;
+}
+
+.ant-table-wrapper .ant-table-cell-fix-left-first,
+.ant-table-wrapper .ant-table-cell-fix-left-last,
+.ant-table-wrapper .ant-table-cell-fix-right-first,
+.ant-table-wrapper .ant-table-cell-fix-right-last {
+  background: #fff !important;
 }
 
 .ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-fix-left,
 .ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-fix-right {
-  background: #fafafa;
+  background: #fafafa !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-fix-left-first,
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-fix-left-last,
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-fix-right-first,
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-fix-right-last {
+  background: #fafafa !important;
 }
 
 .ant-modal-header {
