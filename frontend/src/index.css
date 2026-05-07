@@ -217,6 +217,17 @@ code {
   border-radius: 8px;
 }
 
+/* Ensure fixed action columns don't bleed underlying row content on hover */
+.ant-table-wrapper .ant-table-cell-fix-left,
+.ant-table-wrapper .ant-table-cell-fix-right {
+  background: #fff;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-fix-left,
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-fix-right {
+  background: #fafafa;
+}
+
 .ant-modal-header {
   margin-bottom: 0;
 }
