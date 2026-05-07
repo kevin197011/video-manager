@@ -612,6 +612,7 @@ export default function VideoStreamEndpointsPage() {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
+      className: 'vm-endpoints-status-col',
       width: 100,
       render: (status: number) => (
         <Tag color={status === 1 ? 'green' : 'red'}>
@@ -627,10 +628,11 @@ export default function VideoStreamEndpointsPage() {
     {
       title: '操作',
       key: 'actions',
+      className: 'vm-endpoints-action-col',
       width: 220,
       fixed: 'right' as const,
       render: (_, record) => (
-        <Space size="small">
+        <Space size="small" className="vm-endpoints-action-inner">
           <Button
             type="link"
             icon={<EyeOutlined />}

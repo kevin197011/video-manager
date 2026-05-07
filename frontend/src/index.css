@@ -245,6 +245,32 @@ code {
   background: #fafafa !important;
 }
 
+/* Endpoints page: force action column above status text */
+.ant-table-wrapper .vm-endpoints-status-col {
+  position: relative;
+  z-index: 1;
+}
+
+.ant-table-wrapper .vm-endpoints-action-col.ant-table-cell-fix-right,
+.ant-table-wrapper .vm-endpoints-action-col.ant-table-cell-fix-right-first,
+.ant-table-wrapper .vm-endpoints-action-col.ant-table-cell-fix-right-last {
+  position: sticky;
+  z-index: 4 !important;
+  background: #fff !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td.vm-endpoints-action-col {
+  background: #fafafa !important;
+}
+
+.ant-table-wrapper .vm-endpoints-action-inner {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  padding: 0 2px;
+  background: inherit;
+}
+
 .ant-modal-header {
   margin-bottom: 0;
 }
