@@ -78,3 +78,27 @@ func AdminMiddleware() gin.HandlerFunc {
 	}
 }
 
+// ReadOnlyForNonAdminMiddleware allows only read operations for non-admin users.
+func ReadOnlyForNonAdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		isAdmin, exists := c.Get("isAdmin")
+		if exists && isAdmin.(bool) {
+			c.Next()
+			return
+		}
+
+		// Allow non-admin users to refresh endpoint data by triggering regeneration.
+		if c.Request.Method == http.MethodPost && c.Request.URL.Path == "/api/video-stream-endpoints/generate" {
+			c.Next()
+			return
+		}
+
+		switch c.Request.Method {
+		case http.MethodGet, http.MethodHead, http.MethodOptions:
+			c.Next()
+		default:
+			response.Error(c, http.StatusForbidden, "readonly access: admin required for write operations")
+			c.Abort()
+		}
+	}
+}

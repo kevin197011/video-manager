@@ -2,13 +2,15 @@ basePath: /
 definitions:
   models.CDNLine:
     properties:
-      created_at:
+      code:
+        description: 代码 (原 name)
         type: string
-      display_name:
+      created_at:
         type: string
       id:
         type: integer
       name:
+        description: 名称 (原 display_name)
         type: string
       provider:
         $ref: '#/definitions/models.CDNProvider'
@@ -44,18 +46,20 @@ definitions:
     type: object
   models.CreateCDNLineRequest:
     properties:
-      display_name:
+      code:
+        description: 代码
         maxLength: 255
         minLength: 1
         type: string
       name:
+        description: 名称
         maxLength: 255
         minLength: 1
         type: string
       provider_id:
         type: integer
     required:
-    - display_name
+    - code
     - name
     - provider_id
     type: object
@@ -132,6 +136,21 @@ definitions:
     required:
     - name
     type: object
+  models.CreateUserRequest:
+    properties:
+      is_admin:
+        type: boolean
+      password:
+        minLength: 6
+        type: string
+      username:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - password
+    - username
+    type: object
   models.CreateVideoStreamEndpointRequest:
     properties:
       domain_id:
@@ -186,6 +205,23 @@ definitions:
       username:
         type: string
     type: object
+  models.OIDCSettingsResponse:
+    properties:
+      client_id:
+        type: string
+      enabled:
+        type: boolean
+      frontend_success_url:
+        type: string
+      has_client_secret:
+        type: boolean
+      issuer_url:
+        type: string
+      redirect_url:
+        type: string
+      scopes:
+        type: string
+    type: object
   models.Stream:
     properties:
       code:
@@ -212,6 +248,9 @@ definitions:
         type: string
       id:
         type: integer
+      series:
+        description: derived from table_id, e.g. L001 -> "L系列"
+        type: string
       stream:
         $ref: '#/definitions/models.Stream'
       stream_id:
@@ -219,6 +258,26 @@ definitions:
       table_id:
         type: string
       updated_at:
+        type: string
+    type: object
+  models.StreamPathImportResult:
+    properties:
+      created:
+        type: integer
+      errors:
+        items:
+          $ref: '#/definitions/models.StreamPathImportRowError'
+        type: array
+      updated:
+        type: integer
+    type: object
+  models.StreamPathImportRowError:
+    properties:
+      line:
+        type: integer
+      message:
+        type: string
+      table_id:
         type: string
     type: object
   models.Token:
@@ -240,18 +299,20 @@ definitions:
     type: object
   models.UpdateCDNLineRequest:
     properties:
-      display_name:
+      code:
+        description: 代码
         maxLength: 255
         minLength: 1
         type: string
       name:
+        description: 名称
         maxLength: 255
         minLength: 1
         type: string
       provider_id:
         type: integer
     required:
-    - display_name
+    - code
     - name
     - provider_id
     type: object
@@ -277,6 +338,25 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  models.UpdateOIDCSettingsRequest:
+    properties:
+      clear_client_secret:
+        type: boolean
+      client_id:
+        type: string
+      client_secret:
+        type: string
+      enabled:
+        type: boolean
+      frontend_success_url:
+        type: string
+      issuer_url:
+        type: string
+      redirect_url:
+        type: string
+      scopes:
+        type: string
     type: object
   models.UpdateStreamPathRequest:
     properties:
@@ -312,6 +392,17 @@ definitions:
     - code
     - name
     type: object
+  models.UpdateUserRequest:
+    properties:
+      is_admin:
+        type: boolean
+      username:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - username
+    type: object
   models.UpdateVideoStreamEndpointRequest:
     properties:
       domain_id:
@@ -333,6 +424,19 @@ definitions:
     - stream_id
     - stream_path_id
     type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_admin:
+        type: boolean
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
   models.VideoStreamEndpoint:
     properties:
       created_at:
@@ -353,6 +457,8 @@ definitions:
         $ref: '#/definitions/models.CDNProvider'
       provider_id:
         type: integer
+      resolution:
+        type: string
       status:
         type: integer
       stream:
@@ -476,6 +582,56 @@ paths:
       security:
       - BearerAuth: []
       summary: Get current user
+      tags:
+      - auth
+  /api/auth/oidc/callback:
+    get:
+      description: Handle OIDC callback, create/login local user as non-admin, then
+        redirect to frontend login
+      parameters:
+      - description: OIDC authorization code
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: OIDC state
+        in: query
+        name: state
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirect to frontend with token
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: OIDC login callback
+      tags:
+      - auth
+  /api/auth/oidc/login:
+    get:
+      description: Redirect to OIDC provider for SSO login
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirect to OIDC provider
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: OIDC login redirect
       tags:
       - auth
   /api/auth/token-info:
@@ -1368,6 +1524,43 @@ paths:
       summary: Update a stream path
       tags:
       - stream-paths
+  /api/stream-paths/import:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 'CSV columns: 桌台号(table_id), 路径(full_path), 流区域 or stream_id. UTF-8
+        with optional BOM.'
+      parameters:
+      - description: CSV file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.StreamPathImportResult'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Import stream paths from CSV
+      tags:
+      - stream-paths
   /api/stream-regions:
     get:
       description: Retrieve all streams
@@ -1542,6 +1735,217 @@ paths:
       summary: Update a stream
       tags:
       - stream-regions
+  /api/system-settings/oidc:
+    get:
+      description: Retrieve OIDC SSO configuration (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.OIDCSettingsResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get OIDC settings
+      tags:
+      - system-settings
+    put:
+      consumes:
+      - application/json
+      description: Update OIDC SSO configuration (admin only)
+      parameters:
+      - description: OIDC settings request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateOIDCSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update OIDC settings
+      tags:
+      - system-settings
+  /api/users:
+    get:
+      description: Retrieve all users (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.User'
+                  type: array
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user (admin only)
+      parameters:
+      - description: Create user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create user
+      tags:
+      - users
+  /api/users/{id}:
+    delete:
+      description: Delete a user (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update username and role for a user (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - users
   /api/video-stream-endpoints:
     get:
       description: Retrieve all video stream endpoints, optionally filtered by line_id,
@@ -1570,6 +1974,10 @@ paths:
       - description: Filter by table ID (桌台号)
         in: query
         name: table_id
+        type: string
+      - description: Filter by resolution (普清, 高清, 超清)
+        in: query
+        name: resolution
         type: string
       produces:
       - application/json
@@ -1787,6 +2195,48 @@ paths:
       security:
       - BearerAuth: []
       summary: Update video stream endpoint status
+      tags:
+      - video-stream-endpoints
+  /api/video-stream-endpoints/{id}/test-resolution:
+    post:
+      description: Test the video stream URL and automatically detect resolution,
+        then update the endpoint
+      parameters:
+      - description: Endpoint ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  properties:
+                    resolution:
+                      type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Test video stream and detect resolution
       tags:
       - video-stream-endpoints
   /api/video-stream-endpoints/generate:

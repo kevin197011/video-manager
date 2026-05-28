@@ -6,9 +6,14 @@
 package handlers
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,12 +26,14 @@ import (
 )
 
 type AuthHandler struct {
-	authService *services.AuthService
+	authService          *services.AuthService
+	systemSettingService *services.SystemSettingService
 }
 
 func NewAuthHandler() *AuthHandler {
 	return &AuthHandler{
-		authService: services.NewAuthService(),
+		authService:          services.NewAuthService(),
+		systemSettingService: services.NewSystemSettingService(),
 	}
 }
 
@@ -222,10 +229,10 @@ func (h *AuthHandler) CreateToken(c *gin.Context) {
 
 	logger.InfoContext(c.Request.Context(), "Token created successfully", "user_id", userID, "name", req.Name, "never_expire", req.NeverExpire)
 	response.Success(c, gin.H{
-		"token":      token,
-		"username":   username,
-		"is_admin":   isAdmin,
-		"name":       req.Name,
+		"token":        token,
+		"username":     username,
+		"is_admin":     isAdmin,
+		"name":         req.Name,
 		"never_expire": req.NeverExpire,
 	})
 }
@@ -299,3 +306,172 @@ func (h *AuthHandler) DeleteToken(c *gin.Context) {
 	response.Success(c, gin.H{"message": "token deleted successfully"})
 }
 
+// OIDCLogin redirects user to OIDC provider authorization endpoint.
+// @Summary OIDC login redirect
+// @Description Redirect to OIDC provider for SSO login
+// @Tags auth
+// @Produce json
+// @Success 302 {string} string "Redirect to OIDC provider"
+// @Failure 503 {object} response.Response
+// @Router /api/auth/oidc/login [get]
+func (h *AuthHandler) OIDCLogin(c *gin.Context) {
+	oidcSvc, err := h.loadOIDCService(c.Request.Context())
+	if err != nil {
+		logger.Warn("Failed to initialize OIDC service", "error", err)
+		response.Error(c, http.StatusServiceUnavailable, "oidc is not configured")
+		return
+	}
+
+	state, err := generateOIDCState()
+	if err != nil {
+		response.InternalServerError(c, "failed to initialize oidc state")
+		return
+	}
+
+	authURL, err := oidcSvc.AuthCodeURL(state)
+	if err != nil {
+		response.InternalServerError(c, "failed to build oidc auth url")
+		return
+	}
+
+	secure := c.Request.TLS != nil
+	c.SetCookie("oidc_state", state, 300, "/", "", secure, true)
+	c.Redirect(http.StatusFound, authURL)
+}
+
+// OIDCCallback handles OIDC callback and logs user in as non-admin.
+// @Summary OIDC login callback
+// @Description Handle OIDC callback, create/login local user as non-admin, then redirect to frontend login
+// @Tags auth
+// @Produce json
+// @Param code query string true "OIDC authorization code"
+// @Param state query string true "OIDC state"
+// @Success 302 {string} string "Redirect to frontend with token"
+// @Failure 400 {object} response.Response
+// @Failure 503 {object} response.Response
+// @Router /api/auth/oidc/callback [get]
+func (h *AuthHandler) OIDCCallback(c *gin.Context) {
+	oidcSvc, err := h.loadOIDCService(c.Request.Context())
+	if err != nil {
+		logger.Warn("Failed to initialize OIDC service", "error", err)
+		response.Error(c, http.StatusServiceUnavailable, "oidc is not configured")
+		return
+	}
+
+	code := c.Query("code")
+	state := c.Query("state")
+	if code == "" || state == "" {
+		response.BadRequest(c, "missing oidc callback code/state")
+		return
+	}
+
+	cookieState, err := c.Cookie("oidc_state")
+	if err != nil || cookieState == "" || cookieState != state {
+		response.Error(c, http.StatusBadRequest, "invalid oidc state")
+		return
+	}
+	secure := c.Request.TLS != nil
+	c.SetCookie("oidc_state", "", -1, "/", "", secure, true)
+
+	info, err := oidcSvc.ExchangeAndVerify(c.Request.Context(), code)
+	if err != nil {
+		logger.Warn("OIDC exchange failed", "error", err)
+		response.Error(c, http.StatusUnauthorized, "oidc authentication failed")
+		return
+	}
+
+	username := deriveOIDCUsername(info)
+	if username == "" {
+		response.Error(c, http.StatusBadRequest, "oidc claims missing username")
+		return
+	}
+
+	loginResp, err := h.authService.LoginOrCreateOIDCUser(c.Request.Context(), username)
+	if err != nil {
+		logger.Error("OIDC local login/create failed", "username", username, "error", err)
+		response.InternalServerError(c, "failed to complete oidc login")
+		return
+	}
+
+	redirectTarget := buildOIDCSuccessRedirect(oidcSvc.FrontendSuccessURL(), loginResp.Token)
+	c.Redirect(http.StatusFound, redirectTarget)
+}
+
+func (h *AuthHandler) loadOIDCService(ctx context.Context) (*services.OIDCService, error) {
+	settings, err := h.systemSettingService.GetOIDCSettings(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cfg := services.OIDCConfig{
+		Enabled:            settings.Enabled,
+		IssuerURL:          settings.IssuerURL,
+		ClientID:           settings.ClientID,
+		ClientSecret:       settings.ClientSecret,
+		RedirectURL:        settings.RedirectURL,
+		Scopes:             settings.Scopes,
+		FrontendSuccessURL: settings.FrontendSuccessURL,
+	}
+	return services.NewOIDCServiceFromConfig(ctx, cfg)
+}
+
+func generateOIDCState() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+func deriveOIDCUsername(info *services.OIDCUserInfo) string {
+	if info == nil {
+		return ""
+	}
+	if u := strings.TrimSpace(info.PreferredUsername); u != "" {
+		return sanitizeUsername(u)
+	}
+	if email := strings.TrimSpace(info.Email); email != "" {
+		local := strings.Split(email, "@")[0]
+		if local != "" {
+			return sanitizeUsername(local)
+		}
+	}
+	if sub := strings.TrimSpace(info.Subject); sub != "" {
+		return sanitizeUsername("oidc_" + sub)
+	}
+	return ""
+}
+
+func sanitizeUsername(input string) string {
+	var b strings.Builder
+	for _, r := range input {
+		switch {
+		case r >= 'a' && r <= 'z':
+			b.WriteRune(r)
+		case r >= 'A' && r <= 'Z':
+			b.WriteRune(r + ('a' - 'A'))
+		case r >= '0' && r <= '9':
+			b.WriteRune(r)
+		case r == '_' || r == '-' || r == '.':
+			b.WriteRune(r)
+		}
+	}
+	out := strings.Trim(b.String(), "._-")
+	if out == "" {
+		return ""
+	}
+	if len(out) > 255 {
+		return out[:255]
+	}
+	return out
+}
+
+func buildOIDCSuccessRedirect(baseURL string, token string) string {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return "/login?sso_token=" + url.QueryEscape(token)
+	}
+	q := u.Query()
+	q.Set("sso_token", token)
+	u.RawQuery = q.Encode()
+	return u.String()
+}

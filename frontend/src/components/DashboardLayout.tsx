@@ -36,6 +36,8 @@ const ROUTE_TITLES: Record<string, string> = {
   '/stream-paths': '流路径',
   '/endpoints': '视频流端点',
   '/token-management': 'Token 管理',
+  '/users': '用户管理',
+  '/system-settings': '系统设置',
   '/swagger': 'API 文档',
 };
 
@@ -64,17 +66,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     return () => clearInterval(statusInterval);
   }, []);
 
-  const menuItems = [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表板' },
-    { key: '/providers', icon: <CloudServerOutlined />, label: 'CDN 厂商' },
-    { key: '/lines', icon: <LinkOutlined />, label: 'CDN 线路' },
-    { key: '/domains', icon: <GlobalOutlined />, label: '域名' },
-    { key: '/stream-regions', icon: <PlayCircleOutlined />, label: '视频流区域' },
-    { key: '/stream-paths', icon: <FileTextOutlined />, label: '流路径' },
-    { key: '/endpoints', icon: <ApiOutlined />, label: '视频流端点' },
-    { key: '/token-management', icon: <KeyOutlined />, label: 'Token 管理' },
-    { key: '/swagger', icon: <BookOutlined />, label: 'API 文档' },
-  ];
+  const menuItems = user?.is_admin
+    ? [
+        { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表板' },
+        { key: '/providers', icon: <CloudServerOutlined />, label: 'CDN 厂商' },
+        { key: '/lines', icon: <LinkOutlined />, label: 'CDN 线路' },
+        { key: '/domains', icon: <GlobalOutlined />, label: '域名' },
+        { key: '/stream-regions', icon: <PlayCircleOutlined />, label: '视频流区域' },
+        { key: '/stream-paths', icon: <FileTextOutlined />, label: '流路径' },
+        { key: '/endpoints', icon: <ApiOutlined />, label: '视频流端点' },
+        { key: '/token-management', icon: <KeyOutlined />, label: 'Token 管理' },
+        { key: '/users', icon: <UserOutlined />, label: '用户管理' },
+        { key: '/system-settings', icon: <BookOutlined />, label: '系统设置' },
+        { key: '/swagger', icon: <BookOutlined />, label: 'API 文档' },
+      ]
+    : [
+        { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表板' },
+        { key: '/endpoints', icon: <ApiOutlined />, label: '视频流端点' },
+      ];
 
   const selectedKey =
     menuItems.find(

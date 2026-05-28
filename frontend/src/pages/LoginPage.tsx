@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Form, Input, Button, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
@@ -17,6 +17,34 @@ export default function LoginPage() {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [ssoLoading, setSsoLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ssoToken = params.get('sso_token');
+    if (!ssoToken) return;
+
+    const completeSSOLogin = async () => {
+      setSsoLoading(true);
+      try {
+        auth.setToken(ssoToken);
+        const me = await authAPI.getCurrentUser();
+        auth.setUser(me);
+        message.success('SSO 登录成功');
+        navigate('/dashboard', { replace: true });
+      } catch (error: unknown) {
+        auth.logout();
+        const err = error as { response?: { data?: { message?: string } } };
+        message.error(err.response?.data?.message || 'SSO 登录失败');
+      } finally {
+        setSsoLoading(false);
+        const cleanURL = window.location.pathname;
+        window.history.replaceState({}, '', cleanURL);
+      }
+    };
+
+    void completeSSOLogin();
+  }, [message, navigate]);
 
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
@@ -39,6 +67,11 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOIDCLogin = () => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
+    window.location.href = `${apiBase}/auth/oidc/login`;
   };
 
   return (
@@ -133,6 +166,11 @@ export default function LoginPage() {
             <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
               <Button type="primary" htmlType="submit" loading={loading} block size="large">
                 进入控制台
+              </Button>
+            </Form.Item>
+            <Form.Item style={{ marginBottom: 0, marginTop: 12 }}>
+              <Button onClick={handleOIDCLogin} loading={ssoLoading} block size="large">
+                使用 SSO 登录
               </Button>
             </Form.Item>
           </Form>

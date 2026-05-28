@@ -38,7 +38,20 @@ type ChangePasswordRequest struct {
 
 // CreateTokenRequest represents the request payload for creating a new token
 type CreateTokenRequest struct {
-	Name        string `json:"name" binding:"required,min=1,max=255"`        // Token name/description
-	NeverExpire bool   `json:"never_expire"`                                 // If true, token never expires
-	ExpiresIn   int64  `json:"expires_in"`                                   // Expiration time in seconds (ignored if never_expire is true)
+	Name        string `json:"name" binding:"required,min=1,max=255"` // Token name/description
+	NeverExpire bool   `json:"never_expire"`                          // If true, token never expires
+	ExpiresIn   int64  `json:"expires_in"`                            // Expiration time in seconds (ignored if never_expire is true)
+}
+
+// CreateUserRequest represents the request payload for creating a user.
+type CreateUserRequest struct {
+	Username string `json:"username" binding:"required,min=1,max=255"`
+	Password string `json:"password" binding:"required,min=6"`
+	IsAdmin  bool   `json:"is_admin"`
+}
+
+// UpdateUserRequest represents the request payload for updating a user.
+type UpdateUserRequest struct {
+	Username string `json:"username" binding:"required,min=1,max=255"`
+	IsAdmin  bool   `json:"is_admin"`
 }

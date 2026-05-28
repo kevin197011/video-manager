@@ -7,9 +7,11 @@ package services
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -165,4 +167,53 @@ func (s *AuthService) DeleteToken(ctx context.Context, tokenID, userID int64) er
 	}
 
 	return s.tokenRepo.Delete(ctx, tokenID)
+}
+
+// LoginOrCreateOIDCUser logs in an OIDC user; creates a non-admin account when missing.
+func (s *AuthService) LoginOrCreateOIDCUser(ctx context.Context, username string) (*models.LoginResponse, error) {
+	user, err := s.userRepo.GetByUsername(ctx, username)
+	if err != nil {
+		if !errors.Is(err, repositories.ErrUserNotFound) {
+			return nil, err
+		}
+
+		passwordHash, hashErr := randomPasswordHash()
+		if hashErr != nil {
+			return nil, hashErr
+		}
+
+		createdUser, createErr := s.userRepo.Create(ctx, username, passwordHash, false)
+		if createErr != nil {
+			if errors.Is(createErr, repositories.ErrUserExists) {
+				user, err = s.userRepo.GetByUsername(ctx, username)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, createErr
+			}
+		} else {
+			user = createdUser
+		}
+	}
+
+	token, err := jwt.GenerateToken(user.ID, user.Username, user.IsAdmin)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.LoginResponse{
+		Token:    token,
+		Username: user.Username,
+		IsAdmin:  user.IsAdmin,
+	}, nil
+}
+
+func randomPasswordHash() (string, error) {
+	const n = 32
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("failed to generate random password: %w", err)
+	}
+	return HashPassword(hex.EncodeToString(b))
 }

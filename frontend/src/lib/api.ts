@@ -442,3 +442,71 @@ export const statsAPI = {
   },
 };
 
+export type OIDCSettings = {
+  enabled: boolean;
+  issuer_url: string;
+  client_id: string;
+  redirect_url: string;
+  scopes: string;
+  frontend_success_url: string;
+  has_client_secret: boolean;
+};
+
+export type UpdateOIDCSettingsRequest = {
+  enabled: boolean;
+  issuer_url: string;
+  client_id: string;
+  client_secret?: string;
+  clear_client_secret?: boolean;
+  redirect_url: string;
+  scopes: string;
+  frontend_success_url: string;
+};
+
+export const systemSettingsAPI = {
+  getOIDCSettings: async (): Promise<OIDCSettings> => {
+    const response = await api.get<APIResponse<OIDCSettings>>('/system-settings/oidc');
+    return response.data.data;
+  },
+  updateOIDCSettings: async (data: UpdateOIDCSettingsRequest): Promise<void> => {
+    await api.put('/system-settings/oidc', data);
+  },
+};
+
+export type ManagedUser = {
+  id: number;
+  username: string;
+  is_admin: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CreateManagedUserRequest = {
+  username: string;
+  password: string;
+  is_admin: boolean;
+};
+
+export type UpdateManagedUserRequest = {
+  username: string;
+  is_admin: boolean;
+};
+
+export const userAPI = {
+  getAll: async (): Promise<ManagedUser[]> => {
+    const response = await api.get<APIResponse<ManagedUser[]>>('/users');
+    return response.data.data;
+  },
+  create: async (data: CreateManagedUserRequest): Promise<ManagedUser> => {
+    const response = await api.post<APIResponse<ManagedUser>>('/users', data);
+    return response.data.data;
+  },
+  update: async (id: number, data: UpdateManagedUserRequest): Promise<ManagedUser> => {
+    const response = await api.put<APIResponse<ManagedUser>>(`/users/${id}`, data);
+    return response.data.data;
+  },
+  delete: async (id: number): Promise<void> => {
+    await api.delete<APIResponse<null>>(`/users/${id}`);
+  },
+};
+

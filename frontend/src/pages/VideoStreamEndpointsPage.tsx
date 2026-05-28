@@ -12,6 +12,7 @@ import type { VideoStreamEndpoint, CDNLine, Domain, Stream, CDNProvider } from '
 import { selectSearchableProps } from '../lib/selectSearchProps';
 import { displayStreamSeries } from '../lib/streamSeries';
 import { getApiErrorMessage } from '../lib/httpError';
+import { auth } from '../lib/auth';
 import flvjs from 'flv.js';
 
 const { Search } = Input;
@@ -24,6 +25,8 @@ function endpointSeriesLabel(e: VideoStreamEndpoint): string {
 }
 
 export default function VideoStreamEndpointsPage() {
+  const currentUser = auth.getUser();
+  const isAdmin = Boolean(currentUser?.is_admin);
   const [endpoints, setEndpoints] = useState<VideoStreamEndpoint[]>([]);
   const [filteredEndpoints, setFilteredEndpoints] = useState<VideoStreamEndpoint[]>([]);
   const [lines, setLines] = useState<CDNLine[]>([]);
@@ -193,14 +196,12 @@ export default function VideoStreamEndpointsPage() {
   const handleRefresh = async () => {
     try {
       setLoading(true);
-      // 先调用 GenerateAll 重新生成所有 endpoints
+      // 所有登录用户统一走重生成+刷新，确保与管理员看到一致的最新数据
       const result = await videoStreamEndpointAPI.generateAll();
       message.success(`已重新生成 ${result.count} 个端点`);
-      // 然后刷新列表
       await loadEndpoints();
     } catch (err: unknown) {
-      message.error(getApiErrorMessage(err, '重新生成端点失败'));
-      // 即使生成失败，也尝试加载现有数据
+      message.error(getApiErrorMessage(err, '刷新端点失败'));
       await loadEndpoints();
     } finally {
       setLoading(false);
@@ -517,11 +518,19 @@ export default function VideoStreamEndpointsPage() {
 
   const columns: ColumnsType<VideoStreamEndpoint> = useMemo(() => [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-      sorter: (a, b) => a.id - b.id,
+      title: '桌台号',
+      key: 'table_id',
+      render: (_, record) => record.stream_path?.table_id || 'N/A',
+      filters: tableIdFilters,
+      onFilter: (value, record) => record.stream_path?.table_id === value,
+    },
+    {
+      title: '系列',
+      key: 'series',
+      width: 100,
+      render: (_, record) => endpointSeriesLabel(record),
+      sorter: (a, b) =>
+        endpointSeriesLabel(a).localeCompare(endpointSeriesLabel(b), 'zh-CN'),
     },
     {
       title: '完整URL',
@@ -570,21 +579,6 @@ export default function VideoStreamEndpointsPage() {
       render: (_, record) => record.stream?.name || 'Unknown',
       filters: (streams || []).map((s) => ({ text: s.name, value: s.id })),
       onFilter: (value, record) => record.stream_id === value,
-    },
-    {
-      title: '桌台号',
-      key: 'table_id',
-      render: (_, record) => record.stream_path?.table_id || 'N/A',
-      filters: tableIdFilters,
-      onFilter: (value, record) => record.stream_path?.table_id === value,
-    },
-    {
-      title: '系列',
-      key: 'series',
-      width: 100,
-      render: (_, record) => endpointSeriesLabel(record),
-      sorter: (a, b) =>
-        endpointSeriesLabel(a).localeCompare(endpointSeriesLabel(b), 'zh-CN'),
     },
     {
       title: '路径',
@@ -655,7 +649,7 @@ export default function VideoStreamEndpointsPage() {
             icon={<ExperimentOutlined />}
             onClick={() => handleTestResolution(record.id)}
             loading={testingResolution.has(record.id)}
-            disabled={testingResolution.has(record.id)}
+            disabled={!isAdmin || testingResolution.has(record.id)}
             size="small"
           >
             分辨率检测
@@ -663,6 +657,7 @@ export default function VideoStreamEndpointsPage() {
           <Switch
             checked={record.status === 1}
             onChange={() => handleToggleStatus(record.id, record.status)}
+            disabled={!isAdmin}
             size="small"
           />
         </Space>
@@ -680,6 +675,7 @@ export default function VideoStreamEndpointsPage() {
     testingResolution,
     handleToggleStatus,
     handleCopyUrl,
+    isAdmin,
   ]);
 
   const stats = useMemo(() => {
@@ -1008,9 +1004,18 @@ export default function VideoStreamEndpointsPage() {
           <div>
             <Descriptions bordered column={1} size="small" style={{ marginBottom: 16 }}>
               <Descriptions.Item label="URL">
-                <a href={playingEndpoint.full_url} target="_blank" rel="noopener noreferrer">
-                  {playingEndpoint.full_url}
-                </a>
+                <Space>
+                  <a href={playingEndpoint.full_url} target="_blank" rel="noopener noreferrer">
+                    {playingEndpoint.full_url}
+                  </a>
+                  <Button
+                    type="text"
+                    icon={<CopyOutlined />}
+                    size="small"
+                    onClick={() => handleCopyUrl(playingEndpoint.full_url)}
+                    title="复制URL"
+                  />
+                </Space>
               </Descriptions.Item>
               <Descriptions.Item label="厂商">
                 {playingEndpoint.provider?.name || 'Unknown'}
