@@ -326,7 +326,17 @@ export const videoStreamEndpointAPI = {
   },
 };
 
+export type OIDCStatus = {
+  enabled: boolean;
+  ready: boolean;
+  issues: string[];
+};
+
 export const authAPI = {
+  getOIDCStatus: async (): Promise<OIDCStatus> => {
+    const response = await api.get<APIResponse<OIDCStatus>>('/auth/oidc/status');
+    return response.data.data;
+  },
   login: async (username: string, password: string): Promise<{
     token: string;
     username: string;

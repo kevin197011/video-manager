@@ -314,11 +314,52 @@ func (h *AuthHandler) DeleteToken(c *gin.Context) {
 // @Success 302 {string} string "Redirect to OIDC provider"
 // @Failure 503 {object} response.Response
 // @Router /api/auth/oidc/login [get]
+// OIDCStatus reports whether SSO login is ready (public).
+// @Summary OIDC availability
+// @Description Check if OIDC SSO login is configured and ready
+// @Tags auth
+// @Produce json
+// @Success 200 {object} response.Response{data=object}
+// @Router /api/auth/oidc/status [get]
+func (h *AuthHandler) OIDCStatus(c *gin.Context) {
+	settings, err := h.systemSettingService.GetOIDCSettings(c.Request.Context())
+	if err != nil {
+		response.InternalServerError(c, "failed to load oidc settings")
+		return
+	}
+	cfg := services.OIDCConfig{
+		Enabled:            settings.Enabled,
+		IssuerURL:          settings.IssuerURL,
+		ClientID:           settings.ClientID,
+		ClientSecret:       settings.ClientSecret,
+		RedirectURL:        settings.RedirectURL,
+		Scopes:             settings.Scopes,
+		FrontendSuccessURL: settings.FrontendSuccessURL,
+	}
+	issues := services.OIDCConfigIssues(cfg)
+	ready := settings.Enabled && len(issues) == 0
+	response.Success(c, gin.H{
+		"enabled": settings.Enabled,
+		"ready":   ready,
+		"issues":  issues,
+	})
+}
+
 func (h *AuthHandler) OIDCLogin(c *gin.Context) {
-	oidcSvc, err := h.loadOIDCService(c.Request.Context())
+	oidcSvc, cfg, err := h.loadOIDCService(c.Request.Context())
 	if err != nil {
 		logger.Warn("Failed to initialize OIDC service", "error", err)
-		response.Error(c, http.StatusServiceUnavailable, "oidc is not configured")
+		response.Error(c, http.StatusServiceUnavailable, "oidc provider discovery failed: "+err.Error())
+		return
+	}
+	if !oidcSvc.IsEnabled() {
+		issues := services.OIDCConfigIssues(cfg)
+		msg := "oidc is not fully configured"
+		if len(issues) > 0 {
+			msg = msg + ": " + strings.Join(issues, ", ")
+		}
+		logger.Warn("OIDC login requested but not ready", "issues", issues)
+		response.Error(c, http.StatusServiceUnavailable, msg)
 		return
 	}
 
@@ -330,6 +371,7 @@ func (h *AuthHandler) OIDCLogin(c *gin.Context) {
 
 	authURL, err := oidcSvc.AuthCodeURL(state)
 	if err != nil {
+		logger.Warn("Failed to build OIDC auth URL", "error", err)
 		response.InternalServerError(c, "failed to build oidc auth url")
 		return
 	}
@@ -351,10 +393,19 @@ func (h *AuthHandler) OIDCLogin(c *gin.Context) {
 // @Failure 503 {object} response.Response
 // @Router /api/auth/oidc/callback [get]
 func (h *AuthHandler) OIDCCallback(c *gin.Context) {
-	oidcSvc, err := h.loadOIDCService(c.Request.Context())
+	oidcSvc, cfg, err := h.loadOIDCService(c.Request.Context())
 	if err != nil {
 		logger.Warn("Failed to initialize OIDC service", "error", err)
-		response.Error(c, http.StatusServiceUnavailable, "oidc is not configured")
+		response.Error(c, http.StatusServiceUnavailable, "oidc provider discovery failed: "+err.Error())
+		return
+	}
+	if !oidcSvc.IsEnabled() {
+		issues := services.OIDCConfigIssues(cfg)
+		msg := "oidc is not fully configured"
+		if len(issues) > 0 {
+			msg = msg + ": " + strings.Join(issues, ", ")
+		}
+		response.Error(c, http.StatusServiceUnavailable, msg)
 		return
 	}
 
@@ -397,10 +448,10 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 	c.Redirect(http.StatusFound, redirectTarget)
 }
 
-func (h *AuthHandler) loadOIDCService(ctx context.Context) (*services.OIDCService, error) {
+func (h *AuthHandler) loadOIDCService(ctx context.Context) (*services.OIDCService, services.OIDCConfig, error) {
 	settings, err := h.systemSettingService.GetOIDCSettings(ctx)
 	if err != nil {
-		return nil, err
+		return nil, services.OIDCConfig{}, err
 	}
 	cfg := services.OIDCConfig{
 		Enabled:            settings.Enabled,
@@ -411,7 +462,11 @@ func (h *AuthHandler) loadOIDCService(ctx context.Context) (*services.OIDCServic
 		Scopes:             settings.Scopes,
 		FrontendSuccessURL: settings.FrontendSuccessURL,
 	}
-	return services.NewOIDCServiceFromConfig(ctx, cfg)
+	svc, err := services.NewOIDCServiceFromConfig(ctx, cfg)
+	if err != nil {
+		return nil, cfg, err
+	}
+	return svc, cfg, nil
 }
 
 func generateOIDCState() (string, error) {

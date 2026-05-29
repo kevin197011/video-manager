@@ -139,6 +139,7 @@ func main() {
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", authHandler.Login)
+			auth.GET("/oidc/status", authHandler.OIDCStatus)
 			auth.GET("/oidc/login", authHandler.OIDCLogin)
 			auth.GET("/oidc/callback", authHandler.OIDCCallback)
 		}

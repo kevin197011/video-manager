@@ -18,6 +18,19 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [ssoLoading, setSsoLoading] = useState(false);
+  const [oidcReady, setOidcReady] = useState(false);
+
+  useEffect(() => {
+    const loadOIDCStatus = async () => {
+      try {
+        const status = await authAPI.getOIDCStatus();
+        setOidcReady(status.ready);
+      } catch {
+        setOidcReady(false);
+      }
+    };
+    void loadOIDCStatus();
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -168,11 +181,13 @@ export default function LoginPage() {
                 进入控制台
               </Button>
             </Form.Item>
-            <Form.Item style={{ marginBottom: 0, marginTop: 12 }}>
-              <Button onClick={handleOIDCLogin} loading={ssoLoading} block size="large">
-                使用 SSO 登录
-              </Button>
-            </Form.Item>
+            {oidcReady && (
+              <Form.Item style={{ marginBottom: 0, marginTop: 12 }}>
+                <Button onClick={handleOIDCLogin} loading={ssoLoading} block size="large">
+                  使用 SSO 登录
+                </Button>
+              </Form.Item>
+            )}
           </Form>
         </div>
       </div>

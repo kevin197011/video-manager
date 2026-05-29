@@ -1,0 +1,667 @@
+{
+  "/Users/kevin/projects/src/video-manager/skills-lock.json": {
+    "mtime": 1779970572.579006,
+    "ast_hash": "75a17c382989f5f3d1e0abce1ed6d5fc",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/push.rb": {
+    "mtime": 1765863688.6286185,
+    "ast_hash": "1a4a126df6a1c6c408a593686dd241d7",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/deploy.sh": {
+    "mtime": 1765863688.6284273,
+    "ast_hash": "850f99771dbb1bb2cda6779fc89ecf57",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/tsconfig.node.json": {
+    "mtime": 1765863669.2004435,
+    "ast_hash": "eec85c9d7c6b599801557f1afd86672c",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/tailwind.config.js": {
+    "mtime": 1765863669.2001936,
+    "ast_hash": "8e5f3e4bb648ed10dcaa8f0098a7e849",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/tsconfig.app.json": {
+    "mtime": 1778041608.4600928,
+    "ast_hash": "61d1da4168f2b41ec9765c1bbe28400b",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/package.json": {
+    "mtime": 1778041559.6999927,
+    "ast_hash": "8891a506aab2473a285ebc3f73e2614f",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/tsconfig.json": {
+    "mtime": 1765863669.2003574,
+    "ast_hash": "a3d39fa780ebff65444de257f291ce6c",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/eslint.config.js": {
+    "mtime": 1778042225.3527303,
+    "ast_hash": "0196295f5e8e19f3798dd5db1f368cb7",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/vite.config.ts": {
+    "mtime": 1778040182.967578,
+    "ast_hash": "48a45d65d762b48696d99740923e3c5e",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/postcss.config.js": {
+    "mtime": 1765863669.1979399,
+    "ast_hash": "88eaead9bd51840cd9d816b3761009a9",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/App.tsx": {
+    "mtime": 1779971293.7782238,
+    "ast_hash": "d6f9a8d4a6042ebc8c14482c3e862207",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/main.tsx": {
+    "mtime": 1778041608.4680414,
+    "ast_hash": "04eadf1f0aca7979306a3d83a0c7b16d",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/vite-env.d.ts": {
+    "mtime": 1778042225.3526237,
+    "ast_hash": "343492fdcb50dcad924e7253c59db1a3",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/theme.ts": {
+    "mtime": 1778041608.4680352,
+    "ast_hash": "82084e90de85b1896e70f32a3f77ef5a",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/types/axios.d.ts": {
+    "mtime": 1767583502.489442,
+    "ast_hash": "2996f82437b1bbba45fae5cb8924af41",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/types/ant-design-icons.d.ts": {
+    "mtime": 1767584529.5451639,
+    "ast_hash": "b35d6e1232cf485b6f88812670660b23",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/types/react-dom.d.ts": {
+    "mtime": 1767583724.1456573,
+    "ast_hash": "bd297c147c9e67743b416c38e03144c8",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/types/antd.d.ts": {
+    "mtime": 1778042225.3523822,
+    "ast_hash": "f3ad7488525f161f24705089819b077f",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/types/react.d.ts": {
+    "mtime": 1767583876.0949109,
+    "ast_hash": "66e9ac37ab2369f7c9d3100b34b5e3f5",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/types/css.d.ts": {
+    "mtime": 1767583724.1454098,
+    "ast_hash": "23fdfb193736b0b221fc5e77a5624001",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/types/antd-table.d.ts": {
+    "mtime": 1767583876.066626,
+    "ast_hash": "638d708c0547d3c5e361a134b9854cdd",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/types/react-jsx-runtime.d.ts": {
+    "mtime": 1767583580.2923195,
+    "ast_hash": "0c67591d987e574538cb9e5446f9ff7c",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/ConfirmDialog.tsx": {
+    "mtime": 1765863669.1985025,
+    "ast_hash": "f0bcc0d4d155f8e5a2a040e8fb51fd0e",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/StreamPathForm.tsx": {
+    "mtime": 1778042225.3525872,
+    "ast_hash": "8b9d1f4b7393f54113ef60480a8f90e3",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/DomainForm.tsx": {
+    "mtime": 1778042225.3526666,
+    "ast_hash": "c441bbe6d5031459079a1a0644646c0c",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/ProtectedRoute.tsx": {
+    "mtime": 1765863669.1988702,
+    "ast_hash": "52e3aec2a08527768c080baedd6c5b5c",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/VideoStreamEndpointForm.tsx": {
+    "mtime": 1778042225.3521852,
+    "ast_hash": "dbb4b48dc7dd302e348842fe3c45826d",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/ProviderForm.tsx": {
+    "mtime": 1778042225.3525994,
+    "ast_hash": "a49039c30466b53168e76be6d95546fe",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/DashboardLayout.tsx": {
+    "mtime": 1779971293.7783926,
+    "ast_hash": "17fadbe36fb0852aea941814e5d2eaf5",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/Logo.tsx": {
+    "mtime": 1778041608.468048,
+    "ast_hash": "c263c90a39eaa074086d1701dac298a2",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/StreamForm.tsx": {
+    "mtime": 1778042225.3526416,
+    "ast_hash": "a3b2ee04c9c52283f3edfe71aabd25cc",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/components/LineForm.tsx": {
+    "mtime": 1778042225.3526077,
+    "ast_hash": "1f65396c1e1037c61eb2573fbce78105",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/lib/selectSearchProps.ts": {
+    "mtime": 1778039729.9628341,
+    "ast_hash": "87e030625a318d0ac624aef3680766e4",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/lib/httpError.ts": {
+    "mtime": 1778042225.352615,
+    "ast_hash": "97018ed4b2493618dd5838ba1fa2b4ef",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/lib/api.ts": {
+    "mtime": 1780040372.7581308,
+    "ast_hash": "517cfec41bd6909850fc8b5d9ae956f9",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/lib/streamSeries.ts": {
+    "mtime": 1778039980.0451448,
+    "ast_hash": "7376bcc3a2dc57cc234d89e711707d61",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/lib/auth.ts": {
+    "mtime": 1765863669.1994107,
+    "ast_hash": "066f8ac0b2fbffe3350bd2571fba12d0",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/LoginPage.tsx": {
+    "mtime": 1780040373.442286,
+    "ast_hash": "629d5962829cd7bd189647b29c1f6e17",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/DomainsPage.tsx": {
+    "mtime": 1778042225.3521636,
+    "ast_hash": "4e4a3a8927ec278581db346a92f95c7b",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/SystemSettingsPage.tsx": {
+    "mtime": 1780040362.8232453,
+    "ast_hash": "92dd0626958f4c01aa3c7713c88e26bb",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/LinesPage.tsx": {
+    "mtime": 1778042225.3521738,
+    "ast_hash": "bdf25ae7b002131fd8c72ccac11155e8",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/UsersPage.tsx": {
+    "mtime": 1779970976.6044567,
+    "ast_hash": "407f3dac35950b7717b54748a4aa66b4",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/TokenManagementPage.tsx": {
+    "mtime": 1778042225.3520582,
+    "ast_hash": "e3aa8b2583b8e3b567bb7241deb92204",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/SwaggerPage.tsx": {
+    "mtime": 1765863669.2000031,
+    "ast_hash": "ded4d41e1d66addf3a9fd6e6a4ce8752",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/StreamPathsPage.tsx": {
+    "mtime": 1778042225.3432238,
+    "ast_hash": "28e86f96e2c00a380efeec7168ca4ce6",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/ProvidersPage.tsx": {
+    "mtime": 1778042225.3475807,
+    "ast_hash": "fbfb14c7af56c8adc2a83527d92fa496",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/StreamsPage.tsx": {
+    "mtime": 1778042225.352157,
+    "ast_hash": "da58788bd70e76d943e30bf6a7c2aac6",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/VideoStreamEndpointsPage.tsx": {
+    "mtime": 1779972081.8438601,
+    "ast_hash": "690d544df9e63ed6d802a5ae4945f655",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/pages/DashboardPage.tsx": {
+    "mtime": 1778051113.0790927,
+    "ast_hash": "a09f701c2a026888c824c28550e56a54",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/cmd/main.go": {
+    "mtime": 1780040356.3455398,
+    "ast_hash": "13be5ad5046e75f479fab7746262c2fb",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/migrations/000022_add_resolution_column.up.sql": {
+    "mtime": 1767593468.9452949,
+    "ast_hash": "3047ae99842ed02e9a12f4f3679409db",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/migrations/init_schema.sql": {
+    "mtime": 1779970325.491362,
+    "ast_hash": "81fec9285bb8db8792a9a49e7e69f68e",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/migrations/000023_add_system_settings.up.sql": {
+    "mtime": 1779970325.5013285,
+    "ast_hash": "3592c15b71d386c916871e13496a86f1",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/repositories/stream_path_repository.go": {
+    "mtime": 1778039980.0849032,
+    "ast_hash": "8119a9a1a3c6450bea97662f61823ab0",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/repositories/domain_repository.go": {
+    "mtime": 1765863669.1942344,
+    "ast_hash": "0ad3006e5be79ddcb19c5b203934e64a",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/repositories/cdn_provider_repository.go": {
+    "mtime": 1765863669.194111,
+    "ast_hash": "ceb25362d8565f90b36c840f9ed2b923",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/repositories/cdn_line_repository.go": {
+    "mtime": 1765863669.1939678,
+    "ast_hash": "375ca763eb7974c8e82b67cb92319616",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/repositories/video_stream_endpoint_repository.go": {
+    "mtime": 1778039980.0920594,
+    "ast_hash": "0ceeba8a1934d510d5ae1e65b6236d1a",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/repositories/user_repository.go": {
+    "mtime": 1779969797.039203,
+    "ast_hash": "69e5fe8cda616aa280638f428d4e2056",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/repositories/stream_repository.go": {
+    "mtime": 1765863669.194494,
+    "ast_hash": "564afb1c60fbe1b1c93a05131d5310eb",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/repositories/system_setting_repository.go": {
+    "mtime": 1779970325.523553,
+    "ast_hash": "7aaf107ef7d8f7bfe35a569f4678f6b7",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/domain.go": {
+    "mtime": 1765863669.19299,
+    "ast_hash": "2e20eb0d0fc3f58af838885a53c9a72e",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/stream_path.go": {
+    "mtime": 1778039980.084896,
+    "ast_hash": "9d1389d8eb76a342732f56d2506bbcfa",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/user.go": {
+    "mtime": 1779969797.0385683,
+    "ast_hash": "0350159db6849ab4b5e0f40e284d7a3f",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/stream_path_series_test.go": {
+    "mtime": 1778039980.0848486,
+    "ast_hash": "6912ef33fc0201e8b663bd90903d7a4d",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/stream.go": {
+    "mtime": 1765863669.1932278,
+    "ast_hash": "5c90ab5444eb7e67ea8c813deaf1238c",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/system_setting.go": {
+    "mtime": 1779970325.531713,
+    "ast_hash": "66f38fc7979c84aa9d46cdd3cb3d7f02",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/cdn_provider.go": {
+    "mtime": 1765863669.1929038,
+    "ast_hash": "1b93591db5dc7402403d104763e0b145",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/video_stream_endpoint.go": {
+    "mtime": 1767582659.0333533,
+    "ast_hash": "5536bcc5effdc6bee1680a75aaec78df",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/models/cdn_line.go": {
+    "mtime": 1765863669.1928122,
+    "ast_hash": "863f9c0e53f42bdfc9a0c05d6448be12",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/auth_handler.go": {
+    "mtime": 1780040340.2703846,
+    "ast_hash": "4588261aee54bcbab34719b5f70b836d",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/domain_handler.go": {
+    "mtime": 1765863669.1920729,
+    "ast_hash": "d440d77493c41ac131888d42ff76d418",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/cdn_line_handler.go": {
+    "mtime": 1765863669.1917882,
+    "ast_hash": "7d7d4f7ca55578c6ec49f25e03cccd0f",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/video_stream_endpoint_handler.go": {
+    "mtime": 1767582658.875685,
+    "ast_hash": "64ab7eb65c932b55f368bf4d2bdfc163",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/stream_handler.go": {
+    "mtime": 1765863669.1923935,
+    "ast_hash": "6b5b2c2b67e3a6fe9a9ec7c3fae40ca7",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/user_handler.go": {
+    "mtime": 1779969797.0255818,
+    "ast_hash": "cea6c59b9ed0fb24c69e9db328b04a7d",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/stream_path_handler.go": {
+    "mtime": 1765863669.1925404,
+    "ast_hash": "fd4a66ef79eb894d89c02c51b6048684",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/stats_handler.go": {
+    "mtime": 1765863669.1922204,
+    "ast_hash": "7f58232bba64a87ec814e5e15d844232",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/system_setting_handler.go": {
+    "mtime": 1780040357.85425,
+    "ast_hash": "7d019a2b1c78a6523a57e5377f10c07f",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/cdn_provider_handler.go": {
+    "mtime": 1765863669.1919317,
+    "ast_hash": "79936928d918c4dfb4d2ca6b0a81e98e",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/handlers/stream_path_import.go": {
+    "mtime": 1774320600.6382093,
+    "ast_hash": "db5e4f3f0ae226b85e9eca5e75590fd1",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/oidc_service.go": {
+    "mtime": 1780040331.5810406,
+    "ast_hash": "63bd27839ae4a6626217f230c89085bb",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/auth_service.go": {
+    "mtime": 1779970057.7472823,
+    "ast_hash": "1dc6571482f7566553ada4924c47a0d4",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/video_stream_endpoint_service.go": {
+    "mtime": 1767582658.870577,
+    "ast_hash": "d3ade6e7b0af5c06e34ef3195b0fdf92",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/cdn_line_service.go": {
+    "mtime": 1765863669.1951969,
+    "ast_hash": "abb8ef0462b2e61e551b4f3e1f183030",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/domain_service.go": {
+    "mtime": 1765863669.1953597,
+    "ast_hash": "758bf66677a770197588199ba5f8e168",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/user_service.go": {
+    "mtime": 1779969797.0255961,
+    "ast_hash": "a8a6298c2dc51cef2e6b3ce61bf4bc80",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/stream_service.go": {
+    "mtime": 1765863669.1955287,
+    "ast_hash": "1437add9272c3acfadd083de46c13aba",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/cdn_provider_service.go": {
+    "mtime": 1765863669.1952753,
+    "ast_hash": "f8afe3a59b5a194478ef72debeaa36eb",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/system_setting_service.go": {
+    "mtime": 1780040352.2463913,
+    "ast_hash": "15abbd1a887e0bab2a8981bb814529b2",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/internal/services/stream_path_service.go": {
+    "mtime": 1774322001.898542,
+    "ast_hash": "c24dad74e3a565be5ac7b6ff14c8d811",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/docs/docs.go": {
+    "mtime": 1779970308.6391692,
+    "ast_hash": "52fda879d7de838cbde14bd1e11e95fe",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/docs/swagger.json": {
+    "mtime": 1779970308.6418188,
+    "ast_hash": "bac1ab203ff7ff8b3adcf33a8b8e6cda",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/scripts/update_resolution.rb": {
+    "mtime": 1767582658.882157,
+    "ast_hash": "d334de20a503ba0de92f44dc8769629c",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/jwt/jwt.go": {
+    "mtime": 1765863669.1964767,
+    "ast_hash": "e92cba5dd539328eeecec519da9a7153",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/middleware/auth.go": {
+    "mtime": 1779971774.1374714,
+    "ast_hash": "03293ffe8ff45c80e2df344a778843a0",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/middleware/logger.go": {
+    "mtime": 1765863669.196703,
+    "ast_hash": "5f04c1adfb9a49656c658e1f3acc63cd",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/database/database.go": {
+    "mtime": 1765863669.19639,
+    "ast_hash": "0a6cabc95cd99357b25bcea2cee40a7c",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/pagination/pagination.go": {
+    "mtime": 1765863669.1967874,
+    "ast_hash": "7b4440675eb7d9a1f42bab255a8a00fc",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/logger/logger.go": {
+    "mtime": 1765863669.1965573,
+    "ast_hash": "98da531a595fac49c35697bb2f8e7f9a",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/response/response.go": {
+    "mtime": 1765863669.1968656,
+    "ast_hash": "e68250590843919dab6aadae59adef01",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/url_generator/url_generator.go": {
+    "mtime": 1765863669.1969416,
+    "ast_hash": "30f61fc537023043193fc3a8ee128174",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/pkg/resolution/resolution.go": {
+    "mtime": 1767592890.7004008,
+    "ast_hash": "3ce13b57606c0423d0aabe3c8b320da1",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/scripts/stream_paths_import.rb": {
+    "mtime": 1778040197.1144795,
+    "ast_hash": "efbbfad229b1a77345e32086ee31ea36",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/README.md": {
+    "mtime": 1778040197.1150534,
+    "ast_hash": "d199d45b76a3cd988c2de34e76d25c2a",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.rubocop.yml": {
+    "mtime": 1765863688.6277685,
+    "ast_hash": "38eb0a2a3c2e8c4fae2861d84280fc79",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/docker-compose.yml": {
+    "mtime": 1778040197.114944,
+    "ast_hash": "50e65447b84b33414bae74e65d2b8331",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/docker-compose.prod.yml": {
+    "mtime": 1765863669.197179,
+    "ast_hash": "a97f562a4f51476a1b1bda03610e1cbf",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/AGENTS.md": {
+    "mtime": 1767581100.8304765,
+    "ast_hash": "20e021bc0804e03bd75005141b6a7937",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/index.html": {
+    "mtime": 1778041608.4680865,
+    "ast_hash": "d9a65ca440181c447e7ef7959cd5ff83",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/README.md": {
+    "mtime": 1765863669.1974547,
+    "ast_hash": "cac141da861c855e069a9c32557458ac",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/full-output-enforcement/SKILL.md": {
+    "mtime": 1779970572.5120907,
+    "ast_hash": "5ed528ceb72c5d089757ba70c5a434e8",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/design-taste-frontend-v1/SKILL.md": {
+    "mtime": 1779970572.5684662,
+    "ast_hash": "c702d3d833567da18f39c50c616346c3",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/imagegen-frontend-mobile/SKILL.md": {
+    "mtime": 1779970572.4881473,
+    "ast_hash": "4c84e37e50e610779a71e0fb0a198963",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/stitch-design-taste/SKILL.md": {
+    "mtime": 1779970572.5503895,
+    "ast_hash": "1f397f053ae55acc04668e83ef38f266",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/stitch-design-taste/DESIGN.md": {
+    "mtime": 1779970572.5502865,
+    "ast_hash": "ee7cc02dcc99eda38299a5a6f6727563",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/industrial-brutalist-ui/SKILL.md": {
+    "mtime": 1779970572.46471,
+    "ast_hash": "9e673477ecc2eaf4a230c8326cbc2f0d",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/imagegen-frontend-web/SKILL.md": {
+    "mtime": 1779970572.495588,
+    "ast_hash": "208c5866f7320c7f842283b312a00e17",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/design-taste-frontend/SKILL.md": {
+    "mtime": 1779970572.5595448,
+    "ast_hash": "6f73606d20cd948b471b1ce1767aab50",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/minimalist-ui/SKILL.md": {
+    "mtime": 1779970572.50366,
+    "ast_hash": "c7f814d7df4b1b0e3eebf706a6d74adf",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/gpt-taste/SKILL.md": {
+    "mtime": 1779970572.4733455,
+    "ast_hash": "0968d17fda872b36dc35e6bcc0c9af36",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/high-end-visual-design/SKILL.md": {
+    "mtime": 1779970572.5387979,
+    "ast_hash": "269e37851b3a17693d8052f5f8002cfc",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/redesign-existing-projects/SKILL.md": {
+    "mtime": 1779970572.521581,
+    "ast_hash": "31d802d02ccb9f5da82d99156af36317",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/image-to-code/SKILL.md": {
+    "mtime": 1779970572.4808943,
+    "ast_hash": "442613e4710f0005b94f1c4b1d3ac246",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.agents/skills/brandkit/SKILL.md": {
+    "mtime": 1779970572.4530385,
+    "ast_hash": "cd3701c774e9bd7ce4fc9078377d517f",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/migrations/README.md": {
+    "mtime": 1765863669.196193,
+    "ast_hash": "170fca0ca6f1a25697165b050e28f2f6",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/backend/docs/swagger.yaml": {
+    "mtime": 1779970308.6473577,
+    "ast_hash": "924609b933497a8522fa80e5e6090bdf",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.github/workflows/docker-build.yml": {
+    "mtime": 1765863669.1890998,
+    "ast_hash": "8c5e3f982533bba78ffc44853cf9ac68",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/.github/workflows/README.md": {
+    "mtime": 1765863669.188953,
+    "ast_hash": "a5090da7041967c15c6eb4e92736f7a9",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/public/vite.svg": {
+    "mtime": 1765863669.1981862,
+    "ast_hash": "8e3a10e157f75ada21ab742c022d5430",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/public/logo.svg": {
+    "mtime": 1765863669.1981297,
+    "ast_hash": "02935ed32a7d6939144c4cf73326a450",
+    "semantic_hash": ""
+  },
+  "/Users/kevin/projects/src/video-manager/frontend/src/assets/react.svg": {
+    "mtime": 1765863669.1984243,
+    "ast_hash": "f0402b67b6ce880f65666bb49e841696",
+    "semantic_hash": ""
+  }
+}

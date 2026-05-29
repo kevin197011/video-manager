@@ -18,6 +18,27 @@ import (
 
 var ErrOIDCDisabled = errors.New("oidc is not configured")
 
+// OIDCConfigIssues returns human-readable missing fields when OIDC cannot run.
+func OIDCConfigIssues(cfg OIDCConfig) []string {
+	if !cfg.Enabled {
+		return []string{"oidc is not enabled"}
+	}
+	var missing []string
+	if strings.TrimSpace(cfg.IssuerURL) == "" {
+		missing = append(missing, "issuer_url")
+	}
+	if strings.TrimSpace(cfg.ClientID) == "" {
+		missing = append(missing, "client_id")
+	}
+	if strings.TrimSpace(cfg.ClientSecret) == "" {
+		missing = append(missing, "client_secret")
+	}
+	if strings.TrimSpace(cfg.RedirectURL) == "" {
+		missing = append(missing, "redirect_url")
+	}
+	return missing
+}
+
 type OIDCUserInfo struct {
 	Subject           string `json:"sub"`
 	Email             string `json:"email"`
@@ -66,7 +87,7 @@ func NewOIDCServiceFromConfig(ctx context.Context, cfg OIDCConfig) (*OIDCService
 		enabled: false,
 	}
 
-	if !cfg.Enabled || issuer == "" || clientID == "" || clientSecret == "" || redirectURL == "" {
+	if issues := OIDCConfigIssues(cfg); len(issues) > 0 {
 		return service, nil
 	}
 

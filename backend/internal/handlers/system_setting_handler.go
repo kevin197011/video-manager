@@ -6,6 +6,8 @@
 package handlers
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/video-manager/backend/internal/models"
 	"github.com/video-manager/backend/internal/services"
@@ -60,6 +62,10 @@ func (h *SystemSettingHandler) UpdateOIDCSettings(c *gin.Context) {
 	}
 
 	if err := h.service.UpdateOIDCSettings(c.Request.Context(), req); err != nil {
+		if errors.Is(err, services.ErrOIDCSettingsIncomplete) {
+			response.BadRequest(c, err.Error())
+			return
+		}
 		response.InternalServerError(c, "failed to update oidc settings")
 		return
 	}

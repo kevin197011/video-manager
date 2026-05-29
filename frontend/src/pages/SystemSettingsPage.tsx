@@ -38,6 +38,10 @@ export default function SystemSettingsPage() {
   }, []);
 
   const handleSubmit = async (values: UpdateOIDCSettingsRequest) => {
+    if (values.enabled && !hasClientSecret && !values.client_secret?.trim()) {
+      message.error('启用 SSO 前请先填写 Client Secret');
+      return;
+    }
     setSaving(true);
     try {
       await systemSettingsAPI.updateOIDCSettings(values);

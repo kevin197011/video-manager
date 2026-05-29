@@ -7,12 +7,16 @@ package services
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/video-manager/backend/internal/models"
 	"github.com/video-manager/backend/internal/repositories"
 )
+
+var ErrOIDCSettingsIncomplete = errors.New("oidc settings incomplete")
 
 const (
 	settingOIDCEnabled            = "oidc_enabled"
@@ -96,6 +100,18 @@ func (s *SystemSettingService) GetOIDCSettingsResponse(ctx context.Context) (*mo
 }
 
 func (s *SystemSettingService) UpdateOIDCSettings(ctx context.Context, req models.UpdateOIDCSettingsRequest) error {
+	current, err := s.GetOIDCSettings(ctx)
+	if err != nil {
+		return err
+	}
+
+	merged := mergeOIDCSettings(current, req)
+	if merged.Enabled {
+		if issues := OIDCConfigIssues(merged); len(issues) > 0 {
+			return fmt.Errorf("%w: %s", ErrOIDCSettingsIncomplete, strings.Join(issues, ", "))
+		}
+	}
+
 	if err := s.repo.Upsert(ctx, settingOIDCEnabled, boolToString(req.Enabled)); err != nil {
 		return err
 	}
@@ -129,4 +145,32 @@ func boolToString(v bool) string {
 		return "true"
 	}
 	return "false"
+}
+
+func mergeOIDCSettings(current *models.OIDCSettings, req models.UpdateOIDCSettingsRequest) OIDCConfig {
+	secret := strings.TrimSpace(current.ClientSecret)
+	if req.ClearClientSecret {
+		secret = ""
+	} else if v := strings.TrimSpace(req.ClientSecret); v != "" {
+		secret = v
+	}
+
+	return OIDCConfig{
+		Enabled:            req.Enabled,
+		IssuerURL:          firstNonEmpty(strings.TrimSpace(req.IssuerURL), current.IssuerURL),
+		ClientID:           firstNonEmpty(strings.TrimSpace(req.ClientID), current.ClientID),
+		ClientSecret:       secret,
+		RedirectURL:        firstNonEmpty(strings.TrimSpace(req.RedirectURL), current.RedirectURL),
+		Scopes:             firstNonEmpty(strings.TrimSpace(req.Scopes), current.Scopes),
+		FrontendSuccessURL: firstNonEmpty(strings.TrimSpace(req.FrontendSuccessURL), current.FrontendSuccessURL),
+	}
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if strings.TrimSpace(v) != "" {
+			return strings.TrimSpace(v)
+		}
+	}
+	return ""
 }
