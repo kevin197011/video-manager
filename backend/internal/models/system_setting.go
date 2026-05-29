@@ -30,7 +30,6 @@ type UpdateOIDCSettingsRequest struct {
 	IssuerURL          string `json:"issuer_url" binding:"omitempty,url"`
 	ClientID           string `json:"client_id"`
 	ClientSecret       string `json:"client_secret"`
-	ClearClientSecret  bool   `json:"clear_client_secret"`
 	RedirectURL        string `json:"redirect_url" binding:"omitempty,url"`
 	Scopes             string `json:"scopes"`
 	FrontendSuccessURL string `json:"frontend_success_url"`

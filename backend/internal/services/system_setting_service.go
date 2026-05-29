@@ -131,11 +131,10 @@ func (s *SystemSettingService) UpdateOIDCSettings(ctx context.Context, req model
 		return err
 	}
 
-	if req.ClearClientSecret {
-		return s.repo.Delete(ctx, settingOIDCClientSecret)
-	}
-	if strings.TrimSpace(req.ClientSecret) != "" {
-		return s.repo.Upsert(ctx, settingOIDCClientSecret, strings.TrimSpace(req.ClientSecret))
+	if secret := strings.TrimSpace(req.ClientSecret); secret != "" {
+		if err := s.repo.Upsert(ctx, settingOIDCClientSecret, secret); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -149,9 +148,7 @@ func boolToString(v bool) string {
 
 func mergeOIDCSettings(current *models.OIDCSettings, req models.UpdateOIDCSettingsRequest) OIDCConfig {
 	secret := strings.TrimSpace(current.ClientSecret)
-	if req.ClearClientSecret {
-		secret = ""
-	} else if v := strings.TrimSpace(req.ClientSecret); v != "" {
+	if v := strings.TrimSpace(req.ClientSecret); v != "" {
 		secret = v
 	}
 

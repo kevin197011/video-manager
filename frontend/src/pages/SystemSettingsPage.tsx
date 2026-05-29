@@ -48,7 +48,6 @@ export default function SystemSettingsPage() {
       message.success('系统设置已保存');
       await loadSettings();
       form.setFieldValue('client_secret', '');
-      form.setFieldValue('clear_client_secret', false);
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       message.error(err.response?.data?.message || '保存系统设置失败');
@@ -71,6 +70,15 @@ export default function SystemSettingsPage() {
           description="保存后立即生效。SSO 登录用户会自动创建为普通用户（非管理员）。"
         />
 
+        {!hasClientSecret && (
+          <Alert
+            type="warning"
+            showIcon
+            message="尚未配置 Client Secret"
+            description="启用 SSO 前必须在下方填写 Client Secret 并保存。该值来自 IdP 应用配置，不会回显。"
+          />
+        )}
+
         <Form
           form={form}
           layout="vertical"
@@ -78,7 +86,6 @@ export default function SystemSettingsPage() {
           initialValues={{
             enabled: false,
             scopes: 'openid profile email',
-            clear_client_secret: false,
           }}
         >
           <Form.Item name="enabled" label="启用 OIDC SSO" valuePropName="checked">
@@ -97,12 +104,21 @@ export default function SystemSettingsPage() {
             <Input />
           </Form.Item>
 
-          <Form.Item name="client_secret" label="Client Secret（留空表示不修改）">
-            <Input.Password placeholder={hasClientSecret ? '当前已配置，留空则保持不变' : '请输入 Client Secret'} />
-          </Form.Item>
-
-          <Form.Item name="clear_client_secret" valuePropName="checked">
-            <Switch checkedChildren="清除 Secret" unCheckedChildren="保留 Secret" />
+          <Form.Item
+            name="client_secret"
+            label="Client Secret"
+            rules={
+              hasClientSecret
+                ? []
+                : [{ required: true, message: '首次配置时必须填写 Client Secret' }]
+            }
+            extra={
+              hasClientSecret
+                ? '已配置。留空保存表示不修改；填写新值保存将覆盖旧 Secret。'
+                : '必填。从 IdP 控制台复制 Client Secret。'
+            }
+          >
+            <Input.Password placeholder={hasClientSecret ? '留空则不修改，填写则覆盖' : '粘贴 Client Secret'} />
           </Form.Item>
 
           <Form.Item
