@@ -70,6 +70,7 @@ func (s *SystemSettingService) GetOIDCSettings(ctx context.Context) (*models.OID
 	if settings.RedirectURL == "" {
 		settings.RedirectURL = strings.TrimSpace(os.Getenv("OIDC_REDIRECT_URL"))
 	}
+	settings.RedirectURL = normalizeOIDCRedirectURL(settings.RedirectURL)
 	if settings.Scopes == "" {
 		settings.Scopes = strings.TrimSpace(os.Getenv("OIDC_SCOPES"))
 	}
@@ -121,7 +122,7 @@ func (s *SystemSettingService) UpdateOIDCSettings(ctx context.Context, req model
 	if err := s.repo.Upsert(ctx, settingOIDCClientID, strings.TrimSpace(req.ClientID)); err != nil {
 		return err
 	}
-	if err := s.repo.Upsert(ctx, settingOIDCRedirectURL, strings.TrimSpace(req.RedirectURL)); err != nil {
+	if err := s.repo.Upsert(ctx, settingOIDCRedirectURL, normalizeOIDCRedirectURL(req.RedirectURL)); err != nil {
 		return err
 	}
 	if err := s.repo.Upsert(ctx, settingOIDCScopes, strings.TrimSpace(req.Scopes)); err != nil {

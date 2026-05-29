@@ -434,15 +434,26 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
 	c.SetCookie("oidc_state", "", -1, "/", "", secure, true)
 
-	info, err := oidcSvc.ExchangeAndVerify(c.Request.Context(), code)
+	info, err := oidcSvc.ExchangeAndVerify(c.Request.Context(), code, state)
 	if err != nil {
 		logger.Error("OIDC exchange failed",
 			"error", err,
 			"ip", c.ClientIP(),
 			"redirect_url", cfg.RedirectURL,
 			"client_id", cfg.ClientID,
+			"code_len", len(code),
+			"user_agent", c.Request.UserAgent(),
+			"referer", c.GetHeader("Referer"),
 		)
-		response.Error(c, http.StatusUnauthorized, "oidc authentication failed: "+err.Error())
+		msg := "oidc authentication failed: " + err.Error()
+		if strings.Contains(strings.ToLower(err.Error()), "authorization code not found") ||
+			strings.Contains(strings.ToLower(err.Error()), "code not found") {
+			msg = "oidc token exchange failed: IdP could not find this authorization code. " +
+				"Start SSO again from the login page (do not refresh or bookmark the callback URL). " +
+				"If it still fails, ask the ppu-sso team to verify client_secret, registered redirect_uri, " +
+				"and that all IdP nodes share the same authorization-code store (sticky session or Redis)."
+		}
+		response.Error(c, http.StatusUnauthorized, msg)
 		return
 	}
 

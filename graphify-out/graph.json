@@ -2536,7 +2536,7 @@
       "label": "systemSettingsAPI",
       "file_type": "code",
       "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L476",
+      "source_location": "L475",
       "id": "lib_api_systemsettingsapi",
       "community": 11,
       "norm_label": "systemsettingsapi"
@@ -2545,7 +2545,7 @@
       "label": "ManagedUser",
       "file_type": "code",
       "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L486",
+      "source_location": "L485",
       "id": "lib_api_manageduser",
       "community": 8,
       "norm_label": "manageduser"
@@ -2554,7 +2554,7 @@
       "label": "CreateManagedUserRequest",
       "file_type": "code",
       "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L494",
+      "source_location": "L493",
       "id": "lib_api_createmanageduserrequest",
       "community": 11,
       "norm_label": "createmanageduserrequest"
@@ -2563,7 +2563,7 @@
       "label": "UpdateManagedUserRequest",
       "file_type": "code",
       "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L500",
+      "source_location": "L499",
       "id": "lib_api_updatemanageduserrequest",
       "community": 11,
       "norm_label": "updatemanageduserrequest"
@@ -2572,7 +2572,7 @@
       "label": "userAPI",
       "file_type": "code",
       "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L505",
+      "source_location": "L504",
       "id": "lib_api_userapi",
       "community": 8,
       "norm_label": "userapi"
@@ -2880,7 +2880,7 @@
       "source_file": "backend/cmd/main.go",
       "source_location": "L1",
       "id": "backend_cmd_main_go",
-      "community": 26,
+      "community": 28,
       "norm_label": "main.go"
     },
     {
@@ -2889,7 +2889,7 @@
       "source_file": "backend/cmd/main.go",
       "source_location": "L48",
       "id": "cmd_main_main",
-      "community": 26,
+      "community": 28,
       "norm_label": "main()"
     },
     {
@@ -2898,7 +2898,7 @@
       "source_file": "backend/cmd/main.go",
       "source_location": "L313",
       "id": "cmd_main_runmigrations",
-      "community": 26,
+      "community": 28,
       "norm_label": "runmigrations()"
     },
     {
@@ -2907,7 +2907,7 @@
       "source_file": "backend/cmd/main.go",
       "source_location": "L485",
       "id": "cmd_main_initadminuser",
-      "community": 26,
+      "community": 28,
       "norm_label": "initadminuser()"
     },
     {
@@ -2916,7 +2916,7 @@
       "source_file": "backend/cmd/main.go",
       "source_location": "L509",
       "id": "cmd_main_initswaggerdocs",
-      "community": 26,
+      "community": 28,
       "norm_label": "initswaggerdocs()"
     },
     {
@@ -3330,7 +3330,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L1",
       "id": "backend_internal_repositories_user_repository_go",
-      "community": 21,
+      "community": 34,
       "norm_label": "user_repository.go"
     },
     {
@@ -3339,7 +3339,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L22",
       "id": "repositories_userrepository",
-      "community": 21,
+      "community": 43,
       "norm_label": "userrepository"
     },
     {
@@ -3348,7 +3348,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L24",
       "id": "repositories_user_repository_newuserrepository",
-      "community": 21,
+      "community": 34,
       "norm_label": "newuserrepository()"
     },
     {
@@ -3357,7 +3357,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L29",
       "id": "repositories_userrepository_getbyusername",
-      "community": 21,
+      "community": 43,
       "norm_label": ".getbyusername()"
     },
     {
@@ -3366,7 +3366,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L54",
       "id": "repositories_userrepository_getbyid",
-      "community": 21,
+      "community": 43,
       "norm_label": ".getbyid()"
     },
     {
@@ -3375,7 +3375,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L79",
       "id": "repositories_userrepository_updatepassword",
-      "community": 21,
+      "community": 43,
       "norm_label": ".updatepassword()"
     },
     {
@@ -3384,7 +3384,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L94",
       "id": "repositories_userrepository_create",
-      "community": 21,
+      "community": 43,
       "norm_label": ".create()"
     },
     {
@@ -3393,7 +3393,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L121",
       "id": "repositories_userrepository_initadminuser",
-      "community": 21,
+      "community": 43,
       "norm_label": ".initadminuser()"
     },
     {
@@ -3402,7 +3402,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L139",
       "id": "repositories_userrepository_getall",
-      "community": 21,
+      "community": 43,
       "norm_label": ".getall()"
     },
     {
@@ -3411,7 +3411,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L172",
       "id": "repositories_userrepository_update",
-      "community": 21,
+      "community": 43,
       "norm_label": ".update()"
     },
     {
@@ -3420,7 +3420,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L200",
       "id": "repositories_userrepository_delete",
-      "community": 21,
+      "community": 43,
       "norm_label": ".delete()"
     },
     {
@@ -3429,7 +3429,7 @@
       "source_file": "backend/internal/repositories/user_repository.go",
       "source_location": "L213",
       "id": "repositories_userrepository_countadmins",
-      "community": 21,
+      "community": 43,
       "norm_label": ".countadmins()"
     },
     {
@@ -3510,7 +3510,7 @@
       "source_file": "backend/internal/repositories/system_setting_repository.go",
       "source_location": "L1",
       "id": "backend_internal_repositories_system_setting_repository_go",
-      "community": 26,
+      "community": 32,
       "norm_label": "system_setting_repository.go"
     },
     {
@@ -3519,7 +3519,7 @@
       "source_file": "backend/internal/repositories/system_setting_repository.go",
       "source_location": "L14",
       "id": "repositories_systemsettingrepository",
-      "community": 26,
+      "community": 32,
       "norm_label": "systemsettingrepository"
     },
     {
@@ -3528,7 +3528,7 @@
       "source_file": "backend/internal/repositories/system_setting_repository.go",
       "source_location": "L16",
       "id": "repositories_system_setting_repository_newsystemsettingrepository",
-      "community": 26,
+      "community": 32,
       "norm_label": "newsystemsettingrepository()"
     },
     {
@@ -3537,7 +3537,7 @@
       "source_file": "backend/internal/repositories/system_setting_repository.go",
       "source_location": "L20",
       "id": "repositories_systemsettingrepository_upsert",
-      "community": 26,
+      "community": 32,
       "norm_label": ".upsert()"
     },
     {
@@ -3546,7 +3546,7 @@
       "source_file": "backend/internal/repositories/system_setting_repository.go",
       "source_location": "L31",
       "id": "repositories_systemsettingrepository_delete",
-      "community": 26,
+      "community": 32,
       "norm_label": ".delete()"
     },
     {
@@ -3555,7 +3555,7 @@
       "source_file": "backend/internal/repositories/system_setting_repository.go",
       "source_location": "L36",
       "id": "repositories_systemsettingrepository_getbyprefix",
-      "community": 26,
+      "community": 32,
       "norm_label": ".getbyprefix()"
     },
     {
@@ -3969,7 +3969,7 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L33",
       "id": "handlers_auth_handler_newauthhandler",
-      "community": 26,
+      "community": 32,
       "norm_label": "newauthhandler()"
     },
     {
@@ -4057,7 +4057,7 @@
       "label": ".OIDCCallback()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L409",
+      "source_location": "L410",
       "id": "handlers_authhandler_oidccallback",
       "community": 26,
       "norm_label": ".oidccallback()"
@@ -4066,7 +4066,7 @@
       "label": "respondOIDCNotReady()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L460",
+      "source_location": "L477",
       "id": "handlers_auth_handler_respondoidcnotready",
       "community": 26,
       "norm_label": "respondoidcnotready()"
@@ -4075,7 +4075,7 @@
       "label": ".loadOIDCService()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L489",
+      "source_location": "L506",
       "id": "handlers_authhandler_loadoidcservice",
       "community": 26,
       "norm_label": ".loadoidcservice()"
@@ -4084,7 +4084,7 @@
       "label": "generateOIDCState()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L510",
+      "source_location": "L527",
       "id": "handlers_auth_handler_generateoidcstate",
       "community": 26,
       "norm_label": "generateoidcstate()"
@@ -4093,7 +4093,7 @@
       "label": "deriveOIDCUsername()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L518",
+      "source_location": "L535",
       "id": "handlers_auth_handler_deriveoidcusername",
       "community": 26,
       "norm_label": "deriveoidcusername()"
@@ -4102,7 +4102,7 @@
       "label": "sanitizeUsername()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L537",
+      "source_location": "L554",
       "id": "handlers_auth_handler_sanitizeusername",
       "community": 26,
       "norm_label": "sanitizeusername()"
@@ -4111,7 +4111,7 @@
       "label": "buildOIDCSuccessRedirect()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L561",
+      "source_location": "L578",
       "id": "handlers_auth_handler_buildoidcsuccessredirect",
       "community": 26,
       "norm_label": "buildoidcsuccessredirect()"
@@ -4266,7 +4266,7 @@
       "source_file": "backend/internal/handlers/video_stream_endpoint_handler.go",
       "source_location": "L1",
       "id": "backend_internal_handlers_video_stream_endpoint_handler_go",
-      "community": 44,
+      "community": 28,
       "norm_label": "video_stream_endpoint_handler.go"
     },
     {
@@ -4284,7 +4284,7 @@
       "source_file": "backend/internal/handlers/video_stream_endpoint_handler.go",
       "source_location": "L22",
       "id": "handlers_video_stream_endpoint_handler_newvideostreamendpointhandler",
-      "community": 44,
+      "community": 28,
       "norm_label": "newvideostreamendpointhandler()"
     },
     {
@@ -4437,7 +4437,7 @@
       "source_file": "backend/internal/handlers/user_handler.go",
       "source_location": "L1",
       "id": "backend_internal_handlers_user_handler_go",
-      "community": 21,
+      "community": 34,
       "norm_label": "user_handler.go"
     },
     {
@@ -4455,7 +4455,7 @@
       "source_file": "backend/internal/handlers/user_handler.go",
       "source_location": "L24",
       "id": "handlers_user_handler_newuserhandler",
-      "community": 21,
+      "community": 34,
       "norm_label": "newuserhandler()"
     },
     {
@@ -4572,7 +4572,7 @@
       "source_file": "backend/internal/handlers/stats_handler.go",
       "source_location": "L1",
       "id": "backend_internal_handlers_stats_handler_go",
-      "community": 26,
+      "community": 46,
       "norm_label": "stats_handler.go"
     },
     {
@@ -4581,7 +4581,7 @@
       "source_file": "backend/internal/handlers/stats_handler.go",
       "source_location": "L14",
       "id": "handlers_statshandler",
-      "community": 26,
+      "community": 46,
       "norm_label": "statshandler"
     },
     {
@@ -4590,7 +4590,7 @@
       "source_file": "backend/internal/handlers/stats_handler.go",
       "source_location": "L16",
       "id": "handlers_stats_handler_newstatshandler",
-      "community": 26,
+      "community": 46,
       "norm_label": "newstatshandler()"
     },
     {
@@ -4608,7 +4608,7 @@
       "source_file": "backend/internal/handlers/system_setting_handler.go",
       "source_location": "L1",
       "id": "backend_internal_handlers_system_setting_handler_go",
-      "community": 26,
+      "community": 32,
       "norm_label": "system_setting_handler.go"
     },
     {
@@ -4626,7 +4626,7 @@
       "source_file": "backend/internal/handlers/system_setting_handler.go",
       "source_location": "L21",
       "id": "handlers_system_setting_handler_newsystemsettinghandler",
-      "community": 26,
+      "community": 32,
       "norm_label": "newsystemsettinghandler()"
     },
     {
@@ -4653,7 +4653,7 @@
       "source_file": "backend/internal/handlers/cdn_provider_handler.go",
       "source_location": "L1",
       "id": "backend_internal_handlers_cdn_provider_handler_go",
-      "community": 26,
+      "community": 44,
       "norm_label": "cdn_provider_handler.go"
     },
     {
@@ -4671,7 +4671,7 @@
       "source_file": "backend/internal/handlers/cdn_provider_handler.go",
       "source_location": "L22",
       "id": "handlers_cdn_provider_handler_newcdnproviderhandler",
-      "community": 26,
+      "community": 44,
       "norm_label": "newcdnproviderhandler()"
     },
     {
@@ -4777,7 +4777,7 @@
       "label": "OIDCConfigIssues()",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L22",
+      "source_location": "L29",
       "id": "services_oidc_service_oidcconfigissues",
       "community": 26,
       "norm_label": "oidcconfigissues()"
@@ -4786,7 +4786,7 @@
       "label": "OIDCUserInfo",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L42",
+      "source_location": "L49",
       "id": "services_oidcuserinfo",
       "community": 26,
       "norm_label": "oidcuserinfo"
@@ -4795,7 +4795,7 @@
       "label": "OIDCService",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L49",
+      "source_location": "L56",
       "id": "services_oidcservice",
       "community": 26,
       "norm_label": "oidcservice"
@@ -4804,7 +4804,7 @@
       "label": "OIDCConfig",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L57",
+      "source_location": "L64",
       "id": "services_oidcconfig",
       "community": 26,
       "norm_label": "oidcconfig"
@@ -4813,7 +4813,7 @@
       "label": "NewOIDCService()",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L67",
+      "source_location": "L74",
       "id": "services_oidc_service_newoidcservice",
       "community": 26,
       "norm_label": "newoidcservice()"
@@ -4822,7 +4822,7 @@
       "label": "NewOIDCServiceFromConfig()",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L80",
+      "source_location": "L87",
       "id": "services_oidc_service_newoidcservicefromconfig",
       "community": 26,
       "norm_label": "newoidcservicefromconfig()"
@@ -4831,7 +4831,7 @@
       "label": ".IsEnabled()",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L127",
+      "source_location": "L138",
       "id": "services_oidcservice_isenabled",
       "community": 26,
       "norm_label": ".isenabled()"
@@ -4840,7 +4840,7 @@
       "label": ".AuthCodeURL()",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L131",
+      "source_location": "L142",
       "id": "services_oidcservice_authcodeurl",
       "community": 26,
       "norm_label": ".authcodeurl()"
@@ -4849,16 +4849,106 @@
       "label": ".ExchangeAndVerify()",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L138",
+      "source_location": "L149",
       "id": "services_oidcservice_exchangeandverify",
       "community": 26,
       "norm_label": ".exchangeandverify()"
     },
     {
+      "label": "userInfoFromOIDC()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L182",
+      "id": "services_oidc_service_userinfofromoidc",
+      "community": 26,
+      "norm_label": "userinfofromoidc()"
+    },
+    {
+      "label": "normalizeOIDCRedirectURL()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L202",
+      "id": "services_oidc_service_normalizeoidcredirecturl",
+      "community": 26,
+      "norm_label": "normalizeoidcredirecturl()"
+    },
+    {
+      "label": "oidcTokenError",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L206",
+      "id": "services_oidctokenerror",
+      "community": 26,
+      "norm_label": "oidctokenerror"
+    },
+    {
+      "label": ".Error()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L212",
+      "id": "services_oidctokenerror_error",
+      "community": 26,
+      "norm_label": ".error()"
+    },
+    {
+      "label": "isOIDCCodeNotFoundErr()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L219",
+      "id": "services_oidc_service_isoidccodenotfounderr",
+      "community": 26,
+      "norm_label": "isoidccodenotfounderr()"
+    },
+    {
+      "label": ".exchangeAuthorizationCode()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L231",
+      "id": "services_oidcservice_exchangeauthorizationcode",
+      "community": 26,
+      "norm_label": ".exchangeauthorizationcode()"
+    },
+    {
+      "label": ".postTokenExchange()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L253",
+      "id": "services_oidcservice_posttokenexchange",
+      "community": 26,
+      "norm_label": ".posttokenexchange()"
+    },
+    {
+      "label": ".doTokenRequest()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L285",
+      "id": "services_oidcservice_dotokenrequest",
+      "community": 26,
+      "norm_label": ".dotokenrequest()"
+    },
+    {
+      "label": "parseOIDCTokenErrorMessage()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L309",
+      "id": "services_oidc_service_parseoidctokenerrormessage",
+      "community": 26,
+      "norm_label": "parseoidctokenerrormessage()"
+    },
+    {
+      "label": "parseOIDCTokenResponse()",
+      "file_type": "code",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L333",
+      "id": "services_oidc_service_parseoidctokenresponse",
+      "community": 26,
+      "norm_label": "parseoidctokenresponse()"
+    },
+    {
       "label": ".FrontendSuccessURL()",
       "file_type": "code",
       "source_file": "backend/internal/services/oidc_service.go",
-      "source_location": "L165",
+      "source_location": "L369",
       "id": "services_oidcservice_frontendsuccessurl",
       "community": 26,
       "norm_label": ".frontendsuccessurl()"
@@ -4887,7 +4977,7 @@
       "source_file": "backend/internal/services/auth_service.go",
       "source_location": "L30",
       "id": "services_auth_service_newauthservice",
-      "community": 26,
+      "community": 21,
       "norm_label": "newauthservice()"
     },
     {
@@ -4896,7 +4986,7 @@
       "source_file": "backend/internal/services/auth_service.go",
       "source_location": "L38",
       "id": "services_authservice_login",
-      "community": 21,
+      "community": 45,
       "norm_label": ".login()"
     },
     {
@@ -4932,7 +5022,7 @@
       "source_file": "backend/internal/services/auth_service.go",
       "source_location": "L115",
       "id": "services_authservice_createtoken",
-      "community": 21,
+      "community": 45,
       "norm_label": ".createtoken()"
     },
     {
@@ -5220,7 +5310,7 @@
       "source_file": "backend/internal/services/user_service.go",
       "source_location": "L1",
       "id": "backend_internal_services_user_service_go",
-      "community": 21,
+      "community": 34,
       "norm_label": "user_service.go"
     },
     {
@@ -5229,7 +5319,7 @@
       "source_file": "backend/internal/services/user_service.go",
       "source_location": "L21",
       "id": "services_userservice",
-      "community": 21,
+      "community": 34,
       "norm_label": "userservice"
     },
     {
@@ -5238,7 +5328,7 @@
       "source_file": "backend/internal/services/user_service.go",
       "source_location": "L25",
       "id": "services_user_service_newuserservice",
-      "community": 21,
+      "community": 34,
       "norm_label": "newuserservice()"
     },
     {
@@ -5247,7 +5337,7 @@
       "source_file": "backend/internal/services/user_service.go",
       "source_location": "L31",
       "id": "services_userservice_getall",
-      "community": 21,
+      "community": 34,
       "norm_label": ".getall()"
     },
     {
@@ -5265,7 +5355,7 @@
       "source_file": "backend/internal/services/user_service.go",
       "source_location": "L43",
       "id": "services_userservice_update",
-      "community": 21,
+      "community": 34,
       "norm_label": ".update()"
     },
     {
@@ -5274,7 +5364,7 @@
       "source_file": "backend/internal/services/user_service.go",
       "source_location": "L63",
       "id": "services_userservice_delete",
-      "community": 21,
+      "community": 34,
       "norm_label": ".delete()"
     },
     {
@@ -5373,7 +5463,7 @@
       "source_file": "backend/internal/services/cdn_provider_service.go",
       "source_location": "L20",
       "id": "services_cdn_provider_service_newcdnproviderservice",
-      "community": 26,
+      "community": 44,
       "norm_label": "newcdnproviderservice()"
     },
     {
@@ -5454,7 +5544,7 @@
       "source_file": "backend/internal/services/system_setting_service.go",
       "source_location": "L35",
       "id": "services_system_setting_service_newsystemsettingservice",
-      "community": 26,
+      "community": 32,
       "norm_label": "newsystemsettingservice()"
     },
     {
@@ -5470,7 +5560,7 @@
       "label": ".GetOIDCSettingsResponse()",
       "file_type": "code",
       "source_file": "backend/internal/services/system_setting_service.go",
-      "source_location": "L86",
+      "source_location": "L87",
       "id": "services_systemsettingservice_getoidcsettingsresponse",
       "community": 26,
       "norm_label": ".getoidcsettingsresponse()"
@@ -5479,7 +5569,7 @@
       "label": ".UpdateOIDCSettings()",
       "file_type": "code",
       "source_file": "backend/internal/services/system_setting_service.go",
-      "source_location": "L102",
+      "source_location": "L103",
       "id": "services_systemsettingservice_updateoidcsettings",
       "community": 26,
       "norm_label": ".updateoidcsettings()"
@@ -5506,7 +5596,7 @@
       "label": "firstNonEmpty()",
       "file_type": "code",
       "source_file": "backend/internal/services/system_setting_service.go",
-      "source_location": "L169",
+      "source_location": "L167",
       "id": "services_system_setting_service_firstnonempty",
       "community": 26,
       "norm_label": "firstnonempty()"
@@ -6642,7 +6732,7 @@
       "source_file": "backend/pkg/jwt/jwt.go",
       "source_location": "L1",
       "id": "backend_pkg_jwt_jwt_go",
-      "community": 21,
+      "community": 45,
       "norm_label": "jwt.go"
     },
     {
@@ -6651,7 +6741,7 @@
       "source_file": "backend/pkg/jwt/jwt.go",
       "source_location": "L21",
       "id": "jwt_claims",
-      "community": 21,
+      "community": 45,
       "norm_label": "claims"
     },
     {
@@ -6660,7 +6750,7 @@
       "source_file": "backend/pkg/jwt/jwt.go",
       "source_location": "L29",
       "id": "jwt_jwt_generatetoken",
-      "community": 21,
+      "community": 45,
       "norm_label": "generatetoken()"
     },
     {
@@ -6669,7 +6759,7 @@
       "source_file": "backend/pkg/jwt/jwt.go",
       "source_location": "L35",
       "id": "jwt_jwt_generatetokenwithexpiration",
-      "community": 21,
+      "community": 45,
       "norm_label": "generatetokenwithexpiration()"
     },
     {
@@ -6678,7 +6768,7 @@
       "source_file": "backend/pkg/jwt/jwt.go",
       "source_location": "L76",
       "id": "jwt_jwt_validatetoken",
-      "community": 21,
+      "community": 45,
       "norm_label": "validatetoken()"
     },
     {
@@ -6696,7 +6786,7 @@
       "source_file": "backend/pkg/middleware/auth.go",
       "source_location": "L1",
       "id": "backend_pkg_middleware_auth_go",
-      "community": 26,
+      "community": 28,
       "norm_label": "auth.go"
     },
     {
@@ -6705,7 +6795,7 @@
       "source_file": "backend/pkg/middleware/auth.go",
       "source_location": "L19",
       "id": "middleware_auth_authmiddleware",
-      "community": 26,
+      "community": 28,
       "norm_label": "authmiddleware()"
     },
     {
@@ -6714,7 +6804,7 @@
       "source_file": "backend/pkg/middleware/auth.go",
       "source_location": "L69",
       "id": "middleware_auth_adminmiddleware",
-      "community": 26,
+      "community": 28,
       "norm_label": "adminmiddleware()"
     },
     {
@@ -6723,7 +6813,7 @@
       "source_file": "backend/pkg/middleware/auth.go",
       "source_location": "L82",
       "id": "middleware_auth_readonlyfornonadminmiddleware",
-      "community": 26,
+      "community": 28,
       "norm_label": "readonlyfornonadminmiddleware()"
     },
     {
@@ -6732,7 +6822,7 @@
       "source_file": "backend/pkg/middleware/logger.go",
       "source_location": "L1",
       "id": "backend_pkg_middleware_logger_go",
-      "community": 26,
+      "community": 28,
       "norm_label": "logger.go"
     },
     {
@@ -6741,7 +6831,7 @@
       "source_file": "backend/pkg/middleware/logger.go",
       "source_location": "L16",
       "id": "middleware_logger_loggermiddleware",
-      "community": 26,
+      "community": 28,
       "norm_label": "loggermiddleware()"
     },
     {
@@ -6750,7 +6840,7 @@
       "source_file": "backend/pkg/database/database.go",
       "source_location": "L1",
       "id": "backend_pkg_database_database_go",
-      "community": 26,
+      "community": 58,
       "norm_label": "database.go"
     },
     {
@@ -6759,7 +6849,7 @@
       "source_file": "backend/pkg/database/database.go",
       "source_location": "L19",
       "id": "database_database_init",
-      "community": 26,
+      "community": 58,
       "norm_label": "init()"
     },
     {
@@ -6768,7 +6858,7 @@
       "source_file": "backend/pkg/database/database.go",
       "source_location": "L52",
       "id": "database_database_close",
-      "community": 26,
+      "community": 58,
       "norm_label": "close()"
     },
     {
@@ -6840,7 +6930,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L1",
       "id": "backend_pkg_logger_logger_go",
-      "community": 21,
+      "community": 42,
       "norm_label": "logger.go"
     },
     {
@@ -6849,7 +6939,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L21",
       "id": "logger_loglevel",
-      "community": 21,
+      "community": 42,
       "norm_label": "loglevel"
     },
     {
@@ -6858,7 +6948,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L31",
       "id": "logger_logger_init",
-      "community": 21,
+      "community": 42,
       "norm_label": "init()"
     },
     {
@@ -6867,7 +6957,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L66",
       "id": "logger_logger_getloglevel",
-      "community": 21,
+      "community": 42,
       "norm_label": "getloglevel()"
     },
     {
@@ -6876,7 +6966,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L87",
       "id": "logger_logger_getlogformat",
-      "community": 21,
+      "community": 42,
       "norm_label": "getlogformat()"
     },
     {
@@ -6885,7 +6975,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L96",
       "id": "logger_logger_debug",
-      "community": 26,
+      "community": 28,
       "norm_label": "debug()"
     },
     {
@@ -6894,7 +6984,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L101",
       "id": "logger_logger_info",
-      "community": 21,
+      "community": 42,
       "norm_label": "info()"
     },
     {
@@ -6903,7 +6993,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L106",
       "id": "logger_logger_warn",
-      "community": 26,
+      "community": 28,
       "norm_label": "warn()"
     },
     {
@@ -6912,7 +7002,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L111",
       "id": "logger_logger_error",
-      "community": 21,
+      "community": 42,
       "norm_label": "error()"
     },
     {
@@ -6921,7 +7011,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L116",
       "id": "logger_logger_debugcontext",
-      "community": 21,
+      "community": 45,
       "norm_label": "debugcontext()"
     },
     {
@@ -6939,7 +7029,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L126",
       "id": "logger_logger_warncontext",
-      "community": 21,
+      "community": 42,
       "norm_label": "warncontext()"
     },
     {
@@ -6948,7 +7038,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L131",
       "id": "logger_logger_errorcontext",
-      "community": 21,
+      "community": 45,
       "norm_label": "errorcontext()"
     },
     {
@@ -6957,7 +7047,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L136",
       "id": "logger_logger_with",
-      "community": 21,
+      "community": 42,
       "norm_label": "with()"
     },
     {
@@ -6966,7 +7056,7 @@
       "source_file": "backend/pkg/logger/logger.go",
       "source_location": "L141",
       "id": "logger_logger_withgroup",
-      "community": 21,
+      "community": 42,
       "norm_label": "withgroup()"
     },
     {
@@ -19295,9 +19385,9 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L460",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_internal_handlers_auth_handler_go",
-      "target": "handlers_auth_handler_respondoidcnotready",
-      "confidence_score": 1.0
+      "target": "handlers_auth_handler_respondoidcnotready"
     },
     {
       "relation": "contains",
@@ -19698,9 +19788,9 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L370",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_authhandler_oidclogin",
-      "target": "handlers_auth_handler_respondoidcnotready",
-      "confidence_score": 1.0
+      "target": "handlers_auth_handler_respondoidcnotready"
     },
     {
       "relation": "calls",
@@ -19764,9 +19854,9 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L417",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_authhandler_oidccallback",
-      "target": "handlers_auth_handler_respondoidcnotready",
-      "confidence_score": 1.0
+      "target": "handlers_auth_handler_respondoidcnotready"
     },
     {
       "relation": "calls",
@@ -22176,6 +22266,66 @@
       "target": "services_oidc_service_newoidcservicefromconfig"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L182",
+      "weight": 1.0,
+      "source": "backend_internal_services_oidc_service_go",
+      "target": "services_oidc_service_userinfofromoidc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L202",
+      "weight": 1.0,
+      "source": "backend_internal_services_oidc_service_go",
+      "target": "services_oidc_service_normalizeoidcredirecturl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L206",
+      "weight": 1.0,
+      "source": "backend_internal_services_oidc_service_go",
+      "target": "services_oidctokenerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L219",
+      "weight": 1.0,
+      "source": "backend_internal_services_oidc_service_go",
+      "target": "services_oidc_service_isoidccodenotfounderr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L309",
+      "weight": 1.0,
+      "source": "backend_internal_services_oidc_service_go",
+      "target": "services_oidc_service_parseoidctokenerrormessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L333",
+      "weight": 1.0,
+      "source": "backend_internal_services_oidc_service_go",
+      "target": "services_oidc_service_parseoidctokenresponse",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -22231,6 +22381,36 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L231",
+      "weight": 1.0,
+      "source": "services_oidcservice",
+      "target": "services_oidcservice_exchangeauthorizationcode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L253",
+      "weight": 1.0,
+      "source": "services_oidcservice",
+      "target": "services_oidcservice_posttokenexchange",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L285",
+      "weight": 1.0,
+      "source": "services_oidcservice",
+      "target": "services_oidcservice_dotokenrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
       "source_location": "L165",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -22253,6 +22433,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "services_oidc_service_newoidcservicefromconfig",
+      "target": "services_oidc_service_normalizeoidcredirecturl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
       "source_location": "L132",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -22269,6 +22460,126 @@
       "confidence_score": 1.0,
       "source": "services_oidcservice_exchangeandverify",
       "target": "services_oidcservice_isenabled"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L154",
+      "weight": 1.0,
+      "source": "services_oidcservice_exchangeandverify",
+      "target": "services_oidcservice_exchangeauthorizationcode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L179",
+      "weight": 1.0,
+      "source": "services_oidcservice_exchangeandverify",
+      "target": "services_oidc_service_userinfofromoidc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/internal/services/system_setting_service.go",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "services_systemsettingservice_getoidcsettings",
+      "target": "services_oidc_service_normalizeoidcredirecturl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/internal/services/system_setting_service.go",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "services_systemsettingservice_updateoidcsettings",
+      "target": "services_oidc_service_normalizeoidcredirecturl"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L212",
+      "weight": 1.0,
+      "source": "services_oidctokenerror",
+      "target": "services_oidctokenerror_error",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L223",
+      "weight": 1.0,
+      "source": "services_oidc_service_isoidccodenotfounderr",
+      "target": "services_oidctokenerror_error",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L241",
+      "weight": 1.0,
+      "source": "services_oidcservice_exchangeauthorizationcode",
+      "target": "services_oidc_service_isoidccodenotfounderr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L235",
+      "weight": 1.0,
+      "source": "services_oidcservice_exchangeauthorizationcode",
+      "target": "services_oidcservice_posttokenexchange",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L270",
+      "weight": 1.0,
+      "source": "services_oidcservice_posttokenexchange",
+      "target": "services_oidcservice_dotokenrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L298",
+      "weight": 1.0,
+      "source": "services_oidcservice_dotokenrequest",
+      "target": "services_oidc_service_parseoidctokenerrormessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/services/oidc_service.go",
+      "source_location": "L306",
+      "weight": 1.0,
+      "source": "services_oidcservice_dotokenrequest",
+      "target": "services_oidc_service_parseoidctokenresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -32756,5 +33067,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4652bdf915b62453db5619c5aabe13191003ff79"
+  "built_at_commit": "367979ad076b5c1e941477a1afff5c0a1eed2980"
 }
