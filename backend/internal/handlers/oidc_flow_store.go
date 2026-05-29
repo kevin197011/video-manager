@@ -30,6 +30,52 @@ var globalOIDCFlowStore = &oidcFlowStore{
 	flows: make(map[string]*oidcFlowData),
 }
 
+// oidcStateStore tracks OIDC state server-side so callback works when cookies
+// are dropped (proxy, cross-host API URL, or concurrent prefetch).
+type oidcStateStore struct {
+	mu     sync.Mutex
+	states map[string]time.Time
+}
+
+var globalOIDCStateStore = &oidcStateStore{
+	states: make(map[string]time.Time),
+}
+
+func (s *oidcStateStore) register(state string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.purgeLocked()
+	s.states[state] = time.Now().Add(oidcFlowTTL)
+}
+
+func (s *oidcStateStore) valid(state string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	exp, ok := s.states[state]
+	return ok && time.Now().Before(exp)
+}
+
+func (s *oidcStateStore) consume(state string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	exp, ok := s.states[state]
+	if !ok || time.Now().After(exp) {
+		delete(s.states, state)
+		return false
+	}
+	delete(s.states, state)
+	return true
+}
+
+func (s *oidcStateStore) purgeLocked() {
+	now := time.Now()
+	for state, exp := range s.states {
+		if now.After(exp) {
+			delete(s.states, state)
+		}
+	}
+}
+
 func (s *oidcFlowStore) create(code, state string) (string, error) {
 	b := make([]byte, 24)
 	if _, err := rand.Read(b); err != nil {

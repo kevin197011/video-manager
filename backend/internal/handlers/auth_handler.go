@@ -395,8 +395,11 @@ func (h *AuthHandler) OIDCLogin(c *gin.Context) {
 		"ip", c.ClientIP(),
 	)
 
+	globalOIDCStateStore.register(state)
+
 	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
-	c.SetSameSite(http.SameSiteLaxMode)
+	// None+Secure helps some browsers send the cookie on the cross-site redirect from the IdP.
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie("oidc_state", state, 300, "/", "", secure, true)
 	c.Redirect(http.StatusFound, authURL)
 }
@@ -432,14 +435,22 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 		return
 	}
 
-	cookieState, err := c.Cookie("oidc_state")
-	if err != nil || cookieState == "" || cookieState != state {
+	cookieState, _ := c.Cookie("oidc_state")
+	serverStateOK := globalOIDCStateStore.valid(state)
+	cookieStateOK := cookieState != "" && cookieState == state
+	if !serverStateOK && !cookieStateOK {
 		logger.Warn("OIDC callback rejected: invalid state",
 			"ip", c.ClientIP(),
 			"user_agent", c.Request.UserAgent(),
-			"has_cookie", err == nil && cookieState != "",
+			"has_cookie", cookieState != "",
+			"server_state_valid", serverStateOK,
 		)
-		response.Error(c, http.StatusBadRequest, "invalid oidc state")
+		successURL := cfg.FrontendSuccessURL
+		if successURL == "" {
+			successURL = "/login"
+		}
+		c.Redirect(http.StatusFound, buildOIDCErrorRedirect(successURL,
+			"SSO session expired or invalid. Please start SSO login again from the login page (do not open the callback URL directly)."))
 		return
 	}
 
@@ -450,7 +461,7 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 	}
 
 	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
-	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie("oidc_state", "", -1, "/", "", secure, true)
 	c.SetCookie("oidc_flow", flowID, 300, "/", "", secure, true)
 
@@ -498,6 +509,12 @@ func (h *AuthHandler) OIDCComplete(c *gin.Context) {
 		return
 	}
 	defer globalOIDCFlowStore.delete(flowID)
+
+	if !globalOIDCStateStore.consume(flow.state) {
+		c.Redirect(http.StatusFound, buildOIDCErrorRedirect(oidcSvc.FrontendSuccessURL(),
+			"SSO session expired. Please start SSO login again from the login page."))
+		return
+	}
 
 	var (
 		info        *services.OIDCUserInfo
