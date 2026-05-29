@@ -23,6 +23,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const oidcHTTPTimeout = 30 * time.Second
+
+var oidcHTTPClient = &http.Client{Timeout: oidcHTTPTimeout}
+
 var ErrOIDCDisabled = errors.New("oidc is not configured")
 
 // OIDCConfigIssues returns human-readable missing fields when OIDC cannot run.
@@ -284,7 +288,7 @@ func (s *OIDCService) postTokenExchange(ctx context.Context, code, state string,
 
 func (s *OIDCService) doTokenRequest(req *http.Request) (*oauth2.Token, string, error) {
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := oidcHTTPClient.Do(req)
 	if err != nil {
 		return nil, "", err
 	}

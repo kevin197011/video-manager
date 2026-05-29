@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
@@ -111,6 +112,9 @@ func (s *SystemSettingService) UpdateOIDCSettings(ctx context.Context, req model
 		if issues := OIDCConfigIssues(merged); len(issues) > 0 {
 			return fmt.Errorf("%w: %s", ErrOIDCSettingsIncomplete, strings.Join(issues, ", "))
 		}
+		if err := validateOIDCFrontendSuccessURL(merged.FrontendSuccessURL); err != nil {
+			return err
+		}
 	}
 
 	if err := s.repo.Upsert(ctx, settingOIDCEnabled, boolToString(req.Enabled)); err != nil {
@@ -171,4 +175,16 @@ func firstNonEmpty(values ...string) string {
 		}
 	}
 	return ""
+}
+
+func validateOIDCFrontendSuccessURL(raw string) error {
+	u, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return fmt.Errorf("frontend_success_url must be a full URL to the SPA login page (e.g. https://video-manager.example.com/login)")
+	}
+	path := strings.ToLower(u.Path)
+	if strings.Contains(path, "/api/auth/oidc") || strings.HasSuffix(path, "/oidc/login") {
+		return fmt.Errorf("frontend_success_url must point to the frontend /login page, not an OIDC API route")
+	}
+	return nil
 }

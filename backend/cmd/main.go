@@ -142,7 +142,6 @@ func main() {
 			auth.GET("/oidc/status", authHandler.OIDCStatus)
 			auth.GET("/oidc/login", authHandler.OIDCLogin)
 			auth.GET("/oidc/callback", authHandler.OIDCCallback)
-			auth.POST("/oidc/complete", authHandler.OIDCComplete)
 		}
 	}
 

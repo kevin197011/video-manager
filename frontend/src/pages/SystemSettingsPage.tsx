@@ -163,7 +163,7 @@ export default function SystemSettingsPage() {
             label="Frontend Success URL"
             rules={[{ required: true, message: '请输入前端成功跳转 URL' }, { type: 'url', message: '请输入合法 URL' }]}
           >
-            <Input placeholder="http://localhost:3000/login" />
+            <Input placeholder="https://video-manager.slileisure.com/login" />
           </Form.Item>
 
           <Space>
@@ -194,7 +194,10 @@ export default function SystemSettingsPage() {
           />
         )}
 
-        <Text type="secondary">提示：OIDC 登录入口为 `/api/auth/oidc/login`。</Text>
+        <Text type="secondary">
+          提示：SSO 入口为 `/api/auth/oidc/login`；登录成功后会跳转到 `/sso-callback`（与 dvr-manager
+          相同）。Frontend Success URL 仅作兼容备用，请填前端登录页，不要填 OIDC API 地址。
+        </Text>
       </Space>
     </Card>
   );
