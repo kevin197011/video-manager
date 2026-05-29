@@ -306,14 +306,6 @@ func (h *AuthHandler) DeleteToken(c *gin.Context) {
 	response.Success(c, gin.H{"message": "token deleted successfully"})
 }
 
-// OIDCLogin redirects user to OIDC provider authorization endpoint.
-// @Summary OIDC login redirect
-// @Description Redirect to OIDC provider for SSO login
-// @Tags auth
-// @Produce json
-// @Success 302 {string} string "Redirect to OIDC provider"
-// @Failure 503 {object} response.Response
-// @Router /api/auth/oidc/login [get]
 // OIDCStatus reports whether SSO login is ready (public).
 // @Summary OIDC availability
 // @Description Check if OIDC SSO login is configured and ready
@@ -345,38 +337,60 @@ func (h *AuthHandler) OIDCStatus(c *gin.Context) {
 	})
 }
 
+// OIDCLogin redirects user to OIDC provider authorization endpoint.
+// @Summary OIDC login redirect
+// @Description Redirect to OIDC provider for SSO login
+// @Tags auth
+// @Produce json
+// @Success 302 {string} string "Redirect to OIDC provider"
+// @Failure 503 {object} response.Response
+// @Router /api/auth/oidc/login [get]
 func (h *AuthHandler) OIDCLogin(c *gin.Context) {
+	logger.Info("OIDC login requested",
+		"ip", c.ClientIP(),
+		"host", c.Request.Host,
+		"forwarded_proto", c.GetHeader("X-Forwarded-Proto"),
+	)
+
 	oidcSvc, cfg, err := h.loadOIDCService(c.Request.Context())
 	if err != nil {
-		logger.Warn("Failed to initialize OIDC service", "error", err)
+		logger.Error("OIDC provider initialization failed",
+			"error", err,
+			"issuer_url", cfg.IssuerURL,
+			"client_id", cfg.ClientID,
+			"has_client_secret", cfg.ClientSecret != "",
+			"redirect_url", cfg.RedirectURL,
+			"ip", c.ClientIP(),
+		)
 		response.Error(c, http.StatusServiceUnavailable, "oidc provider discovery failed: "+err.Error())
 		return
 	}
+
 	if !oidcSvc.IsEnabled() {
-		issues := services.OIDCConfigIssues(cfg)
-		msg := "oidc is not fully configured"
-		if len(issues) > 0 {
-			msg = msg + ": " + strings.Join(issues, ", ")
-		}
-		logger.Warn("OIDC login requested but not ready", "issues", issues)
-		response.Error(c, http.StatusServiceUnavailable, msg)
+		respondOIDCNotReady(c, cfg, "incomplete configuration")
 		return
 	}
 
 	state, err := generateOIDCState()
 	if err != nil {
+		logger.Error("OIDC state generation failed", "error", err, "ip", c.ClientIP())
 		response.InternalServerError(c, "failed to initialize oidc state")
 		return
 	}
 
 	authURL, err := oidcSvc.AuthCodeURL(state)
 	if err != nil {
-		logger.Warn("Failed to build OIDC auth URL", "error", err)
-		response.InternalServerError(c, "failed to build oidc auth url")
+		respondOIDCNotReady(c, cfg, "auth_code_url: "+err.Error())
 		return
 	}
 
-	secure := c.Request.TLS != nil
+	logger.Info("OIDC login redirect",
+		"issuer_url", cfg.IssuerURL,
+		"redirect_url", cfg.RedirectURL,
+		"ip", c.ClientIP(),
+	)
+
+	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
 	c.SetCookie("oidc_state", state, 300, "/", "", secure, true)
 	c.Redirect(http.StatusFound, authURL)
 }
@@ -400,12 +414,7 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 		return
 	}
 	if !oidcSvc.IsEnabled() {
-		issues := services.OIDCConfigIssues(cfg)
-		msg := "oidc is not fully configured"
-		if len(issues) > 0 {
-			msg = msg + ": " + strings.Join(issues, ", ")
-		}
-		response.Error(c, http.StatusServiceUnavailable, msg)
+		respondOIDCNotReady(c, cfg, "incomplete configuration")
 		return
 	}
 
@@ -421,7 +430,7 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 		response.Error(c, http.StatusBadRequest, "invalid oidc state")
 		return
 	}
-	secure := c.Request.TLS != nil
+	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
 	c.SetCookie("oidc_state", "", -1, "/", "", secure, true)
 
 	info, err := oidcSvc.ExchangeAndVerify(c.Request.Context(), code)
@@ -446,6 +455,35 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 
 	redirectTarget := buildOIDCSuccessRedirect(oidcSvc.FrontendSuccessURL(), loginResp.Token)
 	c.Redirect(http.StatusFound, redirectTarget)
+}
+
+func respondOIDCNotReady(c *gin.Context, cfg services.OIDCConfig, reason string) {
+	issues := services.OIDCConfigIssues(cfg)
+	msg := "oidc is not fully configured"
+	if len(issues) > 0 {
+		msg = msg + ": " + strings.Join(issues, ", ")
+	}
+
+	logger.Error("OIDC login not ready",
+		"reason", reason,
+		"issues", issues,
+		"enabled", cfg.Enabled,
+		"issuer_url", cfg.IssuerURL,
+		"client_id", cfg.ClientID,
+		"has_client_secret", cfg.ClientSecret != "",
+		"redirect_url", cfg.RedirectURL,
+		"ip", c.ClientIP(),
+	)
+
+	c.JSON(http.StatusServiceUnavailable, response.Response{
+		Code:    http.StatusServiceUnavailable,
+		Message: msg,
+		Data: gin.H{
+			"issues":            issues,
+			"enabled":           cfg.Enabled,
+			"has_client_secret": cfg.ClientSecret != "",
+		},
+	})
 }
 
 func (h *AuthHandler) loadOIDCService(ctx context.Context) (*services.OIDCService, services.OIDCConfig, error) {
