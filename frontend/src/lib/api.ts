@@ -472,6 +472,13 @@ export type UpdateOIDCSettingsRequest = {
   frontend_success_url: string;
 };
 
+export type OIDCProbeResult = {
+  probe_result: string;
+  redirect_url: string;
+  token_endpoint: string;
+  hint: string;
+};
+
 export const systemSettingsAPI = {
   getOIDCSettings: async (): Promise<OIDCSettings> => {
     const response = await api.get<APIResponse<OIDCSettings>>('/system-settings/oidc');
@@ -479,6 +486,10 @@ export const systemSettingsAPI = {
   },
   updateOIDCSettings: async (data: UpdateOIDCSettingsRequest): Promise<void> => {
     await api.put('/system-settings/oidc', data);
+  },
+  probeOIDCSettings: async (): Promise<OIDCProbeResult> => {
+    const response = await api.post<APIResponse<OIDCProbeResult>>('/system-settings/oidc/probe');
+    return response.data.data;
   },
 };
 

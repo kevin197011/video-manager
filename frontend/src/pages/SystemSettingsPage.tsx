@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Alert, Button, Card, Form, Input, Space, Switch, Typography, message } from 'antd';
 import { auth } from '../lib/auth';
-import { systemSettingsAPI, type OIDCSettings, type UpdateOIDCSettingsRequest } from '../lib/api';
+import {
+  systemSettingsAPI,
+  type OIDCProbeResult,
+  type OIDCSettings,
+  type UpdateOIDCSettingsRequest,
+} from '../lib/api';
 
 const { Text } = Typography;
 
@@ -10,6 +15,8 @@ export default function SystemSettingsPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [probing, setProbing] = useState(false);
+  const [probeResult, setProbeResult] = useState<OIDCProbeResult | null>(null);
   const [hasClientSecret, setHasClientSecret] = useState(false);
 
   const loadSettings = async () => {
@@ -36,6 +43,24 @@ export default function SystemSettingsPage() {
   useEffect(() => {
     void loadSettings();
   }, []);
+
+  const handleProbe = async () => {
+    setProbing(true);
+    try {
+      const result = await systemSettingsAPI.probeOIDCSettings();
+      setProbeResult(result);
+      if (result.probe_result === 'client_credentials_ok') {
+        message.success('Client Secret 校验通过');
+      } else {
+        message.warning(result.hint || 'OIDC 探测未通过');
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err.response?.data?.message || 'OIDC 探测失败');
+    } finally {
+      setProbing(false);
+    }
+  };
 
   const handleSubmit = async (values: UpdateOIDCSettingsRequest) => {
     if (values.enabled && !hasClientSecret && !values.client_secret?.trim()) {
@@ -148,8 +173,26 @@ export default function SystemSettingsPage() {
             <Button onClick={() => void loadSettings()} loading={loading}>
               刷新
             </Button>
+            <Button onClick={() => void handleProbe()} loading={probing}>
+              探测 Client Secret
+            </Button>
           </Space>
         </Form>
+
+        {probeResult && (
+          <Alert
+            type={probeResult.probe_result === 'client_credentials_ok' ? 'success' : 'warning'}
+            showIcon
+            message={`探测结果: ${probeResult.probe_result}`}
+            description={
+              <>
+                <div>{probeResult.hint}</div>
+                <div>Redirect URL: {probeResult.redirect_url}</div>
+                <div>Token endpoint: {probeResult.token_endpoint}</div>
+              </>
+            }
+          />
+        )}
 
         <Text type="secondary">提示：OIDC 登录入口为 `/api/auth/oidc/login`。</Text>
       </Space>

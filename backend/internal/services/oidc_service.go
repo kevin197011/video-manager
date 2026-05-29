@@ -372,3 +372,43 @@ func (s *OIDCService) FrontendSuccessURL() string {
 	}
 	return s.frontendSuccessURL
 }
+
+// ProbeClientCredentials posts a dummy code to the token endpoint to verify client_id/secret.
+// ppu-sso returns "Invalid client credentials" when secret is wrong, and
+// "authorization code not found" when credentials are accepted.
+func (s *OIDCService) ProbeClientCredentials(ctx context.Context) (string, error) {
+	if !s.IsEnabled() {
+		return "", ErrOIDCDisabled
+	}
+	_, _, err := s.postTokenExchange(ctx, "probe-invalid-code", "", oauth2.AuthStyleInParams)
+	if err == nil {
+		return "unexpected_success", nil
+	}
+	tokenErr, ok := err.(*oidcTokenError)
+	if !ok {
+		return "unknown", err
+	}
+	msg := strings.ToLower(tokenErr.message)
+	switch {
+	case strings.Contains(msg, "invalid client"):
+		return "invalid_client_credentials", nil
+	case strings.Contains(msg, "authorization code not found"), strings.Contains(msg, "code not found"):
+		return "client_credentials_ok", nil
+	default:
+		return "unknown", err
+	}
+}
+
+func (s *OIDCService) RedirectURL() string {
+	if s == nil || s.oauth2Config == nil {
+		return ""
+	}
+	return s.oauth2Config.RedirectURL
+}
+
+func (s *OIDCService) TokenEndpoint() string {
+	if s == nil || s.oauth2Config == nil {
+		return ""
+	}
+	return s.oauth2Config.Endpoint.TokenURL
+}

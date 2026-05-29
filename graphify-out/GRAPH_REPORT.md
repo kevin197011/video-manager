@@ -1,16 +1,16 @@
 # Graph Report - video-manager  (2026-05-29)
 
 ## Corpus Check
-- 124 files · ~116,394 words
+- 125 files · ~117,409 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1424 nodes · 1973 edges · 132 communities (115 shown, 17 thin omitted)
-- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 264 edges (avg confidence: 0.8)
+- 1440 nodes · 2009 edges · 139 communities (118 shown, 21 thin omitted)
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 270 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `367979ad`
+- Built from commit: `f37611cc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -74,7 +74,9 @@
 - [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Community 57|Community 57]]
 - [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
 - [[_COMMUNITY_Community 60|Community 60]]
+- [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
 - [[_COMMUNITY_Community 64|Community 64]]
@@ -98,6 +100,7 @@
 - [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
 - [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 87|Community 87]]
 - [[_COMMUNITY_Community 88|Community 88]]
@@ -126,20 +129,24 @@
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
 - [[_COMMUNITY_Community 113|Community 113]]
+- [[_COMMUNITY_Community 114|Community 114]]
 - [[_COMMUNITY_Community 115|Community 115]]
 - [[_COMMUNITY_Community 116|Community 116]]
 - [[_COMMUNITY_Community 117|Community 117]]
 - [[_COMMUNITY_Community 118|Community 118]]
 - [[_COMMUNITY_Community 119|Community 119]]
+- [[_COMMUNITY_Community 120|Community 120]]
+- [[_COMMUNITY_Community 121|Community 121]]
+- [[_COMMUNITY_Community 122|Community 122]]
 - [[_COMMUNITY_Community 124|Community 124]]
 - [[_COMMUNITY_Community 125|Community 125]]
 - [[_COMMUNITY_Community 127|Community 127]]
 - [[_COMMUNITY_Community 128|Community 128]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Success()` - 51 edges
-2. `InternalServerError()` - 43 edges
-3. `BadRequest()` - 39 edges
+1. `Success()` - 52 edges
+2. `InternalServerError()` - 44 edges
+3. `BadRequest()` - 40 edges
 4. `CORE DIRECTIVE: PREMIUM MOBILE APP IMAGE DIRECTION` - 39 edges
 5. `CORE DIRECTIVE: IMAGE-FIRST WEBSITE DESIGN TO CODE` - 39 edges
 6. `NotFound()` - 25 edges
@@ -153,18 +160,18 @@
   backend/cmd/main.go → backend/pkg/database/database.go
 - `main()` --calls--> `NewStatsHandler()`  [INFERRED]
   backend/cmd/main.go → backend/internal/handlers/stats_handler.go
+- `NewVideoStreamEndpointService()` --calls--> `NewVideoStreamEndpointRepository()`  [INFERRED]
+  backend/internal/services/video_stream_endpoint_service.go → backend/internal/repositories/video_stream_endpoint_repository.go
 - `AuthMiddleware()` --calls--> `ValidateToken()`  [INFERRED]
   backend/pkg/middleware/auth.go → backend/pkg/jwt/jwt.go
 - `main()` --calls--> `NewAuthHandler()`  [INFERRED]
   backend/cmd/main.go → backend/internal/handlers/auth_handler.go
-- `main()` --calls--> `NewCDNProviderHandler()`  [INFERRED]
-  backend/cmd/main.go → backend/internal/handlers/cdn_provider_handler.go
 
-## Communities (132 total, 17 thin omitted)
+## Communities (139 total, 21 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.08
-Nodes (21): AuthHandler, NewCDNLineHandler(), CDNLineHandler, CDNProviderHandler, DomainHandler, parseStreamPathImportCSV(), streamPathImportHeaderKey(), StreamHandler (+13 more)
+Cohesion: 0.07
+Nodes (28): buildOIDCErrorRedirect(), buildOIDCSuccessRedirect(), deriveOIDCUsername(), generateOIDCState(), oidcExchangeUserMessage(), respondOIDCNotReady(), sanitizeUsername(), AuthHandler (+20 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
@@ -195,8 +202,8 @@ Cohesion: 0.07
 Nodes (28): AlertProps, ButtonProps, CardProps, ColProps, ConfigProviderProps, DescriptionsProps, DropdownProps, FormProps (+20 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.11
-Nodes (11): DashboardLayoutProps, ROUTE_TITLES, LogoProps, ProtectedRouteProps, authAPI, ManagedUser, userAPI, auth (+3 more)
+Cohesion: 0.10
+Nodes (10): DashboardLayoutProps, ROUTE_TITLES, LogoProps, ProtectedRouteProps, authAPI, token, auth, User (+2 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.08
@@ -207,8 +214,8 @@ Cohesion: 0.09
 Nodes (21): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, jsx, lib, module, moduleDetection, moduleResolution (+13 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.12
-Nodes (14): api, APIResponse, CreateManagedUserRequest, DashboardStats, h, OIDCSettings, OIDCStatus, statsAPI (+6 more)
+Cohesion: 0.13
+Nodes (15): api, APIResponse, CreateManagedUserRequest, DashboardStats, h, ManagedUser, OIDCProbeResult, OIDCSettings (+7 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.10
@@ -235,20 +242,20 @@ Cohesion: 0.12
 Nodes (16): 10. SECTION RHYTHM RULE, 12. DENSITY & SPACING DISCIPLINE, 14. IMAGE / MEDIA DIRECTION, 16. MULTI-IMAGE CONSISTENCY RULE, 17. CLARITY CHECK, 19. RESPONSE BEHAVIOR, 1. ACTIVE BASELINE CONFIGURATION, 21. FINAL GOAL (+8 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.21
-Nodes (9): LineFormProps, VideoStreamEndpointFormProps, CDNLine, lineAPI, VideoStreamEndpoint, videoStreamEndpointAPI, selectSearchableProps, endpointSeriesLabel() (+1 more)
+Cohesion: 0.20
+Nodes (11): LineFormProps, VideoStreamEndpointFormProps, CDNLine, CDNProvider, lineAPI, providerAPI, VideoStreamEndpoint, videoStreamEndpointAPI (+3 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.21
-Nodes (8): DomainFormProps, ProviderFormProps, CDNProvider, Domain, domainAPI, providerAPI, getApiErrorMessage(), isAntdFormValidateError()
+Cohesion: 0.17
+Nodes (8): DomainFormProps, ProviderFormProps, Domain, domainAPI, statsAPI, getApiErrorMessage(), isAntdFormValidateError(), Stats
 
 ### Community 20 - "Community 20"
 Cohesion: 0.22
 Nodes (5): NewCDNLineRepository(), NewDomainRepository(), NewStreamPathRepository(), VideoStreamEndpointRepository, GenerateEndpointURL()
 
 ### Community 21 - "Community 21"
-Cohesion: 0.24
-Nodes (4): HashPassword(), NewAuthService(), randomPasswordHash(), AuthService
+Cohesion: 0.27
+Nodes (3): HashPassword(), randomPasswordHash(), AuthService
 
 ### Community 22 - "Community 22"
 Cohesion: 0.12
@@ -267,16 +274,16 @@ Cohesion: 0.13
 Nodes (14): Component, ComponentType, Dispatch, Element, ElementAttributesProperty, ElementChildrenAttribute, ElementClass, ExoticComponent (+6 more)
 
 ### Community 26 - "Community 26"
-Cohesion: 0.09
-Nodes (21): buildOIDCSuccessRedirect(), deriveOIDCUsername(), generateOIDCState(), respondOIDCNotReady(), sanitizeUsername(), isOIDCCodeNotFoundErr(), NewOIDCService(), NewOIDCServiceFromConfig() (+13 more)
+Cohesion: 0.11
+Nodes (15): isOIDCCodeNotFoundErr(), NewOIDCService(), NewOIDCServiceFromConfig(), normalizeOIDCRedirectURL(), parseOIDCTokenErrorMessage(), parseOIDCTokenResponse(), userInfoFromOIDC(), OIDCConfig (+7 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.13
 Nodes (14): 1. Visual Theme & Atmosphere, 2. Color Palette & Roles, 3. Typography Rules, 4. Component Stylings, 5. Hero Section, 6. Layout Principles, 7. Responsive Rules, 8. Motion & Interaction (Code-Phase Intent) (+6 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.24
-Nodes (11): initAdminUser(), initSwaggerDocs(), main(), runMigrations(), NewVideoStreamEndpointHandler(), Debug(), Warn(), AdminMiddleware() (+3 more)
+Cohesion: 0.29
+Nodes (10): initAdminUser(), initSwaggerDocs(), main(), runMigrations(), Debug(), Warn(), AdminMiddleware(), AuthMiddleware() (+2 more)
 
 ### Community 29 - "Community 29"
 Cohesion: 0.14
@@ -292,7 +299,7 @@ Nodes (12): code:bash (# 使用 psql 直接执行), code:bash (# 手动执行 SQ
 
 ### Community 32 - "Community 32"
 Cohesion: 0.20
-Nodes (5): NewAuthHandler(), NewSystemSettingHandler(), NewSystemSettingRepository(), SystemSettingRepository, NewSystemSettingService()
+Nodes (6): NewAuthHandler(), NewSystemSettingHandler(), NewSystemSettingRepository(), SystemSettingRepository, NewAuthService(), NewSystemSettingService()
 
 ### Community 33 - "Community 33"
 Cohesion: 0.17
@@ -335,8 +342,8 @@ Cohesion: 0.24
 Nodes (4): getLogFormat(), getLogLevel(), Init(), LogLevel
 
 ### Community 44 - "Community 44"
-Cohesion: 0.05
-Nodes (17): NewCDNProviderHandler(), NewDomainHandler(), NewStreamHandler(), NewStreamPathHandler(), NewVideoStreamEndpointRepository(), VideoStreamEndpointFilters, isValidCode(), NewCDNProviderService() (+9 more)
+Cohesion: 0.22
+Nodes (4): NewCDNProviderHandler(), isValidCode(), NewCDNProviderService(), CDNProviderService
 
 ### Community 45 - "Community 45"
 Cohesion: 0.28
@@ -385,6 +392,14 @@ Nodes (8): 12. THE COMBINATORIAL VARIATION ENGINE, Background Character, Hero Ar
 ### Community 57 - "Community 57"
 Cohesion: 0.25
 Nodes (8): 8. ANTI-AI-SLOP RULES, Carousel / marquee slop (layout), Content slop, Data / KPI slop, Density slop, Layout slop, Typography slop, Visual slop
+
+### Community 59 - "Community 59"
+Cohesion: 0.20
+Nodes (3): NewCDNLineHandler(), NewCDNLineService(), CDNLineService
+
+### Community 61 - "Community 61"
+Cohesion: 0.20
+Nodes (3): NewDomainHandler(), NewDomainService(), DomainService
 
 ### Community 62 - "Community 62"
 Cohesion: 0.25
@@ -457,6 +472,10 @@ Nodes (4): BatchGenerateRequest, CreateVideoStreamEndpointRequest, UpdateVideoSt
 ### Community 84 - "Community 84"
 Cohesion: 0.70
 Nodes (4): detect_resolution_from_path(), main(), make_request(), update_resolution()
+
+### Community 85 - "Community 85"
+Cohesion: 0.28
+Nodes (3): NewVideoStreamEndpointHandler(), StreamService, NewVideoStreamEndpointService()
 
 ### Community 86 - "Community 86"
 Cohesion: 0.40
@@ -575,24 +594,24 @@ Cohesion: 0.50
 Nodes (4): code:bash (# 检查端口占用), code:bash (# 检查数据库容器状态), 常见问题, 故障排除
 
 ## Knowledge Gaps
-- **749 isolated node(s):** `version`, `source`, `sourceType`, `skillPath`, `computedHash` (+744 more)
+- **750 isolated node(s):** `version`, `source`, `sourceType`, `skillPath`, `computedHash` (+745 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `main()` connect `Community 28` to `Community 32`, `Community 0`, `Community 34`, `Community 44`, `Community 46`, `Community 58`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
-- **Why does `Warn()` connect `Community 28` to `Community 0`, `Community 42`, `Community 26`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `NewVideoStreamEndpointService()` connect `Community 44` to `Community 28`, `Community 30`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Are the 50 inferred relationships involving `Success()` (e.g. with `.Login()` and `.ChangePassword()`) actually correct?**
-  _`Success()` has 50 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 41 inferred relationships involving `InternalServerError()` (e.g. with `.OIDCStatus()` and `.OIDCLogin()`) actually correct?**
-  _`InternalServerError()` has 41 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 37 inferred relationships involving `BadRequest()` (e.g. with `.Login()` and `.ChangePassword()`) actually correct?**
-  _`BadRequest()` has 37 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `main()` connect `Community 28` to `Community 32`, `Community 34`, `Community 44`, `Community 46`, `Community 85`, `Community 120`, `Community 121`, `Community 58`, `Community 59`, `Community 61`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `Warn()` connect `Community 28` to `Community 0`, `Community 42`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `OIDCConfigIssues()` connect `Community 0` to `Community 26`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Are the 51 inferred relationships involving `Success()` (e.g. with `.Login()` and `.ChangePassword()`) actually correct?**
+  _`Success()` has 51 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 42 inferred relationships involving `InternalServerError()` (e.g. with `.OIDCStatus()` and `.OIDCLogin()`) actually correct?**
+  _`InternalServerError()` has 42 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 38 inferred relationships involving `BadRequest()` (e.g. with `.Login()` and `.ChangePassword()`) actually correct?**
+  _`BadRequest()` has 38 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `version`, `source`, `sourceType` to the rest of the system?**
-  _749 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _750 weakly-connected nodes found - possible documentation gaps or missing edges._

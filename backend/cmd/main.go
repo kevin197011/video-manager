@@ -142,6 +142,7 @@ func main() {
 			auth.GET("/oidc/status", authHandler.OIDCStatus)
 			auth.GET("/oidc/login", authHandler.OIDCLogin)
 			auth.GET("/oidc/callback", authHandler.OIDCCallback)
+			auth.GET("/oidc/complete", authHandler.OIDCComplete)
 		}
 	}
 
@@ -239,6 +240,7 @@ func main() {
 		{
 			systemSettings.GET("/oidc", systemSettingHandler.GetOIDCSettings)
 			systemSettings.PUT("/oidc", systemSettingHandler.UpdateOIDCSettings)
+			systemSettings.POST("/oidc/probe", systemSettingHandler.ProbeOIDCSettings)
 		}
 	}
 

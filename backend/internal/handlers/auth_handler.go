@@ -330,11 +330,16 @@ func (h *AuthHandler) OIDCStatus(c *gin.Context) {
 	}
 	issues := services.OIDCConfigIssues(cfg)
 	ready := settings.Enabled && len(issues) == 0
-	response.Success(c, gin.H{
+	data := gin.H{
 		"enabled": settings.Enabled,
 		"ready":   ready,
 		"issues":  issues,
-	})
+	}
+	if ready {
+		data["redirect_url"] = cfg.RedirectURL
+		data["client_id"] = cfg.ClientID
+	}
+	response.Success(c, data)
 }
 
 // OIDCLogin redirects user to OIDC provider authorization endpoint.
@@ -396,25 +401,26 @@ func (h *AuthHandler) OIDCLogin(c *gin.Context) {
 	c.Redirect(http.StatusFound, authURL)
 }
 
-// OIDCCallback handles OIDC callback and logs user in as non-admin.
+// OIDCCallback stores the authorization code server-side and redirects to /oidc/complete.
+// The code is not exchanged on this request so link prefetchers cannot consume it.
 // @Summary OIDC login callback
-// @Description Handle OIDC callback, create/login local user as non-admin, then redirect to frontend login
+// @Description Accept OIDC redirect, stash code, redirect to complete step
 // @Tags auth
 // @Produce json
 // @Param code query string true "OIDC authorization code"
 // @Param state query string true "OIDC state"
-// @Success 302 {string} string "Redirect to frontend with token"
+// @Success 302 {string} string "Redirect to OIDC complete"
 // @Failure 400 {object} response.Response
 // @Failure 503 {object} response.Response
 // @Router /api/auth/oidc/callback [get]
 func (h *AuthHandler) OIDCCallback(c *gin.Context) {
-	oidcSvc, cfg, err := h.loadOIDCService(c.Request.Context())
+	_, cfg, err := h.loadOIDCService(c.Request.Context())
 	if err != nil {
 		logger.Warn("Failed to initialize OIDC service", "error", err)
 		response.Error(c, http.StatusServiceUnavailable, "oidc provider discovery failed: "+err.Error())
 		return
 	}
-	if !oidcSvc.IsEnabled() {
+	if !cfg.Enabled || len(services.OIDCConfigIssues(cfg)) > 0 {
 		respondOIDCNotReady(c, cfg, "incomplete configuration")
 		return
 	}
@@ -428,50 +434,108 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 
 	cookieState, err := c.Cookie("oidc_state")
 	if err != nil || cookieState == "" || cookieState != state {
+		logger.Warn("OIDC callback rejected: invalid state",
+			"ip", c.ClientIP(),
+			"user_agent", c.Request.UserAgent(),
+			"has_cookie", err == nil && cookieState != "",
+		)
 		response.Error(c, http.StatusBadRequest, "invalid oidc state")
 		return
 	}
-	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
-	c.SetCookie("oidc_state", "", -1, "/", "", secure, true)
 
-	info, err := oidcSvc.ExchangeAndVerify(c.Request.Context(), code, state)
+	flowID, err := globalOIDCFlowStore.create(code, state)
 	if err != nil {
+		response.InternalServerError(c, "failed to initialize oidc flow")
+		return
+	}
+
+	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("oidc_state", "", -1, "/", "", secure, true)
+	c.SetCookie("oidc_flow", flowID, 300, "/", "", secure, true)
+
+	logger.Info("OIDC callback accepted, redirecting to complete",
+		"ip", c.ClientIP(),
+		"redirect_url", cfg.RedirectURL,
+		"code_len", len(code),
+	)
+	c.Redirect(http.StatusFound, "/api/auth/oidc/complete")
+}
+
+// OIDCComplete exchanges the stashed authorization code and redirects to the frontend.
+// @Summary OIDC login complete
+// @Description Exchange authorization code and redirect to frontend with token
+// @Tags auth
+// @Produce json
+// @Success 302 {string} string "Redirect to frontend with token"
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 503 {object} response.Response
+// @Router /api/auth/oidc/complete [get]
+func (h *AuthHandler) OIDCComplete(c *gin.Context) {
+	oidcSvc, cfg, err := h.loadOIDCService(c.Request.Context())
+	if err != nil {
+		logger.Warn("Failed to initialize OIDC service", "error", err)
+		response.Error(c, http.StatusServiceUnavailable, "oidc provider discovery failed: "+err.Error())
+		return
+	}
+	if !oidcSvc.IsEnabled() {
+		respondOIDCNotReady(c, cfg, "incomplete configuration")
+		return
+	}
+
+	flowID, err := c.Cookie("oidc_flow")
+	if err != nil || flowID == "" {
+		response.Error(c, http.StatusBadRequest, "missing oidc flow session; start SSO login again")
+		return
+	}
+	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
+	c.SetCookie("oidc_flow", "", -1, "/", "", secure, true)
+
+	flow, ok := globalOIDCFlowStore.get(flowID)
+	if !ok {
+		response.Error(c, http.StatusBadRequest, "oidc flow expired; start SSO login again")
+		return
+	}
+	defer globalOIDCFlowStore.delete(flowID)
+
+	var (
+		info        *services.OIDCUserInfo
+		exchangeErr error
+	)
+	flow.once.Do(func() {
+		info, exchangeErr = oidcSvc.ExchangeAndVerify(c.Request.Context(), flow.code, flow.state)
+	})
+
+	if exchangeErr != nil {
 		logger.Error("OIDC exchange failed",
-			"error", err,
+			"error", exchangeErr,
 			"ip", c.ClientIP(),
 			"redirect_url", cfg.RedirectURL,
 			"client_id", cfg.ClientID,
-			"code_len", len(code),
+			"code_len", len(flow.code),
 			"user_agent", c.Request.UserAgent(),
 			"referer", c.GetHeader("Referer"),
 		)
-		msg := "oidc authentication failed: " + err.Error()
-		if strings.Contains(strings.ToLower(err.Error()), "authorization code not found") ||
-			strings.Contains(strings.ToLower(err.Error()), "code not found") {
-			msg = "oidc token exchange failed: IdP could not find this authorization code. " +
-				"Start SSO again from the login page (do not refresh or bookmark the callback URL). " +
-				"If it still fails, ask the ppu-sso team to verify client_secret, registered redirect_uri, " +
-				"and that all IdP nodes share the same authorization-code store (sticky session or Redis)."
-		}
-		response.Error(c, http.StatusUnauthorized, msg)
+		errMsg := oidcExchangeUserMessage(exchangeErr)
+		c.Redirect(http.StatusFound, buildOIDCErrorRedirect(oidcSvc.FrontendSuccessURL(), errMsg))
 		return
 	}
 
 	username := deriveOIDCUsername(info)
 	if username == "" {
-		response.Error(c, http.StatusBadRequest, "oidc claims missing username")
+		c.Redirect(http.StatusFound, buildOIDCErrorRedirect(oidcSvc.FrontendSuccessURL(), "oidc claims missing username"))
 		return
 	}
 
 	loginResp, err := h.authService.LoginOrCreateOIDCUser(c.Request.Context(), username)
 	if err != nil {
 		logger.Error("OIDC local login/create failed", "username", username, "error", err)
-		response.InternalServerError(c, "failed to complete oidc login")
+		c.Redirect(http.StatusFound, buildOIDCErrorRedirect(oidcSvc.FrontendSuccessURL(), "failed to complete oidc login"))
 		return
 	}
 
-	redirectTarget := buildOIDCSuccessRedirect(oidcSvc.FrontendSuccessURL(), loginResp.Token)
-	c.Redirect(http.StatusFound, redirectTarget)
+	c.Redirect(http.StatusFound, buildOIDCSuccessRedirect(oidcSvc.FrontendSuccessURL(), loginResp.Token))
 }
 
 func respondOIDCNotReady(c *gin.Context, cfg services.OIDCConfig, reason string) {
@@ -584,4 +648,29 @@ func buildOIDCSuccessRedirect(baseURL string, token string) string {
 	q.Set("sso_token", token)
 	u.RawQuery = q.Encode()
 	return u.String()
+}
+
+func buildOIDCErrorRedirect(baseURL string, message string) string {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return "/login?sso_error=" + url.QueryEscape(message)
+	}
+	q := u.Query()
+	q.Set("sso_error", message)
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func oidcExchangeUserMessage(err error) string {
+	if err == nil {
+		return ""
+	}
+	if strings.Contains(strings.ToLower(err.Error()), "authorization code not found") ||
+		strings.Contains(strings.ToLower(err.Error()), "code not found") {
+		return "SSO failed: IdP could not find the authorization code. This usually means the code expired, was already used, or ppu-sso nodes do not share the same code store. Start login again; if it persists, contact the ppu-sso team."
+	}
+	if strings.Contains(strings.ToLower(err.Error()), "invalid client") {
+		return "SSO failed: invalid OIDC client credentials. Re-save the correct Client Secret in System Settings."
+	}
+	return "SSO failed: " + err.Error()
 }

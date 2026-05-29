@@ -34,6 +34,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const ssoError = params.get('sso_error');
+    if (ssoError) {
+      message.error(ssoError);
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
     const ssoToken = params.get('sso_token');
     if (!ssoToken) return;
 
