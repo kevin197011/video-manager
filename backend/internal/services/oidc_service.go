@@ -109,13 +109,17 @@ func NewOIDCServiceFromConfig(ctx context.Context, cfg OIDCConfig) (*OIDCService
 		frontendSuccessURL = "/login"
 	}
 
+	endpoint := provider.Endpoint()
+	// ppu-sso and similar providers often require client_id/client_secret in POST body.
+	endpoint.AuthStyle = oauth2.AuthStyleInParams
+
 	service.enabled = true
 	service.provider = provider
 	service.verifier = provider.Verifier(&oidc.Config{ClientID: clientID})
 	service.oauth2Config = &oauth2.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		Endpoint:     provider.Endpoint(),
+		Endpoint:     endpoint,
 		RedirectURL:  redirectURL,
 		Scopes:       scopes,
 	}
@@ -140,26 +144,52 @@ func (s *OIDCService) ExchangeAndVerify(ctx context.Context, code string) (*OIDC
 		return nil, ErrOIDCDisabled
 	}
 
-	token, err := s.oauth2Config.Exchange(ctx, code)
+	token, err := s.oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("redirect_uri", s.oauth2Config.RedirectURL))
 	if err != nil {
-		return nil, fmt.Errorf("failed to exchange oidc code: %w", err)
+		return nil, fmt.Errorf("token exchange failed: %w", err)
 	}
 
-	rawIDToken, ok := token.Extra("id_token").(string)
-	if !ok || rawIDToken == "" {
-		return nil, errors.New("id_token not found in token response")
+	rawIDToken, _ := token.Extra("id_token").(string)
+	if strings.TrimSpace(rawIDToken) != "" {
+		idToken, err := s.verifier.Verify(ctx, rawIDToken)
+		if err != nil {
+			return nil, fmt.Errorf("id_token verification failed: %w", err)
+		}
+		var info OIDCUserInfo
+		if err := idToken.Claims(&info); err != nil {
+			return nil, fmt.Errorf("failed to parse id_token claims: %w", err)
+		}
+		return &info, nil
 	}
 
-	idToken, err := s.verifier.Verify(ctx, rawIDToken)
+	// Fallback when the IdP returns access_token only (no id_token in body).
+	if s.provider.UserInfoEndpoint() == "" {
+		return nil, errors.New("id_token not found in token response and userinfo endpoint unavailable")
+	}
+	ui, err := s.provider.UserInfo(ctx, s.oauth2Config.TokenSource(ctx, token))
 	if err != nil {
-		return nil, fmt.Errorf("failed to verify id_token: %w", err)
+		return nil, fmt.Errorf("userinfo request failed: %w", err)
 	}
+	return userInfoFromOIDC(ui)
+}
 
-	var info OIDCUserInfo
-	if err := idToken.Claims(&info); err != nil {
-		return nil, fmt.Errorf("failed to parse id_token claims: %w", err)
+func userInfoFromOIDC(ui *oidc.UserInfo) (*OIDCUserInfo, error) {
+	if ui == nil {
+		return nil, errors.New("empty userinfo")
 	}
-	return &info, nil
+	var claims struct {
+		PreferredUsername string `json:"preferred_username"`
+		Name              string `json:"name"`
+	}
+	if err := ui.Claims(&claims); err != nil {
+		return nil, fmt.Errorf("failed to parse userinfo claims: %w", err)
+	}
+	return &OIDCUserInfo{
+		Subject:           ui.Subject,
+		Email:             ui.Email,
+		PreferredUsername: claims.PreferredUsername,
+		Name:              claims.Name,
+	}, nil
 }
 
 func (s *OIDCService) FrontendSuccessURL() string {

@@ -391,6 +391,7 @@ func (h *AuthHandler) OIDCLogin(c *gin.Context) {
 	)
 
 	secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("oidc_state", state, 300, "/", "", secure, true)
 	c.Redirect(http.StatusFound, authURL)
 }
@@ -435,8 +436,13 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 
 	info, err := oidcSvc.ExchangeAndVerify(c.Request.Context(), code)
 	if err != nil {
-		logger.Warn("OIDC exchange failed", "error", err)
-		response.Error(c, http.StatusUnauthorized, "oidc authentication failed")
+		logger.Error("OIDC exchange failed",
+			"error", err,
+			"ip", c.ClientIP(),
+			"redirect_url", cfg.RedirectURL,
+			"client_id", cfg.ClientID,
+		)
+		response.Error(c, http.StatusUnauthorized, "oidc authentication failed: "+err.Error())
 		return
 	}
 
