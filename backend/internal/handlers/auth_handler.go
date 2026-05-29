@@ -377,7 +377,7 @@ func (h *AuthHandler) OIDCLogin(c *gin.Context) {
 	}
 
 	if ssoErr := strings.TrimSpace(c.Query("sso_error")); ssoErr != "" {
-		redirectSSOCallbackError(c, ssoErr)
+		redirectOIDCError(c, cfg, ssoErr)
 		return
 	}
 
@@ -400,20 +400,20 @@ func (h *AuthHandler) OIDCLogin(c *gin.Context) {
 		"ip", c.ClientIP(),
 	)
 
+	globalOIDCStateStore.register(state)
 	setOIDCStateCookie(c, state)
 	c.Redirect(http.StatusFound, authURL)
 }
 
-// OIDCCallback validates state, exchanges the authorization code, and redirects to /sso-callback.
-// Same pattern as dvr-manager: single GET handler, no intermediate HTML or server-side flow store.
+// OIDCCallback validates state, exchanges the authorization code, and redirects to the frontend login page.
 // @Summary OIDC login callback
-// @Description Accept OIDC redirect, exchange code, redirect to frontend SSO callback page
+// @Description Accept OIDC redirect, exchange code, redirect to frontend with sso_token or sso_error
 // @Tags auth
 // @Produce json
 // @Param code query string true "OIDC authorization code"
 // @Param state query string true "OIDC state"
-// @Success 302 {string} string "Redirect to /sso-callback with token"
-// @Failure 302 {string} string "Redirect to /sso-callback with error"
+// @Success 302 {string} string "Redirect to frontend login with sso_token"
+// @Failure 302 {string} string "Redirect to frontend login with sso_error"
 // @Failure 503 {object} response.Response
 // @Router /api/auth/oidc/callback [get]
 func (h *AuthHandler) OIDCCallback(c *gin.Context) {
@@ -437,28 +437,29 @@ func (h *AuthHandler) OIDCCallback(c *gin.Context) {
 			msg = errStr + ": " + desc
 		}
 		logger.Warn("OIDC callback error from IdP", "error", msg, "ip", c.ClientIP())
-		redirectSSOCallbackError(c, msg)
+		redirectOIDCError(c, cfg, msg)
 		return
 	}
 
 	code := strings.TrimSpace(c.Query("code"))
 	state := strings.TrimSpace(c.Query("state"))
 	if code == "" || state == "" {
-		redirectSSOCallbackError(c, "missing oidc callback code/state")
+		redirectOIDCError(c, cfg, "missing oidc callback code/state")
 		return
 	}
 
-	expectedState, _ := c.Cookie(oidcStateCookieName)
-	if expectedState == "" || expectedState != state {
+	if !validateOIDCState(c, state) {
+		cookieState, _ := c.Cookie(oidcStateCookieName)
 		logger.Warn("OIDC callback rejected: state mismatch",
 			"ip", c.ClientIP(),
 			"user_agent", c.Request.UserAgent(),
-			"has_cookie", expectedState != "",
+			"has_cookie", cookieState != "",
+			"cookie_matches", cookieState == state,
+			"server_state_valid", globalOIDCStateStore.valid(state),
 		)
-		redirectSSOCallbackError(c, "state 校验失败，请从登录页重新发起 SSO")
+		redirectOIDCError(c, cfg, "state 校验失败，请从登录页重新发起 SSO")
 		return
 	}
-	clearOIDCStateCookie(c)
 
 	logger.Info("OIDC callback exchanging code",
 		"ip", c.ClientIP(),
@@ -479,24 +480,24 @@ func (h *AuthHandler) finishOIDCWithCode(c *gin.Context, oidcSvc *services.OIDCS
 			"code_len", len(code),
 			"user_agent", c.Request.UserAgent(),
 		)
-		redirectSSOCallbackError(c, oidcExchangeUserMessage(exchangeErr))
+		redirectOIDCError(c, cfg, oidcExchangeUserMessage(exchangeErr))
 		return
 	}
 
 	username := deriveOIDCUsername(info)
 	if username == "" {
-		redirectSSOCallbackError(c, "oidc claims missing username")
+		redirectOIDCError(c, cfg, "oidc claims missing username")
 		return
 	}
 
 	loginResp, err := h.authService.LoginOrCreateOIDCUser(c.Request.Context(), username)
 	if err != nil {
 		logger.Error("OIDC local login/create failed", "username", username, "error", err)
-		redirectSSOCallbackError(c, "failed to complete oidc login")
+		redirectOIDCError(c, cfg, "failed to complete oidc login")
 		return
 	}
 
-	redirectSSOCallbackSuccess(c, loginResp.Token)
+	redirectOIDCSuccess(c, cfg, loginResp.Token)
 }
 
 const oidcStateCookieName = "oidc_state"
@@ -517,17 +518,85 @@ func clearOIDCStateCookie(c *gin.Context) {
 	c.SetCookie(oidcStateCookieName, "", -1, "/", "", secure, true)
 }
 
-// redirectSSOCallbackSuccess mirrors dvr-manager: relative /sso-callback on the same host as the SPA.
-func redirectSSOCallbackSuccess(c *gin.Context, token string) {
-	q := url.Values{}
-	q.Set("token", token)
-	c.Redirect(http.StatusFound, "/sso-callback?"+q.Encode())
+// validateOIDCState accepts cookie match (dvr-manager) or server-side state (cross-site IdP fallback).
+func validateOIDCState(c *gin.Context, state string) bool {
+	cookieState, err := c.Cookie(oidcStateCookieName)
+	cookieOK := err == nil && cookieState != "" && cookieState == state
+
+	if cookieOK {
+		clearOIDCStateCookie(c)
+		globalOIDCStateStore.consume(state)
+		return true
+	}
+	if globalOIDCStateStore.consume(state) {
+		clearOIDCStateCookie(c)
+		return true
+	}
+	return false
 }
 
-func redirectSSOCallbackError(c *gin.Context, message string) {
-	q := url.Values{}
-	q.Set("error", message)
-	c.Redirect(http.StatusFound, "/sso-callback?"+q.Encode())
+func redirectOIDCSuccess(c *gin.Context, cfg services.OIDCConfig, token string) {
+	c.Redirect(http.StatusFound, buildOIDCSuccessRedirect(resolveOIDCFrontendURL(c, cfg), token))
+}
+
+func redirectOIDCError(c *gin.Context, cfg services.OIDCConfig, message string) {
+	c.Redirect(http.StatusFound, buildOIDCErrorRedirect(resolveOIDCFrontendURL(c, cfg), message))
+}
+
+func resolveOIDCFrontendURL(c *gin.Context, cfg services.OIDCConfig) string {
+	raw := strings.TrimSpace(cfg.FrontendSuccessURL)
+	if raw != "" {
+		if u, err := url.Parse(raw); err == nil {
+			path := strings.ToLower(u.Path)
+			if strings.Contains(path, "/api/auth/oidc") || strings.HasSuffix(path, "/oidc/login") {
+				logger.Warn("OIDC frontend_success_url points at API route; using /login instead",
+					"configured", raw,
+				)
+				return defaultOIDCFrontendLoginURL(c)
+			}
+			return raw
+		}
+	}
+	if raw != "" && !strings.HasPrefix(raw, "/api/") {
+		return raw
+	}
+	return defaultOIDCFrontendLoginURL(c)
+}
+
+func defaultOIDCFrontendLoginURL(c *gin.Context) string {
+	scheme := "https"
+	if proto := strings.TrimSpace(c.GetHeader("X-Forwarded-Proto")); proto != "" {
+		scheme = proto
+	} else if c.Request.TLS == nil {
+		scheme = "http"
+	}
+	host := strings.TrimSpace(c.Request.Host)
+	if host == "" {
+		return "/login"
+	}
+	return scheme + "://" + host + "/login"
+}
+
+func buildOIDCSuccessRedirect(baseURL string, token string) string {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return "/login?sso_token=" + url.QueryEscape(token)
+	}
+	q := u.Query()
+	q.Set("sso_token", token)
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func buildOIDCErrorRedirect(baseURL string, message string) string {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return "/login?sso_error=" + url.QueryEscape(message)
+	}
+	q := u.Query()
+	q.Set("sso_error", message)
+	u.RawQuery = q.Encode()
+	return u.String()
 }
 
 func respondOIDCNotReady(c *gin.Context, cfg services.OIDCConfig, reason string) {

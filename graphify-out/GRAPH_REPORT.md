@@ -1,16 +1,16 @@
 # Graph Report - video-manager  (2026-05-29)
 
 ## Corpus Check
-- 125 files · ~117,407 words
+- 126 files · ~117,619 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1461 nodes · 2068 edges · 133 communities (115 shown, 18 thin omitted)
-- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 274 edges (avg confidence: 0.8)
+- 1468 nodes · 2079 edges · 132 communities (115 shown, 17 thin omitted)
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 275 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d7dd3da9`
+- Built from commit: `3aae267a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -74,7 +74,6 @@
 - [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Community 57|Community 57]]
 - [[_COMMUNITY_Community 58|Community 58]]
-- [[_COMMUNITY_Community 59|Community 59]]
 - [[_COMMUNITY_Community 60|Community 60]]
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
@@ -151,22 +150,22 @@
 10. `NewVideoStreamEndpointService()` - 19 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `main()` --calls--> `Close()`  [INFERRED]
-  backend/cmd/main.go → backend/pkg/database/database.go
-- `main()` --calls--> `NewStatsHandler()`  [INFERRED]
-  backend/cmd/main.go → backend/internal/handlers/stats_handler.go
+- `NewVideoStreamEndpointService()` --calls--> `NewVideoStreamEndpointRepository()`  [INFERRED]
+  backend/internal/services/video_stream_endpoint_service.go → backend/internal/repositories/video_stream_endpoint_repository.go
 - `AuthMiddleware()` --calls--> `ValidateToken()`  [INFERRED]
   backend/pkg/middleware/auth.go → backend/pkg/jwt/jwt.go
-- `main()` --calls--> `Warn()`  [INFERRED]
-  backend/cmd/main.go → backend/pkg/logger/logger.go
-- `main()` --calls--> `NewAuthHandler()`  [INFERRED]
-  backend/cmd/main.go → backend/internal/handlers/auth_handler.go
+- `main()` --calls--> `Close()`  [INFERRED]
+  backend/cmd/main.go → backend/pkg/database/database.go
+- `main()` --calls--> `NewCDNProviderHandler()`  [INFERRED]
+  backend/cmd/main.go → backend/internal/handlers/cdn_provider_handler.go
+- `main()` --calls--> `NewCDNLineHandler()`  [INFERRED]
+  backend/cmd/main.go → backend/internal/handlers/cdn_line_handler.go
 
-## Communities (133 total, 18 thin omitted)
+## Communities (132 total, 17 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.09
-Nodes (20): NewCDNLineHandler(), CDNLineHandler, CDNProviderHandler, DomainHandler, parseStreamPathImportCSV(), streamPathImportHeaderKey(), StreamHandler, StreamPathHandler (+12 more)
+Cohesion: 0.08
+Nodes (21): NewCDNLineHandler(), CDNLineHandler, CDNProviderHandler, DomainHandler, parseStreamPathImportCSV(), streamPathImportHeaderKey(), StreamHandler, StreamPathHandler (+13 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
@@ -249,8 +248,8 @@ Cohesion: 0.22
 Nodes (5): NewCDNLineRepository(), NewDomainRepository(), NewStreamPathRepository(), VideoStreamEndpointRepository, GenerateEndpointURL()
 
 ### Community 21 - "Community 21"
-Cohesion: 0.27
-Nodes (3): HashPassword(), randomPasswordHash(), AuthService
+Cohesion: 0.20
+Nodes (3): NewDomainHandler(), NewDomainService(), DomainService
 
 ### Community 22 - "Community 22"
 Cohesion: 0.12
@@ -269,16 +268,16 @@ Cohesion: 0.13
 Nodes (14): Component, ComponentType, Dispatch, Element, ElementAttributesProperty, ElementChildrenAttribute, ElementClass, ExoticComponent (+6 more)
 
 ### Community 26 - "Community 26"
-Cohesion: 0.07
-Nodes (34): buildOIDCErrorRedirect(), buildOIDCSuccessRedirect(), clearOIDCStateCookie(), defaultOIDCFrontendLoginURL(), deriveOIDCUsername(), generateOIDCState(), oidcExchangeUserMessage(), redirectSSOCallbackError() (+26 more)
+Cohesion: 0.09
+Nodes (33): initAdminUser(), initSwaggerDocs(), main(), runMigrations(), Close(), buildOIDCErrorRedirect(), buildOIDCSuccessRedirect(), clearOIDCStateCookie() (+25 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.13
 Nodes (14): 1. Visual Theme & Atmosphere, 2. Color Palette & Roles, 3. Typography Rules, 4. Component Stylings, 5. Hero Section, 6. Layout Principles, 7. Responsive Rules, 8. Motion & Interaction (Code-Phase Intent) (+6 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.29
-Nodes (9): initAdminUser(), initSwaggerDocs(), main(), runMigrations(), Debug(), AdminMiddleware(), AuthMiddleware(), ReadOnlyForNonAdminMiddleware() (+1 more)
+Cohesion: 0.20
+Nodes (3): NewStreamHandler(), NewStreamService(), StreamService
 
 ### Community 29 - "Community 29"
 Cohesion: 0.14
@@ -293,16 +292,16 @@ Cohesion: 0.15
 Nodes (12): code:bash (# 使用 psql 直接执行), code:bash (# 手动执行 SQL), Database Initialization, `init_schema.sql`, 使用方法, 初始化脚本, 方法 1: 手动执行（推荐）, 方法 2: 自动执行（应用启动时） (+4 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.17
-Nodes (7): NewAuthHandler(), NewSystemSettingHandler(), NewSystemSettingRepository(), SystemSettingRepository, NewUserRepository(), NewAuthService(), NewSystemSettingService()
+Cohesion: 0.08
+Nodes (19): NewSystemSettingRepository(), SystemSettingRepository, isOIDCCodeNotFoundErr(), NewOIDCService(), NewOIDCServiceFromConfig(), normalizeOIDCRedirectURL(), parseOIDCTokenErrorMessage(), parseOIDCTokenResponse() (+11 more)
 
 ### Community 33 - "Community 33"
 Cohesion: 0.17
 Nodes (12): 4.10 Quotes & Testimonials, 4.11 Page Theme Lock (Light / Dark Mode Consistency), 4.1 Typography, 4.2 Color Calibration, 4.3 Layout Diversification, 4.4 Materiality, Shadows, Cards, 4.5 Interactive UI States, 4.6 Data & Form Patterns (+4 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.25
-Nodes (3): NewUserHandler(), NewUserService(), UserService
+Cohesion: 0.28
+Nodes (3): NewVideoStreamEndpointHandler(), CDNLineService, NewVideoStreamEndpointService()
 
 ### Community 35 - "Community 35"
 Cohesion: 0.33
@@ -318,7 +317,7 @@ Nodes (10): 10. REFERENCE VOCABULARY (Pattern Names the Agent Should Know), Anim
 
 ### Community 38 - "Community 38"
 Cohesion: 0.20
-Nodes (10): 13. OUT OF SCOPE, 14. FINAL PRE-FLIGHT CHECK, 1.A Dial Inference (design read → dial values), 1.B Use-Case Presets, 1.C How the Dials Drive Output, 1. THE THREE DIALS (Core Configuration), 2.A When to reach for a real design system (use official packages), 2.B When the brief is an aesthetic, not a system (+2 more)
+Nodes (10): 13. OUT OF SCOPE, 14. FINAL PRE-FLIGHT CHECK, 2.A When to reach for a real design system (use official packages), 2.B When the brief is an aesthetic, not a system, 2. BRIEF → DESIGN SYSTEM MAP, 7. DIAL DEFINITIONS (Technical Reference), DESIGN_VARIANCE (Level 1-10), MOTION_INTENSITY (Level 1-10) (+2 more)
 
 ### Community 39 - "Community 39"
 Cohesion: 0.20
@@ -332,21 +331,21 @@ Nodes (10): 22. STYLE VARIATION ENGINE, Decorative Asset Set, Image Art Directio
 Cohesion: 0.20
 Nodes (9): 1. Protocol Overview, 2. Absolute Negative Constraints (Banned Elements), 3. Typographic Architecture, 4. Color Palette (Warm Monochrome + Spot Pastels), 5. Component Specifications, 6. Iconography & Imagery Directives, 7. Subtle Motion & Micro-Animations, 8. Execution Protocol (+1 more)
 
-### Community 42 - "Community 42"
-Cohesion: 0.24
-Nodes (4): getLogFormat(), getLogLevel(), Init(), LogLevel
+### Community 43 - "Community 43"
+Cohesion: 0.10
+Nodes (5): NewUserHandler(), NewUserRepository(), UserRepository, NewUserService(), UserService
 
 ### Community 44 - "Community 44"
-Cohesion: 0.05
-Nodes (16): NewCDNProviderHandler(), NewDomainHandler(), NewStreamHandler(), NewVideoStreamEndpointHandler(), NewVideoStreamEndpointRepository(), VideoStreamEndpointFilters, isValidCode(), NewCDNProviderService() (+8 more)
+Cohesion: 0.22
+Nodes (4): NewCDNProviderHandler(), isValidCode(), NewCDNProviderService(), CDNProviderService
 
 ### Community 45 - "Community 45"
-Cohesion: 0.22
-Nodes (7): Claims, GenerateToken(), GenerateTokenWithExpiration(), ParseTokenWithoutValidation(), ValidateToken(), DebugContext(), ErrorContext()
+Cohesion: 0.09
+Nodes (14): Claims, GenerateToken(), GenerateTokenWithExpiration(), ParseTokenWithoutValidation(), ValidateToken(), DebugContext(), ErrorContext(), getLogFormat() (+6 more)
 
 ### Community 46 - "Community 46"
 Cohesion: 0.50
-Nodes (4): 7. DIAL DEFINITIONS (Technical Reference), DESIGN_VARIANCE (Level 1-10), MOTION_INTENSITY (Level 1-10), VISUAL_DENSITY (Level 1-10)
+Nodes (4): 1.A Dial Inference (design read → dial values), 1.B Use-Case Presets, 1.C How the Dials Drive Output, 1. THE THREE DIALS (Core Configuration)
 
 ### Community 47 - "Community 47"
 Cohesion: 0.20
@@ -573,8 +572,8 @@ Cohesion: 0.50
 Nodes (3): OIDCSettings, OIDCSettingsResponse, UpdateOIDCSettingsRequest
 
 ### Community 114 - "Community 114"
-Cohesion: 0.18
-Nodes (5): init(), oidcFlowData, oidcFlowStore, oidcSession, oidcSessionStore
+Cohesion: 0.13
+Nodes (6): init(), oidcFlowData, oidcFlowStore, oidcSession, oidcSessionStore, oidcStateStore
 
 ### Community 115 - "Community 115"
 Cohesion: 0.50
@@ -583,16 +582,16 @@ Nodes (4): code:bash (# 检查端口占用), code:bash (# 检查数据库容器�
 ## Knowledge Gaps
 - **751 isolated node(s):** `version`, `source`, `sourceType`, `skillPath`, `computedHash` (+746 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `main()` connect `Community 28` to `Community 32`, `Community 0`, `Community 34`, `Community 58`, `Community 44`, `Community 121`, `Community 26`, `Community 59`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `Warn()` connect `Community 26` to `Community 42`, `Community 28`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `NewVideoStreamEndpointService()` connect `Community 44` to `Community 30`?**
+- **Why does `main()` connect `Community 26` to `Community 0`, `Community 34`, `Community 43`, `Community 44`, `Community 21`, `Community 121`, `Community 28`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **Why does `Warn()` connect `Community 26` to `Community 45`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `NewVideoStreamEndpointService()` connect `Community 34` to `Community 42`, `Community 44`, `Community 21`, `Community 58`, `Community 28`, `Community 30`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 51 inferred relationships involving `Success()` (e.g. with `.Login()` and `.ChangePassword()`) actually correct?**
   _`Success()` has 51 INFERRED edges - model-reasoned connections that need verification._

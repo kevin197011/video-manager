@@ -8,7 +8,6 @@ import type { ReactElement } from 'react';
 import DashboardLayout from './components/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
-import SsoCallbackPage from './pages/SsoCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import ProvidersPage from './pages/ProvidersPage';
 import LinesPage from './pages/LinesPage';
@@ -39,7 +38,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/sso-callback" element={<SsoCallbackPage />} />
         <Route
           path="/*"
           element={

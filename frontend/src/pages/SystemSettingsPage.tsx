@@ -195,8 +195,9 @@ export default function SystemSettingsPage() {
         )}
 
         <Text type="secondary">
-          提示：SSO 入口为 `/api/auth/oidc/login`；登录成功后会跳转到 `/sso-callback`（与 dvr-manager
-          相同）。Frontend Success URL 仅作兼容备用，请填前端登录页，不要填 OIDC API 地址。
+          提示：SSO 入口 `/api/auth/oidc/login`，IdP 回调 `/api/auth/oidc/callback`；成功后跳转到
+          Frontend Success URL（如 `https://video-manager.slileisure.com/login?sso_token=...`），不要填
+          OIDC API 地址。
         </Text>
       </Space>
     </Card>
