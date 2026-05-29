@@ -6,117 +6,65 @@
 package handlers
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"sync"
 	"time"
 )
 
 const oidcFlowTTL = 5 * time.Minute
 
-type oidcFlowData struct {
+type oidcSession struct {
 	code    string
-	state   string
 	expires time.Time
 	once    sync.Once
 }
 
-type oidcFlowStore struct {
-	mu    sync.Mutex
-	flows map[string]*oidcFlowData
+type oidcSessionStore struct {
+	mu       sync.Mutex
+	sessions map[string]*oidcSession
 }
 
-var globalOIDCFlowStore = &oidcFlowStore{
-	flows: make(map[string]*oidcFlowData),
+var globalOIDCSessionStore = &oidcSessionStore{
+	sessions: make(map[string]*oidcSession),
 }
 
-// oidcStateStore tracks OIDC state server-side so callback works when cookies
-// are dropped (proxy, cross-host API URL, or concurrent prefetch).
-type oidcStateStore struct {
-	mu     sync.Mutex
-	states map[string]time.Time
-}
-
-var globalOIDCStateStore = &oidcStateStore{
-	states: make(map[string]time.Time),
-}
-
-func (s *oidcStateStore) register(state string) {
+func (s *oidcSessionStore) register(state string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.purgeLocked()
-	s.states[state] = time.Now().Add(oidcFlowTTL)
+	s.purgeExpiredLocked()
+	s.sessions[state] = &oidcSession{
+		expires: time.Now().Add(oidcFlowTTL),
+	}
 }
 
-func (s *oidcStateStore) valid(state string) bool {
+func (s *oidcSessionStore) bindCode(state, code string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	exp, ok := s.states[state]
-	return ok && time.Now().Before(exp)
-}
-
-func (s *oidcStateStore) consume(state string) bool {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	exp, ok := s.states[state]
-	if !ok || time.Now().After(exp) {
-		delete(s.states, state)
+	sess, ok := s.sessions[state]
+	if !ok || time.Now().After(sess.expires) {
+		delete(s.sessions, state)
 		return false
 	}
-	delete(s.states, state)
+	sess.code = code
 	return true
 }
 
-func (s *oidcStateStore) purgeLocked() {
-	now := time.Now()
-	for state, exp := range s.states {
-		if now.After(exp) {
-			delete(s.states, state)
-		}
-	}
-}
-
-func (s *oidcFlowStore) create(code, state string) (string, error) {
-	b := make([]byte, 24)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-	flowID := base64.RawURLEncoding.EncodeToString(b)
-
+func (s *oidcSessionStore) take(state string) (*oidcSession, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.purgeExpiredLocked()
-	s.flows[flowID] = &oidcFlowData{
-		code:    code,
-		state:   state,
-		expires: time.Now().Add(oidcFlowTTL),
-	}
-	return flowID, nil
-}
-
-func (s *oidcFlowStore) get(flowID string) (*oidcFlowData, bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.purgeExpiredLocked()
-	data, ok := s.flows[flowID]
-	if !ok || time.Now().After(data.expires) {
-		delete(s.flows, flowID)
+	sess, ok := s.sessions[state]
+	if !ok || time.Now().After(sess.expires) || sess.code == "" {
+		delete(s.sessions, state)
 		return nil, false
 	}
-	return data, true
+	delete(s.sessions, state)
+	return sess, true
 }
 
-func (s *oidcFlowStore) delete(flowID string) {
-	s.mu.Lock()
-	delete(s.flows, flowID)
-	s.mu.Unlock()
-}
-
-func (s *oidcFlowStore) purgeExpiredLocked() {
+func (s *oidcSessionStore) purgeExpiredLocked() {
 	now := time.Now()
-	for id, data := range s.flows {
-		if now.After(data.expires) {
-			delete(s.flows, id)
+	for state, sess := range s.sessions {
+		if now.After(sess.expires) {
+			delete(s.sessions, state)
 		}
 	}
 }

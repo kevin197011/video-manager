@@ -3231,7 +3231,7 @@
       "source_file": "backend/internal/repositories/video_stream_endpoint_repository.go",
       "source_location": "L1",
       "id": "backend_internal_repositories_video_stream_endpoint_repository_go",
-      "community": 122,
+      "community": 119,
       "norm_label": "video_stream_endpoint_repository.go"
     },
     {
@@ -3249,7 +3249,7 @@
       "source_file": "backend/internal/repositories/video_stream_endpoint_repository.go",
       "source_location": "L27",
       "id": "repositories_video_stream_endpoint_repository_newvideostreamendpointrepository",
-      "community": 122,
+      "community": 119,
       "norm_label": "newvideostreamendpointrepository()"
     },
     {
@@ -3330,7 +3330,7 @@
       "source_file": "backend/internal/repositories/video_stream_endpoint_repository.go",
       "source_location": "L468",
       "id": "repositories_videostreamendpointfilters",
-      "community": 122,
+      "community": 119,
       "norm_label": "videostreamendpointfilters"
     },
     {
@@ -4066,7 +4066,7 @@
       "label": ".OIDCCallback()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L416",
+      "source_location": "L414",
       "id": "handlers_authhandler_oidccallback",
       "community": 0,
       "norm_label": ".oidccallback()"
@@ -4075,16 +4075,25 @@
       "label": ".OIDCComplete()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L475",
+      "source_location": "L466",
       "id": "handlers_authhandler_oidccomplete",
       "community": 0,
       "norm_label": ".oidccomplete()"
     },
     {
+      "label": ".redirectOIDCError()",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/auth_handler.go",
+      "source_location": "L532",
+      "id": "handlers_authhandler_redirectoidcerror",
+      "community": 0,
+      "norm_label": ".redirectoidcerror()"
+    },
+    {
       "label": "respondOIDCNotReady()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L541",
+      "source_location": "L539",
       "id": "handlers_auth_handler_respondoidcnotready",
       "community": 0,
       "norm_label": "respondoidcnotready()"
@@ -4093,7 +4102,7 @@
       "label": ".loadOIDCService()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L570",
+      "source_location": "L568",
       "id": "handlers_authhandler_loadoidcservice",
       "community": 0,
       "norm_label": ".loadoidcservice()"
@@ -4102,7 +4111,7 @@
       "label": "generateOIDCState()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L591",
+      "source_location": "L589",
       "id": "handlers_auth_handler_generateoidcstate",
       "community": 0,
       "norm_label": "generateoidcstate()"
@@ -4111,7 +4120,7 @@
       "label": "deriveOIDCUsername()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L599",
+      "source_location": "L597",
       "id": "handlers_auth_handler_deriveoidcusername",
       "community": 0,
       "norm_label": "deriveoidcusername()"
@@ -4120,7 +4129,7 @@
       "label": "sanitizeUsername()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L618",
+      "source_location": "L616",
       "id": "handlers_auth_handler_sanitizeusername",
       "community": 0,
       "norm_label": "sanitizeusername()"
@@ -4129,7 +4138,7 @@
       "label": "buildOIDCSuccessRedirect()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L642",
+      "source_location": "L640",
       "id": "handlers_auth_handler_buildoidcsuccessredirect",
       "community": 0,
       "norm_label": "buildoidcsuccessredirect()"
@@ -4138,7 +4147,7 @@
       "label": "buildOIDCErrorRedirect()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L653",
+      "source_location": "L651",
       "id": "handlers_auth_handler_buildoidcerrorredirect",
       "community": 0,
       "norm_label": "buildoidcerrorredirect()"
@@ -4147,7 +4156,7 @@
       "label": "oidcExchangeUserMessage()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L664",
+      "source_location": "L662",
       "id": "handlers_auth_handler_oidcexchangeusermessage",
       "community": 0,
       "norm_label": "oidcexchangeusermessage()"
@@ -4302,7 +4311,7 @@
       "source_file": "backend/internal/handlers/video_stream_endpoint_handler.go",
       "source_location": "L1",
       "id": "backend_internal_handlers_video_stream_endpoint_handler_go",
-      "community": 85,
+      "community": 119,
       "norm_label": "video_stream_endpoint_handler.go"
     },
     {
@@ -4320,7 +4329,7 @@
       "source_file": "backend/internal/handlers/video_stream_endpoint_handler.go",
       "source_location": "L22",
       "id": "handlers_video_stream_endpoint_handler_newvideostreamendpointhandler",
-      "community": 85,
+      "community": 119,
       "norm_label": "newvideostreamendpointhandler()"
     },
     {
@@ -4405,56 +4414,56 @@
       "norm_label": "oidc_flow_store.go"
     },
     {
-      "label": "oidcFlowData",
+      "label": "oidcSession",
       "file_type": "code",
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L17",
-      "id": "handlers_oidcflowdata",
+      "source_location": "L15",
+      "id": "handlers_oidcsession",
       "community": 114,
-      "norm_label": "oidcflowdata"
+      "norm_label": "oidcsession"
     },
     {
-      "label": "oidcFlowStore",
+      "label": "oidcSessionStore",
       "file_type": "code",
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L24",
-      "id": "handlers_oidcflowstore",
+      "source_location": "L21",
+      "id": "handlers_oidcsessionstore",
       "community": 114,
-      "norm_label": "oidcflowstore"
+      "norm_label": "oidcsessionstore"
     },
     {
-      "label": ".create()",
+      "label": ".register()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L33",
-      "id": "handlers_oidcflowstore_create",
+      "source_location": "L30",
+      "id": "handlers_oidcsessionstore_register",
       "community": 114,
-      "norm_label": ".create()"
+      "norm_label": ".register()"
     },
     {
-      "label": ".get()",
+      "label": ".bindCode()",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L39",
+      "id": "handlers_oidcsessionstore_bindcode",
+      "community": 114,
+      "norm_label": ".bindcode()"
+    },
+    {
+      "label": ".take()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
       "source_location": "L51",
-      "id": "handlers_oidcflowstore_get",
+      "id": "handlers_oidcsessionstore_take",
       "community": 114,
-      "norm_label": ".get()"
-    },
-    {
-      "label": ".delete()",
-      "file_type": "code",
-      "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L63",
-      "id": "handlers_oidcflowstore_delete",
-      "community": 114,
-      "norm_label": ".delete()"
+      "norm_label": ".take()"
     },
     {
       "label": ".purgeExpiredLocked()",
       "file_type": "code",
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L69",
-      "id": "handlers_oidcflowstore_purgeexpiredlocked",
+      "source_location": "L63",
+      "id": "handlers_oidcsessionstore_purgeexpiredlocked",
       "community": 114,
       "norm_label": ".purgeexpiredlocked()"
     },
@@ -4464,7 +4473,7 @@
       "source_file": "backend/internal/handlers/stream_handler.go",
       "source_location": "L1",
       "id": "backend_internal_handlers_stream_handler_go",
-      "community": 120,
+      "community": 85,
       "norm_label": "stream_handler.go"
     },
     {
@@ -4482,7 +4491,7 @@
       "source_file": "backend/internal/handlers/stream_handler.go",
       "source_location": "L22",
       "id": "handlers_stream_handler_newstreamhandler",
-      "community": 120,
+      "community": 85,
       "norm_label": "newstreamhandler()"
     },
     {
@@ -4592,6 +4601,24 @@
       "id": "handlers_userhandler_delete",
       "community": 0,
       "norm_label": ".delete()"
+    },
+    {
+      "label": "oidc_callback_page.go",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_callback_page.go",
+      "source_location": "L1",
+      "id": "backend_internal_handlers_oidc_callback_page_go",
+      "community": 0,
+      "norm_label": "oidc_callback_page.go"
+    },
+    {
+      "label": "renderOIDCCompleteForm()",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_callback_page.go",
+      "source_location": "L36",
+      "id": "handlers_oidc_callback_page_renderoidccompleteform",
+      "community": 0,
+      "norm_label": "renderoidccompleteform()"
     },
     {
       "label": "stream_path_handler.go",
@@ -4707,7 +4734,7 @@
       "source_file": "backend/internal/handlers/system_setting_handler.go",
       "source_location": "L1",
       "id": "backend_internal_handlers_system_setting_handler_go",
-      "community": 0,
+      "community": 32,
       "norm_label": "system_setting_handler.go"
     },
     {
@@ -4761,7 +4788,7 @@
       "source_file": "backend/internal/handlers/system_setting_handler.go",
       "source_location": "L126",
       "id": "handlers_system_setting_handler_proberesulthint",
-      "community": 0,
+      "community": 32,
       "norm_label": "proberesulthint()"
     },
     {
@@ -5121,7 +5148,7 @@
       "source_file": "backend/internal/services/auth_service.go",
       "source_location": "L30",
       "id": "services_auth_service_newauthservice",
-      "community": 32,
+      "community": 21,
       "norm_label": "newauthservice()"
     },
     {
@@ -5229,7 +5256,7 @@
       "source_file": "backend/internal/services/video_stream_endpoint_service.go",
       "source_location": "L21",
       "id": "services_video_stream_endpoint_service_newvideostreamendpointservice",
-      "community": 85,
+      "community": 119,
       "norm_label": "newvideostreamendpointservice()"
     },
     {
@@ -5517,7 +5544,7 @@
       "source_file": "backend/internal/services/stream_service.go",
       "source_location": "L1",
       "id": "backend_internal_services_stream_service_go",
-      "community": 120,
+      "community": 85,
       "norm_label": "stream_service.go"
     },
     {
@@ -5535,7 +5562,7 @@
       "source_file": "backend/internal/services/stream_service.go",
       "source_location": "L20",
       "id": "services_stream_service_newstreamservice",
-      "community": 120,
+      "community": 85,
       "norm_label": "newstreamservice()"
     },
     {
@@ -5832,7 +5859,7 @@
       "source_file": "backend/docs/docs.go",
       "source_location": "L1",
       "id": "backend_docs_docs_go",
-      "community": 126,
+      "community": 114,
       "norm_label": "docs.go"
     },
     {
@@ -5841,7 +5868,7 @@
       "source_file": "backend/docs/docs.go",
       "source_location": "L3676",
       "id": "docs_docs_init",
-      "community": 126,
+      "community": 114,
       "norm_label": "init()"
     },
     {
@@ -6921,7 +6948,7 @@
       "source_file": "backend/pkg/jwt/jwt.go",
       "source_location": "L105",
       "id": "jwt_jwt_parsetokenwithoutvalidation",
-      "community": 0,
+      "community": 45,
       "norm_label": "parsetokenwithoutvalidation()"
     },
     {
@@ -7371,7 +7398,7 @@
       "source_file": "README.md",
       "source_location": "L29",
       "id": "video_manager_readme_\u6280\u672f\u6808",
-      "community": 22,
+      "community": 120,
       "norm_label": "\u6280\u672f\u6808"
     },
     {
@@ -7380,7 +7407,7 @@
       "source_file": "README.md",
       "source_location": "L31",
       "id": "video_manager_readme_\u540e\u7aef",
-      "community": 22,
+      "community": 120,
       "norm_label": "\u540e\u7aef"
     },
     {
@@ -7389,7 +7416,7 @@
       "source_file": "README.md",
       "source_location": "L40",
       "id": "video_manager_readme_\u524d\u7aef",
-      "community": 22,
+      "community": 120,
       "norm_label": "\u524d\u7aef"
     },
     {
@@ -7398,7 +7425,7 @@
       "source_file": "README.md",
       "source_location": "L50",
       "id": "video_manager_readme_\u5f00\u53d1\u73af\u5883",
-      "community": 22,
+      "community": 120,
       "norm_label": "\u5f00\u53d1\u73af\u5883"
     },
     {
@@ -12962,6 +12989,60 @@
       "id": "workflows_readme_\u5e73\u53f0\u652f\u6301",
       "community": 23,
       "norm_label": "\u5e73\u53f0\u652f\u6301"
+    },
+    {
+      "label": "oidcFlowData",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L17",
+      "community": 114,
+      "norm_label": "oidcflowdata",
+      "id": "handlers_oidcflowdata"
+    },
+    {
+      "label": "oidcFlowStore",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L24",
+      "community": 114,
+      "norm_label": "oidcflowstore",
+      "id": "handlers_oidcflowstore"
+    },
+    {
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L33",
+      "community": 114,
+      "norm_label": ".create()",
+      "id": "handlers_oidcflowstore_create"
+    },
+    {
+      "label": ".get()",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L51",
+      "community": 114,
+      "norm_label": ".get()",
+      "id": "handlers_oidcflowstore_get"
+    },
+    {
+      "label": ".delete()",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L63",
+      "community": 114,
+      "norm_label": ".delete()",
+      "id": "handlers_oidcflowstore_delete"
+    },
+    {
+      "label": ".purgeExpiredLocked()",
+      "file_type": "code",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L69",
+      "community": 114,
+      "norm_label": ".purgeexpiredlocked()",
+      "id": "handlers_oidcflowstore_purgeexpiredlocked"
     }
   ],
   "links": [
@@ -16686,9 +16767,9 @@
       "source_file": "frontend/src/lib/api.ts",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "frontend_src_lib_api_ts",
-      "target": "lib_api_oidcproberesult",
-      "confidence_score": 1.0
+      "target": "lib_api_oidcproberesult"
     },
     {
       "relation": "contains",
@@ -17209,9 +17290,9 @@
       "source_file": "frontend/src/pages/SystemSettingsPage.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "frontend_src_pages_systemsettingspage_tsx",
-      "target": "lib_api_oidcproberesult",
-      "confidence_score": 1.0
+      "target": "lib_api_oidcproberesult"
     },
     {
       "relation": "imports",
@@ -19600,9 +19681,9 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L653",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_internal_handlers_auth_handler_go",
-      "target": "handlers_auth_handler_buildoidcerrorredirect",
-      "confidence_score": 1.0
+      "target": "handlers_auth_handler_buildoidcerrorredirect"
     },
     {
       "relation": "contains",
@@ -19610,9 +19691,9 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L664",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_internal_handlers_auth_handler_go",
-      "target": "handlers_auth_handler_oidcexchangeusermessage",
-      "confidence_score": 1.0
+      "target": "handlers_auth_handler_oidcexchangeusermessage"
     },
     {
       "relation": "method",
@@ -19720,8 +19801,18 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_authhandler",
-      "target": "handlers_authhandler_oidccomplete",
+      "target": "handlers_authhandler_oidccomplete"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/auth_handler.go",
+      "source_location": "L532",
+      "weight": 1.0,
+      "source": "handlers_authhandler",
+      "target": "handlers_authhandler_redirectoidcerror",
       "confidence_score": 1.0
     },
     {
@@ -20056,6 +20147,17 @@
     {
       "relation": "calls",
       "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/auth_handler.go",
+      "source_location": "L442",
+      "weight": 1.0,
+      "source": "handlers_authhandler_oidccallback",
+      "target": "handlers_auth_handler_buildoidcerrorredirect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "backend/internal/handlers/auth_handler.go",
@@ -20085,6 +20187,17 @@
       "weight": 1.0,
       "source": "handlers_authhandler_oidccallback",
       "target": "response_response_badrequest"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/internal/handlers/auth_handler.go",
+      "source_location": "L452",
+      "weight": 1.0,
+      "source": "handlers_authhandler_oidccallback",
+      "target": "handlers_oidc_callback_page_renderoidccompleteform"
     },
     {
       "relation": "calls",
@@ -20126,9 +20239,20 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L476",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_authhandler_oidccomplete",
-      "target": "handlers_authhandler_loadoidcservice",
-      "confidence_score": 1.0
+      "target": "handlers_authhandler_loadoidcservice"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/auth_handler.go",
+      "source_location": "L483",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_authhandler_oidccomplete",
+      "target": "handlers_auth_handler_respondoidcnotready"
     },
     {
       "relation": "calls",
@@ -20138,7 +20262,7 @@
       "source_location": "L483",
       "weight": 1.0,
       "source": "handlers_authhandler_oidccomplete",
-      "target": "handlers_auth_handler_respondoidcnotready",
+      "target": "handlers_authhandler_redirectoidcerror",
       "confidence_score": 1.0
     },
     {
@@ -20148,20 +20272,9 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L520",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_authhandler_oidccomplete",
-      "target": "handlers_auth_handler_oidcexchangeusermessage",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/internal/handlers/auth_handler.go",
-      "source_location": "L521",
-      "weight": 1.0,
-      "source": "handlers_authhandler_oidccomplete",
-      "target": "handlers_auth_handler_buildoidcerrorredirect",
-      "confidence_score": 1.0
+      "target": "handlers_auth_handler_oidcexchangeusermessage"
     },
     {
       "relation": "calls",
@@ -20170,9 +20283,9 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L525",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_authhandler_oidccomplete",
-      "target": "handlers_auth_handler_deriveoidcusername",
-      "confidence_score": 1.0
+      "target": "handlers_auth_handler_deriveoidcusername"
     },
     {
       "relation": "calls",
@@ -20181,9 +20294,9 @@
       "source_file": "backend/internal/handlers/auth_handler.go",
       "source_location": "L538",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_authhandler_oidccomplete",
-      "target": "handlers_auth_handler_buildoidcsuccessredirect",
-      "confidence_score": 1.0
+      "target": "handlers_auth_handler_buildoidcsuccessredirect"
     },
     {
       "relation": "calls",
@@ -20195,6 +20308,28 @@
       "weight": 1.0,
       "source": "handlers_authhandler_oidccomplete",
       "target": "logger_logger_warn"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/auth_handler.go",
+      "source_location": "L521",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_authhandler_oidccomplete",
+      "target": "handlers_auth_handler_buildoidcerrorredirect"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/auth_handler.go",
+      "source_location": "L536",
+      "weight": 1.0,
+      "source": "handlers_authhandler_redirectoidcerror",
+      "target": "handlers_auth_handler_buildoidcerrorredirect",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -21166,11 +21301,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L17",
+      "source_location": "L15",
       "weight": 1.0,
       "source": "backend_internal_handlers_oidc_flow_store_go",
-      "target": "handlers_oidcflowdata",
+      "target": "handlers_oidcsession",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "backend_internal_handlers_oidc_flow_store_go",
+      "target": "handlers_oidcsessionstore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_internal_handlers_oidc_flow_store_go",
+      "target": "handlers_oidcflowdata"
     },
     {
       "relation": "contains",
@@ -21178,18 +21333,28 @@
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_internal_handlers_oidc_flow_store_go",
-      "target": "handlers_oidcflowstore",
+      "target": "handlers_oidcflowstore"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "handlers_oidcsessionstore",
+      "target": "handlers_oidcsessionstore_register",
       "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L33",
+      "source_location": "L39",
       "weight": 1.0,
-      "source": "handlers_oidcflowstore",
-      "target": "handlers_oidcflowstore_create",
+      "source": "handlers_oidcsessionstore",
+      "target": "handlers_oidcsessionstore_bindcode",
       "confidence_score": 1.0
     },
     {
@@ -21198,8 +21363,8 @@
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
       "source_location": "L51",
       "weight": 1.0,
-      "source": "handlers_oidcflowstore",
-      "target": "handlers_oidcflowstore_get",
+      "source": "handlers_oidcsessionstore",
+      "target": "handlers_oidcsessionstore_take",
       "confidence_score": 1.0
     },
     {
@@ -21208,18 +21373,8 @@
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
       "source_location": "L63",
       "weight": 1.0,
-      "source": "handlers_oidcflowstore",
-      "target": "handlers_oidcflowstore_delete",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L69",
-      "weight": 1.0,
-      "source": "handlers_oidcflowstore",
-      "target": "handlers_oidcflowstore_purgeexpiredlocked",
+      "source": "handlers_oidcsessionstore",
+      "target": "handlers_oidcsessionstore_purgeexpiredlocked",
       "confidence_score": 1.0
     },
     {
@@ -21227,44 +21382,22 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L42",
+      "source_location": "L33",
       "weight": 1.0,
-      "source": "handlers_oidcflowstore_create",
-      "target": "handlers_oidcflowstore_purgeexpiredlocked",
+      "source": "handlers_oidcsessionstore_register",
+      "target": "handlers_oidcsessionstore_purgeexpiredlocked",
       "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L54",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/docs/docs.go",
+      "source_location": "L3677",
       "weight": 1.0,
-      "source": "handlers_oidcflowstore_get",
-      "target": "handlers_oidcflowstore_purgeexpiredlocked",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L57",
-      "weight": 1.0,
-      "source": "handlers_oidcflowstore_get",
-      "target": "handlers_oidcflowstore_delete",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/internal/handlers/oidc_flow_store.go",
-      "source_location": "L73",
-      "weight": 1.0,
-      "source": "handlers_oidcflowstore_purgeexpiredlocked",
-      "target": "handlers_oidcflowstore_delete",
-      "confidence_score": 1.0
+      "source": "docs_docs_init",
+      "target": "handlers_oidcsessionstore_register"
     },
     {
       "relation": "contains",
@@ -21740,6 +21873,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_callback_page.go",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "backend_internal_handlers_oidc_callback_page_go",
+      "target": "handlers_oidc_callback_page_renderoidccompleteform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "backend/internal/handlers/stream_path_handler.go",
       "source_location": "L18",
       "weight": 1.0,
@@ -22082,9 +22225,9 @@
       "source_file": "backend/internal/handlers/system_setting_handler.go",
       "source_location": "L126",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_internal_handlers_system_setting_handler_go",
-      "target": "handlers_system_setting_handler_proberesulthint",
-      "confidence_score": 1.0
+      "target": "handlers_system_setting_handler_proberesulthint"
     },
     {
       "relation": "method",
@@ -22112,9 +22255,9 @@
       "source_file": "backend/internal/handlers/system_setting_handler.go",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_systemsettinghandler",
-      "target": "handlers_systemsettinghandler_probeoidcsettings",
-      "confidence_score": 1.0
+      "target": "handlers_systemsettinghandler_probeoidcsettings"
     },
     {
       "relation": "calls",
@@ -22134,9 +22277,9 @@
       "source_file": "backend/internal/handlers/system_setting_handler.go",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_systemsettinghandler_probeoidcsettings",
-      "target": "handlers_systemsettinghandler_getoidcsettings",
-      "confidence_score": 1.0
+      "target": "handlers_systemsettinghandler_getoidcsettings"
     },
     {
       "relation": "calls",
@@ -22200,9 +22343,9 @@
       "source_file": "backend/internal/handlers/system_setting_handler.go",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "handlers_systemsettinghandler_probeoidcsettings",
-      "target": "handlers_system_setting_handler_proberesulthint",
-      "confidence_score": 1.0
+      "target": "handlers_system_setting_handler_proberesulthint"
     },
     {
       "relation": "calls",
@@ -22896,9 +23039,9 @@
       "source_file": "backend/internal/services/oidc_service.go",
       "source_location": "L379",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_oidcservice",
-      "target": "services_oidcservice_probeclientcredentials",
-      "confidence_score": 1.0
+      "target": "services_oidcservice_probeclientcredentials"
     },
     {
       "relation": "method",
@@ -22906,9 +23049,9 @@
       "source_file": "backend/internal/services/oidc_service.go",
       "source_location": "L402",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_oidcservice",
-      "target": "services_oidcservice_redirecturl",
-      "confidence_score": 1.0
+      "target": "services_oidcservice_redirecturl"
     },
     {
       "relation": "method",
@@ -22916,9 +23059,9 @@
       "source_file": "backend/internal/services/oidc_service.go",
       "source_location": "L409",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_oidcservice",
-      "target": "services_oidcservice_tokenendpoint",
-      "confidence_score": 1.0
+      "target": "services_oidcservice_tokenendpoint"
     },
     {
       "relation": "calls",
@@ -22971,9 +23114,9 @@
       "source_file": "backend/internal/services/oidc_service.go",
       "source_location": "L380",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_oidcservice_probeclientcredentials",
-      "target": "services_oidcservice_isenabled",
-      "confidence_score": 1.0
+      "target": "services_oidcservice_isenabled"
     },
     {
       "relation": "calls",
@@ -23080,9 +23223,9 @@
       "source_file": "backend/internal/services/oidc_service.go",
       "source_location": "L383",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_oidcservice_probeclientcredentials",
-      "target": "services_oidcservice_posttokenexchange",
-      "confidence_score": 1.0
+      "target": "services_oidcservice_posttokenexchange"
     },
     {
       "relation": "calls",
@@ -33589,8 +33732,92 @@
       "confidence_score": 1.0,
       "source": "workflows_readme_\u8ba4\u8bc1",
       "target": "workflows_readme_codeblock_3"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_oidcflowstore",
+      "target": "handlers_oidcflowstore_create"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_oidcflowstore",
+      "target": "handlers_oidcflowstore_get"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L63",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_oidcflowstore",
+      "target": "handlers_oidcflowstore_delete"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_oidcflowstore",
+      "target": "handlers_oidcflowstore_purgeexpiredlocked"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_oidcflowstore_create",
+      "target": "handlers_oidcflowstore_purgeexpiredlocked"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L54",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_oidcflowstore_get",
+      "target": "handlers_oidcflowstore_purgeexpiredlocked"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L57",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_oidcflowstore_get",
+      "target": "handlers_oidcflowstore_delete"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/internal/handlers/oidc_flow_store.go",
+      "source_location": "L73",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "handlers_oidcflowstore_purgeexpiredlocked",
+      "target": "handlers_oidcflowstore_delete"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f37611cc2188987ac93250e2fef00467d6c6b317"
+  "built_at_commit": "847e153f7f275552431742a5607c7339408f3c03"
 }

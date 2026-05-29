@@ -1,16 +1,16 @@
 # Graph Report - video-manager  (2026-05-29)
 
 ## Corpus Check
-- 125 files · ~117,409 words
+- 126 files · ~117,490 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1440 nodes · 2009 edges · 139 communities (118 shown, 21 thin omitted)
-- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 270 edges (avg confidence: 0.8)
+- 1449 nodes · 2023 edges · 137 communities (120 shown, 17 thin omitted)
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 272 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f37611cc`
+- Built from commit: `847e153f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -137,7 +137,6 @@
 - [[_COMMUNITY_Community 119|Community 119]]
 - [[_COMMUNITY_Community 120|Community 120]]
 - [[_COMMUNITY_Community 121|Community 121]]
-- [[_COMMUNITY_Community 122|Community 122]]
 - [[_COMMUNITY_Community 124|Community 124]]
 - [[_COMMUNITY_Community 125|Community 125]]
 - [[_COMMUNITY_Community 127|Community 127]]
@@ -160,18 +159,18 @@
   backend/cmd/main.go → backend/pkg/database/database.go
 - `main()` --calls--> `NewStatsHandler()`  [INFERRED]
   backend/cmd/main.go → backend/internal/handlers/stats_handler.go
-- `NewVideoStreamEndpointService()` --calls--> `NewVideoStreamEndpointRepository()`  [INFERRED]
-  backend/internal/services/video_stream_endpoint_service.go → backend/internal/repositories/video_stream_endpoint_repository.go
 - `AuthMiddleware()` --calls--> `ValidateToken()`  [INFERRED]
   backend/pkg/middleware/auth.go → backend/pkg/jwt/jwt.go
 - `main()` --calls--> `NewAuthHandler()`  [INFERRED]
   backend/cmd/main.go → backend/internal/handlers/auth_handler.go
+- `main()` --calls--> `NewCDNProviderHandler()`  [INFERRED]
+  backend/cmd/main.go → backend/internal/handlers/cdn_provider_handler.go
 
-## Communities (139 total, 21 thin omitted)
+## Communities (137 total, 17 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
-Nodes (28): buildOIDCErrorRedirect(), buildOIDCSuccessRedirect(), deriveOIDCUsername(), generateOIDCState(), oidcExchangeUserMessage(), respondOIDCNotReady(), sanitizeUsername(), AuthHandler (+20 more)
+Nodes (27): buildOIDCErrorRedirect(), buildOIDCSuccessRedirect(), deriveOIDCUsername(), generateOIDCState(), oidcExchangeUserMessage(), respondOIDCNotReady(), sanitizeUsername(), AuthHandler (+19 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
@@ -254,12 +253,12 @@ Cohesion: 0.22
 Nodes (5): NewCDNLineRepository(), NewDomainRepository(), NewStreamPathRepository(), VideoStreamEndpointRepository, GenerateEndpointURL()
 
 ### Community 21 - "Community 21"
-Cohesion: 0.27
-Nodes (3): HashPassword(), randomPasswordHash(), AuthService
+Cohesion: 0.24
+Nodes (4): HashPassword(), NewAuthService(), randomPasswordHash(), AuthService
 
 ### Community 22 - "Community 22"
-Cohesion: 0.12
-Nodes (15): code:block1 (video-manager/), Video Manager, 前端, 功能特性, 后端, 安全特性, 开发环境, 开发环境 (.env) (+7 more)
+Cohesion: 0.17
+Nodes (11): code:block1 (video-manager/), Video Manager, 功能特性, 安全特性, 开发环境 (.env), 核心功能, 环境变量, 生产环境 (.env.prod) (+3 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.12
@@ -298,8 +297,8 @@ Cohesion: 0.15
 Nodes (12): code:bash (# 使用 psql 直接执行), code:bash (# 手动执行 SQL), Database Initialization, `init_schema.sql`, 使用方法, 初始化脚本, 方法 1: 手动执行（推荐）, 方法 2: 自动执行（应用启动时） (+4 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.20
-Nodes (6): NewAuthHandler(), NewSystemSettingHandler(), NewSystemSettingRepository(), SystemSettingRepository, NewAuthService(), NewSystemSettingService()
+Cohesion: 0.18
+Nodes (6): NewAuthHandler(), NewSystemSettingHandler(), probeResultHint(), NewSystemSettingRepository(), SystemSettingRepository, NewSystemSettingService()
 
 ### Community 33 - "Community 33"
 Cohesion: 0.17
@@ -346,8 +345,8 @@ Cohesion: 0.22
 Nodes (4): NewCDNProviderHandler(), isValidCode(), NewCDNProviderService(), CDNProviderService
 
 ### Community 45 - "Community 45"
-Cohesion: 0.28
-Nodes (6): Claims, GenerateToken(), GenerateTokenWithExpiration(), ValidateToken(), DebugContext(), ErrorContext()
+Cohesion: 0.24
+Nodes (7): Claims, GenerateToken(), GenerateTokenWithExpiration(), ParseTokenWithoutValidation(), ValidateToken(), DebugContext(), ErrorContext()
 
 ### Community 47 - "Community 47"
 Cohesion: 0.20
@@ -474,8 +473,8 @@ Cohesion: 0.70
 Nodes (4): detect_resolution_from_path(), main(), make_request(), update_resolution()
 
 ### Community 85 - "Community 85"
-Cohesion: 0.28
-Nodes (3): NewVideoStreamEndpointHandler(), StreamService, NewVideoStreamEndpointService()
+Cohesion: 0.20
+Nodes (3): NewStreamHandler(), NewStreamService(), StreamService
 
 ### Community 86 - "Community 86"
 Cohesion: 0.40
@@ -589,23 +588,35 @@ Nodes (3): CreateStreamRequest, Stream, UpdateStreamRequest
 Cohesion: 0.50
 Nodes (3): OIDCSettings, OIDCSettingsResponse, UpdateOIDCSettingsRequest
 
+### Community 114 - "Community 114"
+Cohesion: 0.18
+Nodes (5): init(), oidcFlowData, oidcFlowStore, oidcSession, oidcSessionStore
+
 ### Community 115 - "Community 115"
 Cohesion: 0.50
 Nodes (4): code:bash (# 检查端口占用), code:bash (# 检查数据库容器状态), 常见问题, 故障排除
 
+### Community 119 - "Community 119"
+Cohesion: 0.23
+Nodes (5): NewVideoStreamEndpointHandler(), NewVideoStreamEndpointRepository(), VideoStreamEndpointFilters, StreamPathService, NewVideoStreamEndpointService()
+
+### Community 120 - "Community 120"
+Cohesion: 0.50
+Nodes (4): 前端, 后端, 开发环境, 技术栈
+
 ## Knowledge Gaps
-- **750 isolated node(s):** `version`, `source`, `sourceType`, `skillPath`, `computedHash` (+745 more)
+- **751 isolated node(s):** `version`, `source`, `sourceType`, `skillPath`, `computedHash` (+746 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `main()` connect `Community 28` to `Community 32`, `Community 34`, `Community 44`, `Community 46`, `Community 85`, `Community 120`, `Community 121`, `Community 58`, `Community 59`, `Community 61`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `main()` connect `Community 28` to `Community 32`, `Community 34`, `Community 44`, `Community 46`, `Community 85`, `Community 119`, `Community 121`, `Community 58`, `Community 59`, `Community 61`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `Warn()` connect `Community 28` to `Community 0`, `Community 42`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `OIDCConfigIssues()` connect `Community 0` to `Community 26`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `NewCDNLineService()` connect `Community 59` to `Community 0`, `Community 20`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 51 inferred relationships involving `Success()` (e.g. with `.Login()` and `.ChangePassword()`) actually correct?**
   _`Success()` has 51 INFERRED edges - model-reasoned connections that need verification._
@@ -614,4 +625,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 38 inferred relationships involving `BadRequest()` (e.g. with `.Login()` and `.ChangePassword()`) actually correct?**
   _`BadRequest()` has 38 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `version`, `source`, `sourceType` to the rest of the system?**
-  _750 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _751 weakly-connected nodes found - possible documentation gaps or missing edges._
